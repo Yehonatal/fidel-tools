@@ -1,0 +1,22 @@
+{
+  "version": "0.2",
+  "ignorePaths": ["pnpm-lock.yaml", "**/node_modules/**", "**/dist/**", "**/*.min.js"],
+  "words": [
+    "biomejs",
+    "lefthook",
+    "hono",
+    "dotenv",
+    "vitest",
+    "tanstack",
+    "sveltejs",
+    "kysely",
+    "drizzle",
+    "neon",
+    "neondatabase",
+    "nodemailer",
+    "nanostores",
+    "cspellrc",
+    "ntvs",
+    "njsproj"
+  ]
+}

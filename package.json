@@ -1,17 +1,32 @@
 {
-    "name": "fidel-tools-monorepo",
-    "version": "0.1.6",
-    "private": true,
-    "engines": {
-        "node": ">=22.0.0"
-    },
-    "packageManager": "pnpm@10.28.0",
-    "scripts": {
-        "build": "pnpm --filter ./packages/core build && pnpm --filter ./packages/lang-am build && pnpm --filter ./apps/api build && pnpm --filter ./apps/web build",
-        "dev": "pnpm --filter @fidel-tools/api dev & pnpm --filter @fidel-tools/web dev",
-        "test": "pnpm --filter \"@fidel-tools/*\" test"
-    },
-    "devDependencies": {
-        "typescript": "^5.0.4"
-    }
+  "name": "fidel-tools-monorepo",
+  "version": "0.1.6",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "build": "pnpm --filter ./packages/core build && pnpm --filter ./packages/lang-am build && pnpm --filter ./apps/api build && pnpm --filter ./apps/web build",
+    "dev": "pnpm --filter @fidel-tools/api dev & pnpm --filter @fidel-tools/web dev",
+    "test": "pnpm --filter \"@fidel-tools/*\" test",
+    "lint": "biome lint --changed --since=origin/main",
+    "lint:all": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check --changed --since=origin/main",
+    "check:all": "biome check .",
+    "check:fix": "biome check --write .",
+    "check:staged": "biome check --staged --write",
+    "ci": "biome ci --changed --since=origin/main"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.1",
+    "@changesets/cli": "^2.31.0",
+    "cspell": "^10.0.1",
+    "lefthook": "^2.1.9",
+    "remark-cli": "^12.0.1",
+    "typescript": "^5.0.4"
+  }
 }
