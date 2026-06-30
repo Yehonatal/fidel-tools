@@ -1,46 +1,26 @@
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
-pub struct WasmNormalizer {
+#[cfg(feature = "python")]
+pub mod python;
+
+pub struct Normalizer {
     char_map: HashMap<char, char>,
     labialized_map: HashMap<char, String>,
     gemination_threshold: Option<usize>,
 }
 
-#[wasm_bindgen]
-impl WasmNormalizer {
-    #[wasm_bindgen(constructor)]
+impl Normalizer {
     pub fn new(
-        char_map_val: JsValue,
-        labialized_map_val: JsValue,
-        gemination_threshold_val: JsValue,
-    ) -> Result<WasmNormalizer, JsValue> {
-        let char_map: HashMap<String, String> = serde_wasm_bindgen::from_value(char_map_val)?;
-        let labialized_map: HashMap<String, String> = serde_wasm_bindgen::from_value(labialized_map_val)?;
-        let gemination_threshold: Option<usize> = serde_wasm_bindgen::from_value(gemination_threshold_val)?;
-
-        // Convert key-value of string to char for char_map
-        let mut rust_char_map = HashMap::new();
-        for (k, v) in char_map {
-            if let (Some(kc), Some(vc)) = (k.chars().next(), v.chars().next()) {
-                rust_char_map.insert(kc, vc);
-            }
-        }
-
-        // Convert key of string to char for labialized_map
-        let mut rust_labialized_map = HashMap::new();
-        for (k, v) in labialized_map {
-            if let Some(kc) = k.chars().next() {
-                rust_labialized_map.insert(kc, v);
-            }
-        }
-
-        Ok(WasmNormalizer {
-            char_map: rust_char_map,
-            labialized_map: rust_labialized_map,
+        char_map: HashMap<char, char>,
+        labialized_map: HashMap<char, String>,
+        gemination_threshold: Option<usize>,
+    ) -> Self {
+        Normalizer {
+            char_map,
+            labialized_map,
             gemination_threshold,
-        })
+        }
     }
 
     pub fn normalize(&self, text: &str) -> String {
@@ -104,3 +84,47 @@ impl WasmNormalizer {
         normalized
     }
 }
+
+#[wasm_bindgen]
+pub struct WasmNormalizer {
+    inner: Normalizer,
+}
+
+#[wasm_bindgen]
+impl WasmNormalizer {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        char_map_val: JsValue,
+        labialized_map_val: JsValue,
+        gemination_threshold_val: JsValue,
+    ) -> Result<WasmNormalizer, JsValue> {
+        let char_map: HashMap<String, String> = serde_wasm_bindgen::from_value(char_map_val)?;
+        let labialized_map: HashMap<String, String> = serde_wasm_bindgen::from_value(labialized_map_val)?;
+        let gemination_threshold: Option<usize> = serde_wasm_bindgen::from_value(gemination_threshold_val)?;
+
+        // Convert key-value of string to char for char_map
+        let mut rust_char_map = HashMap::new();
+        for (k, v) in char_map {
+            if let (Some(kc), Some(vc)) = (k.chars().next(), v.chars().next()) {
+                rust_char_map.insert(kc, vc);
+            }
+        }
+
+        // Convert key of string to char for labialized_map
+        let mut rust_labialized_map = HashMap::new();
+        for (k, v) in labialized_map {
+            if let Some(kc) = k.chars().next() {
+                rust_labialized_map.insert(kc, v);
+            }
+        }
+
+        Ok(WasmNormalizer {
+            inner: Normalizer::new(rust_char_map, rust_labialized_map, gemination_threshold),
+        })
+    }
+
+    pub fn normalize(&self, text: &str) -> String {
+        self.inner.normalize(text)
+    }
+}
+
