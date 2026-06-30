@@ -35,6 +35,26 @@ const analyzed = nlp.stem('ልጆቻቸውን');
 // -> 'ልጅ'`
     },
     {
+      name: "@fidel-tools/core-native",
+      lang: "TypeScript",
+      installCmd: "npm install @fidel-tools/core-native",
+      description: "High-performance native core pre-processing module. Houses the Rust implementation of the Amharic normalizer compiled to WebAssembly, featuring zero-dependency base64 inline loading.",
+      features: [
+        "Rust character-by-character normalization mappings",
+        "High-performance gemination collapsing loop",
+        "Base64-inlined WASM for universal compatibility (Edge, Node, Web)",
+        "Dual ES Module and CommonJS distribution out of the box"
+      ],
+      codeExample: `import { initNormalizer, WasmNormalizer } from '@fidel-tools/core-native';
+
+// Initialize inlined WASM binary
+initNormalizer();
+
+const normalizer = new WasmNormalizer(charMap, labializedMap, 2);
+const normalized = normalizer.normalize('ሐኪም ኀይሉ');
+// -> 'ሃኪም ሃይሉ'`
+    },
+    {
       name: "@fidel-tools/lang-am",
       lang: "TypeScript",
       installCmd: "npm install @fidel-tools/lang-am",

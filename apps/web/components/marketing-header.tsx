@@ -15,6 +15,7 @@ export default function MarketingHeader() {
 
   const navLinks = [
     { label: "Packages", href: "/packages" },
+    { label: "Benchmarks", href: "/benchmarks" },
     { label: "Infrastructure", href: "/infrastructure" },
     { label: "Enterprise", href: "/enterprise" },
     { label: "Changelog", href: "/changelog" },

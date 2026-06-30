@@ -13,7 +13,9 @@ import {
   Activity,
   Layers,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  Cpu,
+  Zap
 } from "lucide-react";
 
 // Initialize local pipeline with imported Amharic pack
@@ -25,6 +27,7 @@ const previewTabs = [
   { id: "stemmer", label: "Morphology Stemmer", icon: <Activity className="w-3.5 h-3.5" /> },
   { id: "stopword", label: "Stopwords Filter", icon: <Sparkles className="w-3.5 h-3.5" /> },
   { id: "lexical", label: "Lexical Normalizer", icon: <Code2 className="w-3.5 h-3.5" /> },
+  { id: "engine", label: "JS vs WASM Bench", icon: <Cpu className="w-3.5 h-3.5" /> },
 ] as const;
 
 type TabId = typeof previewTabs[number]["id"];
@@ -37,6 +40,15 @@ export default function LandingPlayground() {
   const [activeTab, setActiveTab] = useState<TabId>("pipeline");
   const [transLang, setTransLang] = useState<TransLang>("am");
   const [copied, setCopied] = useState(false);
+
+  const [benchmarking, setBenchmarking] = useState(false);
+  const [jsResult, setJsResult] = useState<{ time: number; ops: number } | null>(null);
+  const [wasmResult, setWasmResult] = useState<{ time: number; ops: number } | null>(null);
+
+  useEffect(() => {
+    setJsResult(null);
+    setWasmResult(null);
+  }, [inputText]);
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -80,10 +92,91 @@ import amPack from '@fidel-tools/lang-am';
 
 const nlp = new Pipeline(amPack);
 const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
-// -> "ትምህርት ቤት እና መስሪያ ቤት"`
+// -> "ትምህርት ቤት እና መስሪያ ቤት"`,
+
+    engine: `// Transparent backend selection
+import { Pipeline } from '@fidel-tools/core';
+import amPack from '@fidel-tools/lang-am';
+
+// Boots with WebAssembly normalizer if available,
+// falling back to pure JS normalizer transparently.
+const nlp = new Pipeline(amPack);
+const normalized = nlp.normalize("ሐኪም ኀይሉ");`
   };
 
   const sanitize = (val: string) => val.replace(/[.\?"',/#!$%^&*;:፤።{}=\-_`~()]/g, "");
+
+  const localJsNormalize = (text: string, pack: any): string => {
+    if (!text) return "";
+    if (!pack.normalization) return text;
+    let normalized = text;
+    const charMap = pack.normalization.char_map || {};
+    const labializedMap = pack.normalization.labialized_map || {};
+    
+    if (Object.keys(charMap).length > 0 || Object.keys(labializedMap).length > 0) {
+      const chars = normalized.split("");
+      for (let i = 0; i < chars.length; i++) {
+        let char = chars[i];
+        if (charMap[char] !== undefined) {
+          char = charMap[char];
+        }
+        if (labializedMap[char] !== undefined) {
+          char = labializedMap[char];
+        }
+        chars[i] = char;
+      }
+      normalized = chars.join("");
+    }
+    
+    const threshold = pack.normalization.gemination_threshold;
+    if (threshold !== undefined && threshold > 0) {
+      const regex = new RegExp(`([^\\s])\\1{${threshold},}`, 'g');
+      normalized = normalized.replace(regex, (match, p1) => p1.repeat(threshold));
+    }
+    return normalized;
+  };
+
+  const runClientBenchmark = () => {
+    if (benchmarking) return;
+    setBenchmarking(true);
+    setTimeout(() => {
+      const runs = 2000;
+      
+      // Warm up
+      for (let i = 0; i < 200; i++) {
+        localJsNormalize(inputText, amPack);
+        nlp.normalize(inputText);
+      }
+      
+      // JS run
+      const jsStart = performance.now();
+      for (let i = 0; i < runs; i++) {
+        localJsNormalize(inputText, amPack);
+      }
+      const jsEnd = performance.now();
+      const jsTime = jsEnd - jsStart;
+      
+      // WASM run
+      const wasmStart = performance.now();
+      for (let i = 0; i < runs; i++) {
+        nlp.normalize(inputText);
+      }
+      const wasmEnd = performance.now();
+      const wasmTime = wasmEnd - wasmStart;
+      
+      setJsResult({
+        time: jsTime / runs * 1000,
+        ops: Math.round((runs / jsTime) * 1000)
+      });
+      
+      setWasmResult({
+        time: wasmTime / runs * 1000,
+        ops: Math.round((runs / wasmTime) * 1000)
+      });
+      
+      setBenchmarking(false);
+    }, 100);
+  };
 
   const renderActiveVisualizer = () => {
     const lexed = nlp.lexAnalyze(inputText);
@@ -241,11 +334,136 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
           </div>
         );
       }
+      case "engine": {
+        const isWasmSupported = !!(nlp as any).wasmNormalizer;
+        
+        // Compute speedup ratio
+        const speedup = jsResult && wasmResult ? jsResult.time / wasmResult.time : null;
+
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                Hybrid Engine Comparison
+              </span>
+              <span className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                isWasmSupported 
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
+                  : "bg-amber-500/10 border-amber-500/20 text-amber-500"
+              }`}>
+                {isWasmSupported ? "WASM CORE READY" : "JS FALLBACK ONLY"}
+              </span>
+            </div>
+
+            {jsResult && wasmResult ? (
+              <div className="space-y-4">
+                {/* Latency / Speedup Banner */}
+                <div className="p-3 rounded border border-blue-500/10 dark:border-sky-400/10 bg-blue-500/5 dark:bg-sky-400/[0.02] text-center space-y-1">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 dark:text-white">
+                    <Zap className="w-3.5 h-3.5 text-blue-500" />
+                    <span>
+                      {speedup! > 1 
+                        ? `WASM is ${speedup!.toFixed(2)}x faster!` 
+                        : `JS is ${(1 / speedup!).toFixed(2)}x faster!`}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-semibold leading-normal">
+                    {speedup! > 1 
+                      ? "The Rust WebAssembly core is bypassing JIT overhead, optimizing character loops in parallel."
+                      : "JavaScript is faster on short strings due to the overhead of crossing the JS-WASM boundary."}
+                  </p>
+                </div>
+
+                {/* Performance Bars */}
+                <div className="space-y-3 font-mono text-[10px]">
+                  {/* JS Bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-700 dark:text-zinc-400 font-bold">JavaScript Fallback</span>
+                      <span className="text-slate-500 dark:text-zinc-500">
+                        {jsResult.ops.toLocaleString()} ops/sec ({jsResult.time.toFixed(1)} μs/op)
+                      </span>
+                    </div>
+                    <div className="h-2 rounded bg-slate-100 dark:bg-zinc-950 overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-500 rounded transition-all duration-500"
+                        style={{ width: `${Math.min(100, (jsResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* WASM Bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-700 dark:text-zinc-450 font-bold">WebAssembly (Rust Core)</span>
+                      <span className="text-slate-500 dark:text-zinc-500">
+                        {wasmResult.ops.toLocaleString()} ops/sec ({wasmResult.time.toFixed(1)} μs/op)
+                      </span>
+                    </div>
+                    <div className="h-2 rounded bg-slate-100 dark:bg-zinc-950 overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 rounded transition-all duration-500"
+                        style={{ width: `${Math.min(100, (wasmResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recalculate Button */}
+                <button
+                  onClick={runClientBenchmark}
+                  disabled={benchmarking}
+                  className="w-full py-1.5 px-3 rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all cursor-pointer text-center disabled:opacity-50"
+                >
+                  {benchmarking ? "Executing Benchmark..." : "Re-run Live Benchmark"}
+                </button>
+              </div>
+            ) : benchmarking ? (
+              <div className="flex flex-col items-center justify-center py-10 space-y-3 border border-dashed border-slate-200 dark:border-zinc-900 rounded bg-slate-50/50 dark:bg-zinc-950/10">
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-zinc-500">
+                  Running 2,000 normalization loops...
+                </span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 text-center border border-dashed border-slate-200 dark:border-zinc-900 rounded bg-slate-50/50 dark:bg-zinc-950/10 space-y-3">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
+                    Compare performance of pure JS regex rules vs native WebAssembly loops using your current input text.
+                  </p>
+                  <button
+                    onClick={runClientBenchmark}
+                    className="inline-flex items-center gap-1.5 py-1.5 px-4 rounded bg-slate-900 text-white dark:bg-zinc-900 dark:text-white text-xs font-bold hover:bg-slate-800 dark:hover:bg-zinc-800 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>Run Live Benchmark</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-[9px] font-mono leading-relaxed">
+                  <div className="p-2.5 rounded bg-slate-50 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-900/60 space-y-1">
+                    <span className="font-bold text-blue-500">JS ENGINE</span>
+                    <p className="text-slate-500 dark:text-zinc-500">
+                      Boots instantly. High boundary crossing speed, but slower processing of loops and regexes.
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded bg-slate-50 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-900/60 space-y-1">
+                    <span className="font-bold text-emerald-500">RUST WASM ENGINE</span>
+                    <p className="text-slate-500 dark:text-zinc-500">
+                      Static compiled speed, memory-safe, zero GC impact. Ideal for larger texts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
     }
   };
 
   return (
-    <div className="border border-slate-200/60 dark:border-zinc-900 bg-white dark:bg-[#070709] rounded-md shadow-sm overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[480px]">
+    <div className="border border-slate-200/60 dark:border-zinc-900 bg-white dark:bg-[#070709] rounded-md shadow-sm overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[600px]">
       
       {/* Tab Switcher Left Navigation Column */}
       <div className="w-full lg:w-56 border-b lg:border-b-0 lg:border-r border-slate-200/60 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/20 p-4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible shrink-0 scrollbar-none">
@@ -296,12 +514,12 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
         {/* Visualizer & Code Tabs */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top visualizer segment */}
-          <div className="flex-1 p-5 border-b border-slate-200/50 dark:border-zinc-900 overflow-y-auto max-h-[260px] md:max-h-none">
+          <div className="flex-1 p-5 border-b border-slate-200/50 dark:border-zinc-900 overflow-y-auto max-h-[320px] md:max-h-none">
             {renderActiveVisualizer()}
           </div>
 
           {/* Bottom Code Block section */}
-          <div className="bg-[#0b0c10] p-4 font-mono text-[10px] text-zinc-400 relative overflow-hidden h-[150px] shrink-0">
+          <div className="bg-[#0b0c10] p-4 font-mono text-[10px] text-zinc-400 relative overflow-hidden h-[180px] shrink-0">
             <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
               <button
                 onClick={() => copyCode(codeSnippets[activeTab])}

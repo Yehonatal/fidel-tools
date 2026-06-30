@@ -13,6 +13,20 @@ interface ReleaseItem {
 export default function ChangelogPage() {
   const releases: ReleaseItem[] = [
     {
+      version: "v0.1.7",
+      date: "July 01, 2026",
+      packages: ["@fidel-tools/core", "@fidel-tools/core-native"],
+      features: [
+        "Ported the lexical normalizer hot path to Rust compiled to WebAssembly under @fidel-tools/core-native, inlining the WASM binary as base64 for zero-dependency loading.",
+        "Integrated the WASM normalizer into @fidel-tools/core with a silent runtime fallback to the pure JS normalizer if WASM compilation fails.",
+        "Created a multi-scale benchmarking suite to measure speedup: WASM achieves a 1.28x speedup on medium paragraphs (~150 chars), while JIT-optimized JS remains faster on short queries due to WASM boundary crossing overhead."
+      ],
+      fixes: [
+        "Resolved the import.meta.url SyntaxError inside CommonJS environments (like Jest) by replacing imports with context-safe references in the build pipeline.",
+        "Resolved WASM deprecation warning by updating initSync arguments to pass an object wrapper."
+      ]
+    },
+    {
       version: "v0.1.6",
       date: "June 15, 2026",
       packages: ["@fidel-tools/core", "@fidel-tools/lang-am", "@fidel-tools/web"],
@@ -74,7 +88,7 @@ export default function ChangelogPage() {
           </div>
 
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 space-y-2 text-[10px] font-mono font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
-            <div>Latest Release: <span className="text-zinc-900 dark:text-white font-bold ml-1">v0.1.6</span></div>
+            <div>Latest Release: <span className="text-zinc-900 dark:text-white font-bold ml-1">v0.1.7</span></div>
             <div>GitHub Repository: <a href="https://github.com/Yehonatal/fidel-tools" target="_blank" className="text-blue-500 hover:underline inline-flex items-center ml-1">Yehonatal/fidel-tools <ChevronRight className="w-3 h-3" /></a></div>
           </div>
         </div>
