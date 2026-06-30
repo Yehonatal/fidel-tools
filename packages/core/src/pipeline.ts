@@ -8,9 +8,32 @@ import { weighTerms } from "./term_weighter.js";
 import type { DocIndexData, QueryIndexData } from "./indexer.js";
 import { normalize } from "./normalizer.js";
 import { sentenceTokenize } from "./sentence_tokenizer.js";
+import { initNormalizer, WasmNormalizer } from "@fidel-tools/core-native";
+
+let wasmSupported = false;
+try {
+    initNormalizer();
+    wasmSupported = true;
+} catch (e) {
+    // Silently fallback to JS implementation
+}
 
 export class Pipeline {
-    constructor(private pack: LanguagePack) {}
+    private wasmNormalizer: WasmNormalizer | null = null;
+
+    constructor(private pack: LanguagePack) {
+        if (wasmSupported && pack.normalization) {
+            try {
+                this.wasmNormalizer = new WasmNormalizer(
+                    pack.normalization.char_map || {},
+                    pack.normalization.labialized_map || {},
+                    pack.normalization.gemination_threshold
+                );
+            } catch (e) {
+                this.wasmNormalizer = null;
+            }
+        }
+    }
 
     get stopwords(): string[] {
         return this.pack.stopwords || [];
@@ -18,6 +41,13 @@ export class Pipeline {
 
     normalize(text: string): string {
         if (!text) return "";
+        if (this.wasmNormalizer) {
+            try {
+                return this.wasmNormalizer.normalize(text);
+            } catch (e) {
+                // fallback
+            }
+        }
         return normalize(text, this.pack);
     }
 

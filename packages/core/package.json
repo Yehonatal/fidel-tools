@@ -40,5 +40,12 @@
         "jest": "^28.1.3",
         "typescript": "^5.0.4"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@fidel-tools/core-native": "workspace:*"
+    },
+    "jest": {
+        "transformIgnorePatterns": [
+            "/node_modules/(?!@fidel-tools/core-native)/"
+        ]
+    }
 }

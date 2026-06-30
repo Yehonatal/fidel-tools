@@ -1,0 +1,15 @@
+{
+  "name": "fidel-tools-core-native",
+  "type": "module",
+  "version": "0.1.7",
+  "files": [
+    "fidel_tools_core_native_bg.wasm",
+    "fidel_tools_core_native.js",
+    "fidel_tools_core_native.d.ts"
+  ],
+  "main": "fidel_tools_core_native.js",
+  "types": "fidel_tools_core_native.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
