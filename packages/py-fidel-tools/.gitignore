@@ -1,0 +1,12 @@
+# Python ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.eggs/
+*.egg-info/
+venv/
+.venv/
+dist/
+build/

@@ -32,3 +32,18 @@ jobs:
 
     - name: Run tests
       run: pnpm test
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Build and test Python bindings
+      run: |
+        python -m venv .venv
+        .venv/bin/pip install --upgrade pip
+        .venv/bin/pip install maturin pytest
+        VIRTUAL_ENV=.venv .venv/bin/maturin develop
+        .venv/bin/pytest
+      working-directory: packages/py-fidel-tools
+
