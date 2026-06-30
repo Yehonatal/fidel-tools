@@ -33,6 +33,10 @@ jobs:
     - name: Run tests
       run: pnpm test
 
+    - name: Run Accuracy & Speed Benchmarks (Regression Check)
+      run: node benchmark/run-all.js
+
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:

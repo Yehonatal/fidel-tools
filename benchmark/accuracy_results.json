@@ -1,0 +1,13 @@
+{
+  "normalization": {
+    "jsAcc": 100,
+    "wasmAcc": 100
+  },
+  "stemming": {
+    "acc": 100
+  },
+  "tokenization": {
+    "exactAcc": 100,
+    "f1": 100
+  }
+}
