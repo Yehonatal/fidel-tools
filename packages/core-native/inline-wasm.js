@@ -57,10 +57,15 @@ fs.writeFileSync(path.join(__dirname, 'dist', 'wasm_inline.js'), template);
 console.log('Compiling ES modules to CommonJS...');
 
 let glueCode = fs.readFileSync(jsGluePath, 'utf8');
-// Replace import.meta.url to prevent SyntaxError in CommonJS environment
-glueCode = glueCode.replace(/import\.meta\.url/g, 'undefined');
 
-const compiledGlue = babel.transformSync(glueCode, {
+// Prevent bundlers (like Webpack/Turbopack) from statically scanning and trying to resolve the missing .wasm asset
+glueCode = glueCode.replace(/new URL\(['"]fidel_tools_core_native_bg\.wasm['"],\s*import\.meta\.url\)/g, 'undefined');
+fs.writeFileSync(jsGluePath, glueCode);
+
+// Replace import.meta.url to prevent SyntaxError in CommonJS environment
+let cjsGlueCode = glueCode.replace(/import\.meta\.url/g, 'undefined');
+
+const compiledGlue = babel.transformSync(cjsGlueCode, {
   plugins: ['@babel/plugin-transform-modules-commonjs']
 }).code;
 fs.writeFileSync(path.join(__dirname, 'dist', 'fidel_tools_core_native.cjs'), compiledGlue);
