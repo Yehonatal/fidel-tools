@@ -1,0 +1,24 @@
+{
+  "name": "@fidel-tools/core-native",
+  "version": "0.1.7",
+  "type": "module",
+  "main": "dist/wasm_inline.cjs",
+  "module": "dist/wasm_inline.js",
+  "types": "dist/wasm_inline.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/wasm_inline.js",
+      "require": "./dist/wasm_inline.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.19.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.18.6"
+  },
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir dist && node inline-wasm.js"
+  }
+}

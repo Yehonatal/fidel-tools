@@ -214,6 +214,10 @@ importers:
         version: 5.9.3
 
   packages/core:
+    dependencies:
+      '@fidel-tools/core-native':
+        specifier: workspace:*
+        version: link:../core-native
     devDependencies:
       '@babel/core':
         specifier: ^7.19.0
@@ -230,6 +234,15 @@ importers:
       typescript:
         specifier: ^5.0.4
         version: 5.9.3
+
+  packages/core-native:
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.19.0
+        version: 7.29.7
+      '@babel/plugin-transform-modules-commonjs':
+        specifier: ^7.18.6
+        version: 7.29.7(@babel/core@7.29.7)
 
   packages/db:
     dependencies:
