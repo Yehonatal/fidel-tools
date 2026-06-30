@@ -1,33 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+export default function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
+  const params = use(searchParams);
+  const token = params.token;
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!token) {
+      setError("Reset token is missing or invalid. Please request a new link.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    const { error: err } = await authClient.requestPasswordReset({
-      email,
-      redirectTo: "/reset-password",
+    const { error: err } = await authClient.resetPassword({
+      newPassword: password,
+      token,
     });
 
     if (err) {
-      setError(err.message ?? "Failed to send reset email");
+      setError(err.message ?? "Failed to reset password.");
       setLoading(false);
       return;
     }
 
-    setSent(true);
+    setSuccess(true);
     setLoading(false);
   }
 
@@ -54,13 +73,13 @@ export default function ForgotPasswordPage() {
         {/* Center Quote / Pitch */}
         <div className="relative z-10 space-y-4">
           <span className="text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest block">
-            03 / RECOVERY SYSTEM
+            05 / CREDENTIAL UPDATE
           </span>
           <h2 className="text-3xl font-bold text-white tracking-tight leading-none">
-            Credential Recovery
+            Establish New Password
           </h2>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Generate validation links to reset account permissions and verify system-access configurations.
+            Define a secure cryptographic sequence to restore access permissions for the Fidel environment.
           </p>
         </div>
 
@@ -87,17 +106,39 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
 
-          {sent ? (
-            <div className="text-center md:text-left space-y-4">
-              <div className="w-12 h-12 rounded border border-emerald-500/20 bg-emerald-500/10 flex items-center justify-center mx-auto md:mx-0 text-emerald-600 dark:text-emerald-400 animate-pulse-soft">
+          {!token ? (
+            <div className="space-y-4 text-center md:text-left">
+              <div className="w-12 h-12 rounded border border-red-500/20 bg-red-500/10 flex items-center justify-center mx-auto md:mx-0 text-red-600 dark:text-red-400">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Invalid Reset Token
+                </h2>
+                <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500">
+                  The password recovery token is missing, expired, or invalid. Please request a new link.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-bold text-blue-600 dark:text-sky-400 hover:underline transition-colors"
+                >
+                  &larr; Request a new recovery link
+                </Link>
+              </div>
+            </div>
+          ) : success ? (
+            <div className="space-y-4 text-center md:text-left">
+              <div className="w-12 h-12 rounded border border-emerald-500/20 bg-emerald-500/10 flex items-center justify-center mx-auto md:mx-0 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div className="space-y-1">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Check your email
+                  Password Reset Successful
                 </h2>
                 <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500">
-                  If an account exists for {email}, you&apos;ll receive a password reset link.
+                  Your credentials have been updated. You can now log in with your new password.
                 </p>
               </div>
               <div className="pt-2">
@@ -105,7 +146,7 @@ export default function ForgotPasswordPage() {
                   href="/sign-in"
                   className="text-xs font-bold text-blue-600 dark:text-sky-400 hover:underline transition-colors"
                 >
-                  &larr; Back to sign in
+                  Sign In &larr;
                 </Link>
               </div>
             </div>
@@ -116,26 +157,46 @@ export default function ForgotPasswordPage() {
                   Reset Password
                 </h1>
                 <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500">
-                  Enter your email address to receive a secure recovery verification link.
+                  Please enter and verify your new workspace access password.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                 <div className="space-y-1.5">
                   <label
-                    htmlFor="email"
+                    htmlFor="password"
                     className="block text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono"
                   >
-                    Email Address
+                    New Password
                   </label>
                   <input
-                    id="email"
-                    type="email"
+                    id="password"
+                    type="password"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className={inputClass}
-                    placeholder="m@example.com"
+                    placeholder="Min. 8 characters"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono"
+                  >
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    required
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={inputClass}
+                    placeholder="Confirm new password"
                   />
                 </div>
 
@@ -154,10 +215,10 @@ export default function ForgotPasswordPage() {
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="animate-spin w-3.5 h-3.5" />
-                      Sending link…
+                      Updating password…
                     </span>
                   ) : (
-                    "Send Recovery Link"
+                    "Reset Password"
                   )}
                 </button>
               </form>

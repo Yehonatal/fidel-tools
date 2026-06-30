@@ -20,7 +20,7 @@ export default function EnterprisePage() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow flex flex-col justify-center transition-colors duration-300 font-sans">
+    <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow flex flex-col justify-center transition-colors duration-300 font-sans">
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
         
         {/* Left Column Description */}

@@ -60,7 +60,7 @@ export default function InfrastructurePage() {
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow space-y-16 transition-colors duration-300">
+    <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow space-y-16 transition-colors duration-300">
       
       {/* ── Top Pricing Hero & Selector Flow ──────────────────────── */}
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">

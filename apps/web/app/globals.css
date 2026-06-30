@@ -86,12 +86,14 @@ body {
   color: #09090b;
   transition: background-color 0.2s ease, color 0.2s ease;
   position: relative;
+  color-scheme: light;
 }
 
 body.dark,
 .dark body {
   background-color: #030303;
   color: #fafafa;
+  color-scheme: dark;
 }
 
 /* Faint noise overlay for high-end developer texturing */
@@ -119,9 +121,18 @@ body::before {
 }
 
 /* ── Custom Scrollbar ────────────────────────────────────── */
+html, body, * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+
+.dark html, .dark body, .dark * {
+  scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -129,12 +140,59 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.4);
+}
+
+/* ── Custom Scrollbar Utilities (Tailwind compat) ────────── */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+.dark .scrollbar-thin,
+.dark.scrollbar-thin {
+  scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+.dark.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.2);
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.dark.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.4);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Technical Grid Overlay Utility ──────────────────────── */

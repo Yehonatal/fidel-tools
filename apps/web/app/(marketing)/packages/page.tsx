@@ -113,7 +113,7 @@ const activeUser = await db.query.users.findFirst({
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow transition-colors duration-300">
+    <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow transition-colors duration-300">
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
         
         {/* Left Column (Sticky Title & Subtitle) */}

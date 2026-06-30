@@ -264,6 +264,77 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* ── Paradigm Shift Section ───────────────────────────────────── */}
+        <div className="space-y-10 pt-10 border-t border-slate-200 dark:border-zinc-900" data-aos="fade-up">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-4 space-y-4">
+              <span className="text-[10px] font-bold text-blue-500 dark:text-zinc-550 uppercase tracking-widest font-mono block">The Paradigm Shift</span>
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white font-sans leading-tight">
+                Closing the Ethiopic NLP Gap
+              </h2>
+              <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
+                Traditional NLP libraries are English-centric and fail when applied to Ge'ez-based scripts. Fidel Tools introduces a script-first, modular approach designed for maximum accuracy and zero overhead.
+              </p>
+              <div className="p-4 border border-slate-200 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/10 rounded-md space-y-2">
+                <span className="text-[10px] font-bold font-mono text-emerald-500 dark:text-emerald-400 uppercase tracking-wider block">Targeted Business Value</span>
+                <p className="text-[11px] font-semibold text-slate-650 dark:text-zinc-400 leading-relaxed">
+                  Power accurate search engine indexing (matching <code className="font-mono bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-[10px]">ልጆቻቸውን</code> to <code className="font-mono bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-[10px]">ልጅ</code>), reduce LLM token usage in Generative AI / RAG pipelines by stripping Amharic stopwords, and run translations offline.
+                </p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-md bg-white dark:bg-[#070709] space-y-3">
+                <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-800 dark:text-white font-sans">
+                  Schema-First (JSON vs. Code)
+                </h3>
+                <p className="text-[11px] text-slate-650 dark:text-zinc-450 leading-relaxed font-semibold">
+                  In legacy systems, supporting a new language requires writing complex Python classes. In Fidel Tools, it's just a JSON file. Linguists define language specifications without coding, opening up rapid support for Tigrinya, Oromo, and Ge'ez.
+                </p>
+              </div>
+
+              <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-md bg-white dark:bg-[#070709] space-y-3">
+                <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-800 dark:text-white font-sans">
+                  Normalization-First Pipeline
+                </h3>
+                <p className="text-[11px] text-slate-650 dark:text-zinc-450 leading-relaxed font-semibold">
+                  Orthographic ambiguity is the silent killer of Ethiopic text analysis. Fidel Tools collapses spelling variations (e.g. <code className="font-mono bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-[10px]">ሀ/ሐ/ኀ</code>) before tokenization, ensuring downstream search and ML engines read the exact same semantic intent.
+                </p>
+              </div>
+
+              <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-md bg-white dark:bg-[#070709] space-y-3">
+                <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
+                  <Terminal className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-800 dark:text-white font-sans">
+                  Lightweight & Edge-Ready
+                </h3>
+                <p className="text-[11px] text-slate-650 dark:text-zinc-450 leading-relaxed font-semibold">
+                  No heavy neural networks or 500MB weights. The core rules engine is under <code className="font-mono">250KB</code>. Run processing locally inside browser packages, serverless functions, or edge runtimes with zero API network latency.
+                </p>
+              </div>
+
+              <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-md bg-white dark:bg-[#070709] space-y-3">
+                <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-800 dark:text-white font-sans">
+                  Shared Script Adapters
+                </h3>
+                <p className="text-[11px] text-slate-650 dark:text-zinc-450 leading-relaxed font-semibold">
+                  Instead of reinventing the wheel, the core engine abstracts script mechanics (syllabary, unicode mappings) into a <code className="font-mono bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-[10px]">ScriptAdapter</code>. Multiple regional languages share one adapter, allowing near-instant codebase extensibility.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ── Interactive Playground Section ───────────────────────────── */}
         <div className="space-y-6 pt-8 border-t border-slate-200 dark:border-zinc-900" data-aos="fade-up">
           <div className="text-center space-y-1 max-w-xl mx-auto">
