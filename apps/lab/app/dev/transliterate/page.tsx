@@ -4,15 +4,44 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
 import GeezCharMap from "@/components/GeezCharMap";
-import { Keyboard, ArrowRightLeft, AlertTriangle, Gamepad, Award, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Keyboard, ArrowRightLeft, AlertTriangle, Gamepad, Award, RefreshCw, CheckCircle2, XCircle, Heart, Star } from "lucide-react";
 
-const GAME_WORDS = [
+interface TransWord {
+  geez: string;
+  sera: string;
+}
+
+const GAME_WORDS: TransWord[] = [
   { geez: "ሰላም", sera: "selam" },
   { geez: "ጤና", sera: "tEna" },
   { geez: "ኢትዮጵያ", sera: "ityop'ya" },
   { geez: "ትምህርት", sera: "temhert" },
   { geez: "ከተማ", sera: "katamA" },
+  { geez: "ፍቅር", sera: "feqer" },
+  { geez: "ወንድም", sera: "wandem" },
+  { geez: "ደስታ", sera: "dastA" },
 ];
+
+function getEditDistance(a: string, b: string): number {
+  const tmp = [];
+  let i, j;
+  for (i = 0; i <= a.length; i++) {
+    tmp[i] = [i];
+  }
+  for (j = 1; j <= b.length; j++) {
+    tmp[0][j] = j;
+  }
+  for (i = 1; i <= a.length; i++) {
+    for (j = 1; j <= b.length; j++) {
+      tmp[i][j] = Math.min(
+        tmp[i - 1][j] + 1,
+        tmp[i][j - 1] + 1,
+        tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+  }
+  return tmp[a.length][b.length];
+}
 
 export default function TransliteratePage() {
   const { mode } = useLabMode();
@@ -23,14 +52,20 @@ export default function TransliteratePage() {
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Transliteration Rush states
+  // Transliteration Rush v2 states
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isEndless, setIsEndless] = useState(false);
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
+  const [sessionHighScore, setSessionHighScore] = useState(0);
+  const [lives, setLives] = useState(3);
   const [timeLeft, setTimeLeft] = useState(10);
   const [userTyped, setUserTyped] = useState("");
-  const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
+  const [feedback, setFeedback] = useState<"correct" | "near-miss" | "incorrect" | "timeout" | null>(null);
+  const [roundDirection, setRoundDirection] = useState<"to-sera" | "to-geez">("to-sera");
+
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const liveTransliterateRef = useRef<NodeJS.Timeout | null>(null);
 
   const runTransliteration = async (inputVal: string, dir: "to-sera" | "to-geez") => {
     if (!inputVal.trim()) {
@@ -59,14 +94,16 @@ export default function TransliteratePage() {
   };
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      runTransliteration(text, direction);
-    }, 450);
+    if (mode === "academic") {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        runTransliteration(text, direction);
+      }, 450);
+    }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [text, direction]);
+  }, [text, direction, mode]);
 
   const toggleDirection = () => {
     const newDir = direction === "to-sera" ? "to-geez" : "to-sera";
@@ -75,11 +112,35 @@ export default function TransliteratePage() {
     setResult(text);
   };
 
-  // Game functions
+  // Live transliterate-as-you-type helper when round direction is "to-geez"
+  const handleLiveTransliterate = (rawAscii: string) => {
+    setUserTyped(rawAscii);
+    if (roundDirection === "to-sera") return; // No live mapping needed when writing English SERA
+
+    if (liveTransliterateRef.current) clearTimeout(liveTransliterateRef.current);
+    liveTransliterateRef.current = setTimeout(async () => {
+      if (!rawAscii.trim()) return;
+      try {
+        const response = await fetch("/api/transliterate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: rawAscii, direction: "to-geez" }),
+        });
+        const data = await response.json();
+        if (data.result) {
+          setUserTyped(data.result);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 150); // Fast live transform
+  };
+
   const startGame = () => {
     setIsPlaying(true);
     setRound(0);
     setScore(0);
+    setLives(3);
     setUserTyped("");
     setFeedback(null);
     startRound(0);
@@ -89,6 +150,9 @@ export default function TransliteratePage() {
     setTimeLeft(10);
     setUserTyped("");
     setFeedback(null);
+    // Alternate directions
+    setRoundDirection(roundNum % 2 === 0 ? "to-sera" : "to-geez");
+
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     
     gameTimerRef.current = setInterval(() => {
@@ -105,144 +169,296 @@ export default function TransliteratePage() {
 
   const checkAnswer = (timedOut = false) => {
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-    const target = GAME_WORDS[round].sera;
-    const isCorrect = !timedOut && userTyped.trim().toLowerCase() === target.toLowerCase();
+    const activeWord = GAME_WORDS[round % GAME_WORDS.length];
+    
+    // Set targets depending on the direction
+    const target = roundDirection === "to-sera" ? activeWord.sera : activeWord.geez;
+    const cleanUser = userTyped.trim();
 
-    if (isCorrect) {
-      setScore((prev) => prev + 20);
-      setFeedback("correct");
-    } else {
-      setFeedback("incorrect");
+    if (timedOut) {
+      setFeedback("timeout");
+      if (!isEndless) {
+        setLives((l) => {
+          const nextL = l - 1;
+          if (nextL <= 0) {
+            handleGameOver();
+          } else {
+            triggerNext();
+          }
+          return nextL;
+        });
+      } else {
+        setScore((s) => Math.max(0, s - 10)); // Endless penalty
+        triggerNext();
+      }
+      return;
     }
 
+    const isExact = cleanUser.toLowerCase() === target.toLowerCase();
+    const distance = getEditDistance(cleanUser.toLowerCase(), target.toLowerCase());
+    const isNearMiss = !isExact && distance <= 1;
+
+    if (isExact) {
+      setFeedback("correct");
+      setScore((s) => {
+        const nextS = s + 20;
+        if (nextS > sessionHighScore) setSessionHighScore(nextS);
+        return nextS;
+      });
+      triggerNext();
+    } else if (isNearMiss) {
+      setFeedback("near-miss");
+      setScore((s) => {
+        const nextS = s + 10; // Partial points
+        if (nextS > sessionHighScore) setSessionHighScore(nextS);
+        return nextS;
+      });
+      triggerNext();
+    } else {
+      setFeedback("incorrect");
+      if (!isEndless) {
+        setLives((l) => {
+          const nextL = l - 1;
+          if (nextL <= 0) {
+            handleGameOver();
+          } else {
+            triggerNext();
+          }
+          return nextL;
+        });
+      } else {
+        setScore((s) => Math.max(0, s - 10)); // Endless penalty
+        triggerNext();
+      }
+    }
+  };
+
+  const handleGameOver = () => {
     setTimeout(() => {
-      if (round < GAME_WORDS.length - 1) {
+      setIsPlaying(false);
+    }, 1600);
+  };
+
+  const triggerNext = () => {
+    setTimeout(() => {
+      if (lives > 0 || isEndless) {
         setRound((prev) => prev + 1);
         startRound(round + 1);
-      } else {
-        setIsPlaying(false);
       }
-    }, 1500);
+    }, 1600);
   };
 
   useEffect(() => {
     return () => {
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+      if (liveTransliterateRef.current) clearTimeout(liveTransliterateRef.current);
     };
   }, []);
 
   if (mode === "fun") {
-    // ── FUN MODE: TRANSLITERATION RUSH ─────────────────────────────────────
+    const activeWord = GAME_WORDS[round % GAME_WORDS.length];
+    const sourceDisplay = roundDirection === "to-sera" ? activeWord.geez : activeWord.sera;
+    const targetDisplay = roundDirection === "to-sera" ? activeWord.sera : activeWord.geez;
+
+    // ── FUN MODE: CARTOON TRANSLITERATION RUSH V2 ──────────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
+      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#faf8f5] text-zinc-900 dark:bg-[#121110] dark:text-amber-100">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3px solid #000;
+              box-shadow: 4px 4px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3px solid #f59e0b;
+              box-shadow: 4px 4px 0px 0px #f59e0b;
+            }
+            .cartoon-card {
+              border: 3px solid #000;
+              box-shadow: 6px 6px 0px 0px #000;
+            }
+            .dark .cartoon-card {
+              border: 3px solid #f59e0b;
+              box-shadow: 6px 6px 0px 0px #f59e0b;
+            }
+            .boom-stamp {
+              animation: boom-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            }
+            @keyframes boom-in {
+              0% { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+              100% { transform: scale(1) rotate(-5deg); opacity: 1; }
+            }
+          `
+        }} />
+
         {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-2xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-650 dark:text-orange-500">
-            <Gamepad className="w-4 h-4" />
-            <span>LEVEL 7: PHONETIC TRANSLITERATOR</span>
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>⌨️ LEVEL 7: TRANSLITERATION RUSH v2 🚀</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            TRANSLITERATION RUSH
+          <h2 className="text-4xl font-black tracking-wider text-black dark:text-amber-500">
+            TRANSLITERATION RUSH v2
           </h2>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-455 uppercase tracking-wider">
-            Type the correct SERA (ASCII representation) of the given Ge&apos;ez word!
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider">
+            Match characters in both directions under fire. typos get partial credit!
           </p>
         </div>
 
         {!isPlaying ? (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full text-center space-y-6 shadow-inner">
-            <div className="text-5xl">⌨️</div>
+          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+            <div className="text-5xl">🚀</div>
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-blue-600 dark:text-amber-400 uppercase tracking-wider">
-                Ready for the Rush?
+              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                Start Transliteration?
               </h3>
               <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                Match Ge&apos;ez characters to their correct Latin keyboard keys (e.g. for &quot;ሰላም&quot; type &quot;selam&quot;). You have 10 seconds per round.
+                Alternate between Ge'ez-to-ASCII and ASCII-to-Ge'ez typing. Classic Mode gives 3 lives. Endless Mode tracks session high scores!
               </p>
             </div>
-            {score > 0 && (
-              <div className="text-sm font-bold text-blue-600 dark:text-amber-400 border border-blue-500/20 dark:border-amber-500/20 bg-blue-500/5 dark:bg-amber-500/5 py-2 rounded">
-                SCORE: {score} / 100 PTS
+
+            {/* Mode selection buttons */}
+            <div className="grid grid-cols-2 gap-4 border-2 border-black p-2 rounded-xl dark:border-amber-500 bg-zinc-550/5">
+              <button
+                onClick={() => setIsEndless(false)}
+                className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
+                  !isEndless ? "bg-amber-400 border-black" : "bg-transparent border-transparent text-zinc-500"
+                }`}
+              >
+                CLASSIC
+              </button>
+              <button
+                onClick={() => setIsEndless(true)}
+                className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
+                  isEndless ? "bg-amber-400 border-black" : "bg-transparent border-transparent text-zinc-500"
+                }`}
+              >
+                ENDLESS
+              </button>
+            </div>
+
+            {sessionHighScore > 0 && (
+              <div className="text-xs font-black text-black border-2 border-black bg-cyan-150 py-2 rounded dark:bg-cyan-950/20 dark:border-amber-500 dark:text-amber-400 flex items-center justify-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <span>SESSION BEST: {sessionHighScore} PTS</span>
               </div>
             )}
+
             <button
               onClick={startGame}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-black font-bold uppercase tracking-widest text-xs rounded-lg active:scale-98 transition-all cursor-pointer font-mono"
+              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
             >
-              Start Typing
+              Start Arena
             </button>
           </div>
         ) : (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full flex flex-col items-center justify-between shadow-inner min-h-[380px] relative overflow-hidden">
-            {/* Round info & timer */}
-            <div className="w-full flex items-center justify-between border-b border-dashed border-zinc-250 dark:border-zinc-800/80 pb-3 text-xs font-bold text-zinc-450 dark:text-zinc-555">
-              <span>ROUND {round + 1} / {GAME_WORDS.length}</span>
-              <span className="text-blue-600 dark:text-orange-500">TIME: {timeLeft}S</span>
+          <div className="cartoon-border rounded-2xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full flex flex-col justify-between min-h-[440px] relative space-y-6">
+            
+            {/* Top stats HUD */}
+            <div className="w-full flex items-center justify-between border-b-2 border-dashed border-black dark:border-amber-500 pb-3 text-xs font-black">
+              <span>SCORE: {score} PTS</span>
+              {isEndless ? (
+                <span className="flex items-center gap-1 text-[9px] uppercase font-black text-amber-550 dark:text-amber-400">
+                  <Star className="w-3.5 h-3.5 fill-current animate-pulse" /> ENDLESS MODE
+                </span>
+              ) : (
+                <div className="flex gap-1 items-center">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Heart
+                      key={i}
+                      className={`w-4 h-4 ${i < lives ? "text-red-500 fill-red-500" : "text-zinc-200 dark:text-zinc-800"}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Word details */}
-            <div className="my-8 text-center space-y-4">
-              <span className="text-[10px] text-zinc-450 dark:text-zinc-555 uppercase tracking-wider block">GE&apos;EZ SOURCE</span>
-              <span className="text-4xl font-extrabold text-zinc-800 dark:text-white block font-sans">
-                {GAME_WORDS[round].geez}
+            {/* Core word challenge box */}
+            <div className="text-center space-y-4 flex-grow flex flex-col items-center justify-center relative">
+              <span className="text-[10px] text-zinc-550 dark:text-zinc-400 uppercase tracking-widest block font-black">
+                {roundDirection === "to-sera" ? "💻 CONVERT GE'EZ TO SERA" : "💻 CONVERT SERA TO GE'EZ"}
               </span>
 
-              {/* Feedback */}
-              <div className="min-h-[20px] text-center">
+              {/* Time progress bar */}
+              <div className="w-full max-w-[120px] h-3 bg-zinc-200 border-2 border-black rounded-full overflow-hidden relative dark:border-amber-500">
+                <div
+                  style={{ width: `${(timeLeft / 10) * 100}%` }}
+                  className="h-full bg-red-500 transition-all duration-300"
+                />
+              </div>
+
+              <span className="text-4xl font-black text-black dark:text-white block font-sans tracking-wide">
+                {sourceDisplay}
+              </span>
+
+              {/* Stamp feedback */}
+              <div className="absolute top-2 right-2 min-h-[28px]">
                 {feedback === "correct" && (
-                  <span className="text-xs font-bold text-emerald-650 dark:text-emerald-450 uppercase tracking-wider inline-flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 animate-bounce" /> CORRECT!
+                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-green-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                    EXACT MATCH!
+                  </span>
+                )}
+                {feedback === "near-miss" && (
+                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-yellow-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                    NEAR-MISS!
                   </span>
                 )}
                 {feedback === "incorrect" && (
-                  <span className="text-xs font-bold text-red-600 dark:text-red-500 uppercase tracking-wider">
-                    INCORRECT! Target: {GAME_WORDS[round].sera}
+                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-red-400 text-white text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                    WRONG!
+                  </span>
+                )}
+                {feedback === "timeout" && (
+                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-zinc-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                    TIME OUT!
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Typing input */}
+            {/* Input field */}
             <div className="w-full space-y-4">
               <input
                 type="text"
                 autoFocus
                 disabled={feedback !== null}
                 value={userTyped}
-                onChange={(e) => setUserTyped(e.target.value)}
-                placeholder="Type Latin SERA conversion..."
-                className="w-full bg-white border-2 border-blue-500/50 focus:border-blue-600 dark:bg-zinc-950 dark:border-amber-500/55 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-lg text-zinc-800 dark:text-white font-sans font-bold"
+                onChange={(e) => handleLiveTransliterate(e.target.value)}
+                placeholder={roundDirection === "to-sera" ? "Type Latin ASCII..." : "Type keys (e.g. selam)..."}
+                className="w-full bg-white border-[3px] border-black focus:bg-amber-50 dark:bg-black dark:border-amber-500 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-xl text-black dark:text-amber-100 font-sans font-black shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b] focus:translate-x-0.5 focus:translate-y-0.5 focus:shadow-[1px_1px_0px_0px_#000] transition-all"
               />
+
+              {feedback && (
+                <div className="cartoon-border p-3 bg-cyan-100 dark:bg-cyan-950/20 text-[10px] font-black text-center text-zinc-700 dark:text-amber-300 rounded-lg">
+                  Target Answer: "{targetDisplay}"
+                </div>
+              )}
+
               <button
                 disabled={feedback !== null}
                 onClick={() => checkAnswer(false)}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 text-white dark:text-black font-bold text-xs uppercase rounded-lg cursor-pointer"
+                className="w-full py-3 bg-amber-400 border-[3px] border-black text-black font-black text-xs uppercase rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_#000] cursor-pointer"
               >
-                SUBMIT
+                SUBMIT ANSWER
               </button>
             </div>
 
-            {/* score info */}
-            <div className="w-full mt-6 pt-3 border-t border-dashed border-zinc-250 dark:border-zinc-800/80 text-[10px] font-bold text-zinc-450 dark:text-zinc-555 text-left">
-              SCORE: {score} PTS
-            </div>
           </div>
         )}
       </div>
     );
   }
 
-  // ── ACADEMIC MODE: SIDE-BY-SIDE CONSOLE ──────────────────────────────────
-  const codeSnippet = `import { Pipeline } from '@fidel-tools/core'
-import amPack from '@fidel-tools/lang-am'
-
-const nlp = new Pipeline(amPack)
-
-// 1. Ge'ez unicode to SERA ASCII
-const sera = nlp.feligTransliterate("ሰላም", "am") // -> "selam"
-
-// 2. SERA ASCII to Ge'ez unicode
-const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
+  // ── ACADEMIC MODE: REF PANEL ─────────────────────────────────────────────
+  const codeSnippet = `// API Transliteration call
+const res = await fetch('/api/transliterate', {
+  method: 'POST',
+  body: JSON.stringify({ 
+    text: "ሰላም", 
+    direction: "to-sera" 
+  })
+});
+const { result } = await res.json();
+console.log(result); // "selam"`;
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -253,74 +469,73 @@ const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
             <Keyboard className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
-            Ge&apos;ez ↔ SERA Phonetic Transliteration
+            SERA Bidirectional Phonetic Transliteration
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Convert Ge&apos;ez Unicode characters into their phonetic ASCII equivalents (SERA) and vice versa.
+          Convert Ethiopic Ge&apos;ez orthographic glyphs to phonetic Latin ASCII characters and vice versa.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Main pane */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-900 pb-3">
-              <span className="text-[10px] font-mono font-bold text-zinc-405 dark:text-zinc-555 uppercase tracking-widest">
-                Direction: {direction === "to-sera" ? "Ge'ez ➔ SERA ASCII" : "SERA ASCII ➔ Ge'ez"}
-              </span>
-              <button
-                onClick={toggleDirection}
-                className="inline-flex items-center gap-1 text-[10px] font-bold border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 cursor-pointer shadow-xs active:scale-95"
-              >
-                <ArrowRightLeft className="w-3 h-3" />
-                <span>Reverse</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Input Area */}
-              <div className="premium-card flex flex-col overflow-hidden">
-                <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
-                  <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
-                    Source Text
-                  </span>
-                </div>
-                <div className="p-4 flex-grow flex flex-col">
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    className="w-full min-h-[160px] bg-transparent border-0 outline-hidden focus:outline-hidden ring-0 focus:ring-0 text-sm font-sans font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed placeholder-zinc-400 resize-none overflow-y-auto"
-                  />
-                </div>
-              </div>
-
-              {/* Output Result */}
-              <div className="premium-card flex flex-col overflow-hidden">
-                <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
-                  <span className="text-[9px] font-bold text-zinc-405 dark:text-zinc-500 uppercase tracking-wider font-mono">
-                    Transliteration Result
-                  </span>
-                  {loading && <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />}
-                </div>
-                <div className="p-4 flex-grow bg-blue-500/5 dark:bg-blue-500/10 flex flex-col justify-between">
-                  <p className="text-sm font-sans font-bold text-blue-600 dark:text-sky-400 leading-relaxed select-all">
-                    {result || "-"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Character matrix */}
-            <GeezCharMap />
-          </div>
-
-          {/* Documentation */}
+          {/* Input Panel */}
           <div className="lg:col-span-1 space-y-6">
+            <div className="premium-card flex flex-col overflow-hidden">
+              <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                  Input Stream
+                </span>
+                {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-500" />}
+              </div>
+              <div className="p-4 flex flex-col space-y-4">
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  className="w-full min-h-[120px] bg-transparent border-0 outline-hidden focus:outline-hidden ring-0 focus:ring-0 text-sm font-sans font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed placeholder-zinc-400 resize-none overflow-y-auto"
+                />
+
+                <div className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-900 pt-3">
+                  <span className="text-[10px] font-mono font-bold text-zinc-500">
+                    DIR: {direction === "to-sera" ? "Ge'ez → SERA" : "SERA → Ge'ez"}
+                  </span>
+                  <button
+                    onClick={toggleDirection}
+                    className="p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-md hover:border-blue-500 hover:bg-blue-500/5 transition-all text-zinc-650 dark:text-zinc-350 cursor-pointer"
+                  >
+                    <ArrowRightLeft className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <CodeSnippet title="Node.js Integration Code" code={codeSnippet} />
           </div>
 
+          {/* Results Panel */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="premium-card flex flex-col overflow-hidden">
+              <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                  Transliterated Outputs
+                </span>
+              </div>
+              <div className="p-6">
+                {error && (
+                  <div className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 p-3 rounded-lg text-xs font-semibold mb-4">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>{error}</span>
+                  </div>
+                )}
+                <div className="p-5 bg-zinc-100/50 dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-900 text-blue-600 dark:text-emerald-400 font-sans font-bold leading-relaxed select-all">
+                  {result || "-"}
+                </div>
+              </div>
+            </div>
+
+            {/* Character Reference Map */}
+            <GeezCharMap />
+          </div>
         </div>
       </div>
     </div>

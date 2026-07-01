@@ -3,48 +3,78 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
-import { Compass, Gamepad, Play, RotateCcw, AlertTriangle, RefreshCw, Zap } from "lucide-react";
+import { Compass, Gamepad, Play, CheckCircle2, XCircle, RefreshCw, Heart, AlertTriangle } from "lucide-react";
 
-// Game Dictionary mapping complex words to their expected stems
-const DICTIONARY = [
-  { word: "ልጆቻችን", stem: "ልጅ" },
-  { word: "ቤቶቻቸው", stem: "ቤት" },
-  { word: "መጽሐፍቱ", stem: "መጽሐፍ" },
-  { word: "ትምህርቶች", stem: "ትምህርት" },
-  { word: "መምህራን", stem: "መምህር" },
-  { word: "ሀገራችን", stem: "ሀገር" },
-  { word: "ከተማዋ", stem: "ከተማ" },
-  { word: "ቀኖቹ", stem: "ቀን" },
+interface StemCluster {
+  id: number;
+  root: string;
+  meaning: string;
+  inflections: string[];
+}
+
+const CLUSTERS_DATA: StemCluster[] = [
+  {
+    id: 1,
+    root: "ልጅ",
+    meaning: "child",
+    inflections: ["ልጆች", "ልጆቻችን", "ልጅነቴ", "ልጅቷ"],
+  },
+  {
+    id: 2,
+    root: "ቤት",
+    meaning: "house",
+    inflections: ["ቤቶች", "ቤቶቻችን", "ቤታቸው", "ቤትዎ"],
+  },
+  {
+    id: 3,
+    root: "ትምህርት",
+    meaning: "education",
+    inflections: ["ትምህርቶች", "በትምህርት", "ትምህርታችን", "ትምህርቷ"],
+  },
+  {
+    id: 4,
+    root: "ነገር",
+    meaning: "thing/matter",
+    inflections: ["ነገሮች", "በነገራችን", "ነገሩ", "ነገራቸው"],
+  },
 ];
 
 export default function StemPage() {
   const { mode } = useLabMode();
-  const [inputText, setInputText] = useState("ልጆቻችን ቤቶቻቸው መጽሐፍቱ መምህራን");
+  const [inputText, setInputText] = useState("ልጆች ቤቶቻቸውን ትምህርታቸውን እና ነገሮችን ይወዳሉ።");
   const [stemmedList, setStemmedList] = useState<Array<{ word: string; stem: string }>>([]);
   const [loading, setLoading] = useState(false);
 
-  // Stem Sprint states
+  // Root Cluster Game States
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [typedStem, setTypedStem] = useState("");
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [wordY, setWordY] = useState(0); // vertical position percentage
-  const [gameOver, setGameOver] = useState(false);
-  const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [wordY, setWordY] = useState(0); // 0 to 100
+  const [typedStem, setTypedStem] = useState("");
+  const [answerState, setAnswerState] = useState<"correct" | "incorrect" | null>(null);
 
-  const runStem = async (inputVal: string) => {
-    const words = inputVal.split(/\s+/).filter(Boolean);
-    if (words.length === 0) return;
+  const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentCluster = CLUSTERS_DATA[currentIdx];
+
+  const runStem = async (textToStem: string) => {
+    if (!textToStem.trim()) return;
     setLoading(true);
     try {
+      const wordsArray = textToStem.split(/\s+/).filter(Boolean);
       const response = await fetch("/api/stem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ words }),
+        body: JSON.stringify({ words: wordsArray }),
       });
       const data = await response.json();
-      setStemmedList(data.stems || []);
+      if (!data.error && data.stems) {
+        const mapped = wordsArray.map((w, idx) => ({
+          word: w,
+          stem: data.stems[idx] || w,
+        }));
+        setStemmedList(mapped);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -53,133 +83,211 @@ export default function StemPage() {
   };
 
   useEffect(() => {
-    runStem(inputText);
-  }, []);
+    if (mode === "academic") {
+      runStem(inputText);
+    }
+  }, [mode]);
 
-  // Start game
   const startGame = () => {
     setIsPlaying(true);
+    setCurrentIdx(0);
     setScore(0);
     setLives(3);
-    setGameOver(false);
     setWordY(0);
     setTypedStem("");
-    pickRandomWord();
+    setAnswerState(null);
+    startClusterRound(0);
   };
 
-  const pickRandomWord = () => {
-    const rand = Math.floor(Math.random() * DICTIONARY.length);
-    setCurrentIndex(rand);
+  const startClusterRound = (idx: number) => {
     setWordY(0);
-    
-    if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
-    
-    gameIntervalRef.current = setInterval(() => {
+    setTypedStem("");
+    setAnswerState(null);
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+
+    gameTimerRef.current = setInterval(() => {
       setWordY((prev) => {
-        if (prev >= 100) {
-          clearInterval(gameIntervalRef.current!);
+        if (prev >= 85) {
+          clearInterval(gameTimerRef.current!);
           handleMiss();
-          return 0;
+          return 85;
         }
-        return prev + 5; // speed increment
+        return prev + 2.5; // Slide down gradually
       });
-    }, 150);
+    }, 120);
   };
 
   const handleMiss = () => {
+    setAnswerState("incorrect");
     setLives((prev) => {
       const nextLives = prev - 1;
       if (nextLives <= 0) {
-        setGameOver(true);
         setIsPlaying(false);
-        if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
+        if (gameTimerRef.current) clearInterval(gameTimerRef.current);
       } else {
-        pickRandomWord();
+        triggerNextCluster();
       }
       return nextLives;
     });
   };
 
-  const handleZapSubmit = (e: React.FormEvent) => {
+  const handleZapSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isPlaying || gameOver) return;
+    if (answerState !== null || !isPlaying) return;
 
-    const targetStem = DICTIONARY[currentIndex].stem;
-    if (typedStem.trim() === targetStem) {
-      setScore((prev) => prev + 25);
-      setTypedStem("");
-      pickRandomWord(); // zap & next
-    } else {
-      setTypedStem(""); // flash input error (could style it red)
+    setLoading(true);
+    try {
+      // API call to verify the typed stem actually matches the expected base stem
+      const response = await fetch("/api/stem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ words: [typedStem] }),
+      });
+      const data = await response.json();
+      const verifiedStem = data.stems?.[0] || typedStem;
+      const isCorrect = verifiedStem.trim() === currentCluster.root.trim();
+
+      if (isCorrect) {
+        if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+        setAnswerState("correct");
+        // Clear bonus scales with size of cluster: size 4 clears give 120 pts
+        const bonus = currentCluster.inflections.length * 30;
+        setScore((prev) => prev + bonus);
+        triggerNextCluster();
+      } else {
+        setTypedStem("");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const triggerNextCluster = () => {
+    setTimeout(() => {
+      if (lives > 0) {
+        const nextIdx = (currentIdx + 1) % CLUSTERS_DATA.length;
+        setCurrentIdx(nextIdx);
+        startClusterRound(nextIdx);
+      }
+    }, 1500);
   };
 
   useEffect(() => {
     return () => {
-      if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
+      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     };
   }, []);
 
   if (mode === "fun") {
-    // ── FUN MODE: FALLING WORD SPRINT ─────────────────────────────────────
+    // ── FUN MODE: CARTOON ROOT CLUSTER ─────────────────────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
+      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#faf8f5] text-zinc-900 dark:bg-[#121110] dark:text-amber-100">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3px solid #000;
+              box-shadow: 4px 4px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3px solid #f59e0b;
+              box-shadow: 4px 4px 0px 0px #f59e0b;
+            }
+            .cloud-bubble {
+              border: 3px solid #000;
+              box-shadow: 5px 5px 0px 0px #000;
+              border-radius: 40px;
+            }
+            .dark .cloud-bubble {
+              border: 3px solid #f59e0b;
+              box-shadow: 5px 5px 0px 0px #f59e0b;
+            }
+          `
+        }} />
+
         {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-2xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-650 dark:text-orange-500">
-            <Gamepad className="w-4 h-4" />
-            <span>LEVEL 6: MORPHOLOGY ZAPPER</span>
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>☁️ LEVEL 6: MORPHOLOGY ZAPPER ☁️</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            STEM SPRINT
+          <h2 className="text-4xl font-black tracking-wider text-black dark:text-amber-500">
+            ROOT CLUSTER
           </h2>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-450 uppercase tracking-wider">
-            Type the base stem of the falling Amharic word to zap it before it hits the ground!
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider">
+            Identify the single shared base root of the falling inflected word cloud and zap it!
           </p>
         </div>
 
         {!isPlaying ? (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full text-center space-y-6 shadow-inner animate-in scale-in duration-300">
-            <div className="text-5xl">⚡</div>
+          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+            <div className="text-5xl">☁️</div>
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-blue-650 dark:text-amber-400 uppercase tracking-wider">
-                Stem Sprint Arena
+              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                Enter Root Arena?
               </h3>
               <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                Type the canonical base stem (e.g. for &quot;ልጆቻችን&quot; type &quot;ልጅ&quot;). Zap as many as you can. 3 misses and it&apos;s game over!
+                Clouds containing multiple inflected words sharing a stem (e.g. ቤቶች, ቤቶቻችን) will fall. Type the base root (e.g. ቤት) to pop the whole cluster!
               </p>
             </div>
             {score > 0 && (
-              <div className="text-sm font-bold text-blue-600 dark:text-amber-400 border border-blue-500/20 dark:border-amber-500/20 bg-blue-500/5 dark:bg-amber-500/5 py-2 rounded">
+              <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-amber-950/20 dark:border-amber-500">
                 SCORE: {score} PTS
               </div>
             )}
             <button
               onClick={startGame}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-black font-bold uppercase tracking-widest text-xs rounded-lg active:scale-98 transition-all cursor-pointer font-mono"
+              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
             >
-              Enter Arena
+              Start Game
             </button>
           </div>
         ) : (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full flex flex-col justify-between shadow-inner min-h-[420px] relative overflow-hidden">
-            {/* Header info */}
-            <div className="w-full flex items-center justify-between border-b border-zinc-250 dark:border-zinc-800/80 pb-3 text-xs font-bold text-zinc-450 dark:text-zinc-555">
-              <span>SCORE: {score}</span>
-              <span>LIVES: {lives} / 3</span>
+          <div className="cartoon-border rounded-2xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 max-w-md w-full flex flex-col justify-between min-h-[460px] relative overflow-hidden">
+            {/* HUD */}
+            <div className="w-full flex items-center justify-between border-b-2 border-dashed border-black dark:border-amber-500 pb-3 text-xs font-black">
+              <span>SCORE: {score} PTS</span>
+              <div className="flex gap-1 items-center">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Heart
+                    key={i}
+                    className={`w-4.5 h-4.5 ${i < lives ? "text-red-500 fill-red-500" : "text-zinc-200 dark:text-zinc-800"}`}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Falling word track container */}
-            <div className="relative flex-grow w-full border border-zinc-200 dark:border-zinc-900 bg-zinc-100/50 dark:bg-black/40 rounded-lg my-4 overflow-hidden min-h-[220px]">
-              {/* Falling Word */}
+            {/* Falling track container */}
+            <div className="relative flex-grow w-full border-[3px] border-black bg-amber-50/30 dark:bg-black/40 rounded-xl my-4 overflow-hidden min-h-[260px] dark:border-amber-500">
+              {/* Falling Word Cloud */}
               <div
-                className="absolute left-0 right-0 text-center transition-all duration-150 ease-linear"
+                className="absolute left-0 right-0 flex flex-wrap gap-2 justify-center transition-all duration-150 ease-linear"
                 style={{ top: `${wordY}%`, transform: "translateY(-50%)" }}
               >
-                <span className="px-3.5 py-1.5 rounded-lg border border-blue-500 bg-white dark:border-amber-500 dark:bg-zinc-950 font-bold text-lg text-blue-600 dark:text-white font-sans shadow-md animate-pulse">
-                  {DICTIONARY[currentIndex].word}
-                </span>
+                {answerState === "correct" ? (
+                  <span className="inline-block py-2 px-4 border-[3px] border-black bg-green-400 text-black text-xl font-black rotate-12 rounded shadow-[3px_3px_0px_0px_#000] uppercase">
+                    POOF! ZAPPED
+                  </span>
+                ) : answerState === "incorrect" ? (
+                  <span className="inline-block py-2 px-4 border-[3px] border-black bg-red-400 text-white text-xl font-black -rotate-12 rounded shadow-[3px_3px_0px_0px_#000] uppercase">
+                    CRASHED!
+                  </span>
+                ) : (
+                  <div className="cloud-bubble p-4 bg-cyan-150 dark:bg-cyan-900/60 dark:border-amber-500 text-black flex flex-wrap gap-2 justify-center max-w-[280px]">
+                    {currentCluster.inflections.map((word, i) => (
+                      <span
+                        key={i}
+                        className="px-2.5 py-1 border-2 border-black bg-white rounded-lg text-xs font-black font-sans dark:bg-zinc-900 dark:text-white dark:border-amber-500 shadow-[1px_1px_0px_0px_#000]"
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Floor boundary warning */}
+              <div className="absolute bottom-0 inset-x-0 h-1 bg-dashed bg-red-500/40" />
             </div>
 
             {/* Typing form input */}
@@ -187,16 +295,18 @@ export default function StemPage() {
               <input
                 type="text"
                 autoFocus
+                disabled={answerState !== null}
                 value={typedStem}
                 onChange={(e) => setTypedStem(e.target.value)}
-                placeholder="Type stem and press Enter..."
-                className="w-full bg-white border-2 border-blue-500/50 focus:border-blue-600 dark:bg-zinc-950 dark:border-amber-500/55 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-lg text-zinc-800 dark:text-white font-sans font-bold"
+                placeholder="Type root stem (e.g. ልጅ) & Enter..."
+                className="w-full bg-white border-[3px] border-black focus:bg-amber-50 dark:bg-black dark:border-amber-500 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-xl text-black dark:text-amber-100 font-sans font-black shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b] focus:translate-x-0.5 focus:translate-y-0.5 focus:shadow-[1px_1px_0px_0px_#000] transition-all"
               />
               <button
                 type="submit"
-                className="w-full py-2 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 text-white dark:text-black font-bold text-xs uppercase rounded-lg cursor-pointer"
+                disabled={answerState !== null || loading}
+                className="w-full py-3 bg-amber-400 border-[3px] border-black text-black font-black text-xs uppercase rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_#000] cursor-pointer"
               >
-                ZAP!
+                {loading ? "VERIFYING..." : "ZAP CLUSTER!"}
               </button>
             </form>
           </div>
@@ -236,7 +346,6 @@ console.log(stems);
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Input Panel */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -293,7 +402,6 @@ console.log(stems);
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>

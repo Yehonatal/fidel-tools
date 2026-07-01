@@ -1,32 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
-import { X, Gamepad, Play, Award, Heart, CheckCircle2, RefreshCw } from "lucide-react";
+import { X, Gamepad, Play, Award, RefreshCw, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
 
-const GAME_LEVELS = [
-  {
-    sentence: "ሰውየው እና ልጆቹ ወደ ቤት ሄዱ።",
-    words: [
-      { text: "ሰውየው", isStopword: false },
-      { text: "እና", isStopword: true },
-      { text: "ልጆቹ", isStopword: false },
-      { text: "ወደ", isStopword: true },
-      { text: "ቤት", isStopword: false },
-      { text: "ሄዱ።", isStopword: false },
-    ],
-  },
-  {
-    sentence: "በከተማው ውስጥ ብዙ ሰላም ነበር።",
-    words: [
-      { text: "በከተማው", isStopword: false },
-      { text: "ውስጥ", isStopword: true },
-      { text: "ብዙ", isStopword: true },
-      { text: "ሰላም", isStopword: false },
-      { text: "ነበር።", isStopword: false },
-    ],
-  },
+interface WordItem {
+  text: string;
+  isStopword: boolean;
+  reason: string;
+}
+
+const STREAM_WORDS: WordItem[] = [
+  { text: "እና", isStopword: true, reason: "Conjunction ('and')" },
+  { text: "ልጆች", isStopword: false, reason: "Noun ('children')" },
+  { text: "ወደ", isStopword: true, reason: "Preposition ('to')" },
+  { text: "ቤት", isStopword: false, reason: "Noun ('house')" },
+  { text: "በመሆኑም", isStopword: true, reason: "Conjunction ('therefore')" },
+  { text: "ከተማ", isStopword: false, reason: "Noun ('city')" },
+  { text: "ስለዚህ", isStopword: true, reason: "Conjunction ('so')" },
+  { text: "ትምህርት", isStopword: false, reason: "Noun ('education')" },
+  { text: "ከ", isStopword: true, reason: "Preposition ('from')" },
+  { text: "ምግብ", isStopword: false, reason: "Noun ('food')" },
+  { text: "ወይም", isStopword: true, reason: "Conjunction ('or')" },
+  { text: "ጸሀይ", isStopword: false, reason: "Noun ('sun')" },
+  { text: "ጋር", isStopword: true, reason: "Preposition ('with')" },
+  { text: "መጽሐፍ", isStopword: false, reason: "Noun ('book')" },
+  { text: "በ", isStopword: true, reason: "Preposition ('by/in')" },
+  { text: "እናት", isStopword: false, reason: "Noun ('mother')" },
 ];
 
 export default function RemoveStopwordsPage() {
@@ -35,13 +36,19 @@ export default function RemoveStopwordsPage() {
   const [cleanText, setCleanText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Game States
-  const [level, setLevel] = useState(0);
-  const [activeWords, setActiveWords] = useState<Array<{ text: string; isStopword: boolean; tapped?: boolean }>>([]);
-  const [lives, setLives] = useState(3);
+  // Swipe Radar Game States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [gameWin, setGameWin] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [noiseLevel, setNoiseLevel] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(2.5);
   const [gameOver, setGameOver] = useState(false);
+  const [gameWin, setGameWin] = useState(false);
+  const [feedback, setFeedback] = useState<"keep" | "cut" | "miss" | null>(null);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressRef = useRef<NodeJS.Timeout | null>(null);
 
   const runStopwords = async (inputText: string) => {
     if (!inputText.trim()) return;
@@ -62,142 +69,322 @@ export default function RemoveStopwordsPage() {
   };
 
   useEffect(() => {
-    runStopwords(text);
-  }, []);
+    if (mode === "academic") {
+      runStopwords(text);
+    }
+  }, [text, mode]);
 
-  // Initialize Game level
-  const initGameLevel = (lvlNum: number) => {
-    setLevel(lvlNum);
-    const wordsCopy = GAME_LEVELS[lvlNum].words.map(w => ({ ...w, tapped: false }));
-    setActiveWords(wordsCopy);
-    setLives(3);
-    setGameWin(false);
+  const startGame = () => {
+    setIsPlaying(true);
+    setCurrentIndex(0);
+    setScore(0);
+    setStreak(0);
+    setNoiseLevel(0);
     setGameOver(false);
+    setGameWin(false);
+    setFeedback(null);
+    startWordRound(0);
+  };
+
+  const startWordRound = (idx: number) => {
+    setTimeLeft(2.5);
+    setFeedback(null);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (progressRef.current) clearInterval(progressRef.current);
+
+    progressRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0.1) {
+          clearInterval(progressRef.current!);
+          handleTimeout();
+          return 0;
+        }
+        return prev - 0.1;
+      });
+    }, 100);
+  };
+
+  const handleTimeout = () => {
+    setFeedback("miss");
+    setStreak(0);
+    setNoiseLevel((prev) => {
+      const nextNoise = prev + 25;
+      if (nextNoise >= 100) {
+        setGameOver(true);
+        if (progressRef.current) clearInterval(progressRef.current);
+      }
+      return Math.min(100, nextNoise);
+    });
+
+    triggerNextStep();
+  };
+
+  const handleDecision = (userSelectedKeep: boolean) => {
+    if (feedback !== null || gameOver || gameWin) return;
+    if (progressRef.current) clearInterval(progressRef.current);
+
+    const currentWord = STREAM_WORDS[currentIndex];
+    const isCorrect = (userSelectedKeep && !currentWord.isStopword) || (!userSelectedKeep && currentWord.isStopword);
+
+    if (isCorrect) {
+      setFeedback(userSelectedKeep ? "keep" : "cut");
+      setStreak((prev) => prev + 1);
+      const mult = Math.min(5, Math.floor((streak + 1) / 3) + 1);
+      setScore((prev) => prev + 10 * mult);
+    } else {
+      setFeedback("miss");
+      setStreak(0);
+      setNoiseLevel((prev) => {
+        const nextNoise = prev + 25;
+        if (nextNoise >= 100) {
+          setGameOver(true);
+        }
+        return Math.min(100, nextNoise);
+      });
+    }
+
+    triggerNextStep();
+  };
+
+  const triggerNextStep = () => {
+    setTimeout(() => {
+      if (noiseLevel >= 100) {
+        setGameOver(true);
+        return;
+      }
+      if (currentIndex < STREAM_WORDS.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        startWordRound(currentIndex + 1);
+      } else {
+        setGameWin(true);
+        if (progressRef.current) clearInterval(progressRef.current);
+      }
+    }, 1200);
   };
 
   useEffect(() => {
-    initGameLevel(0);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
   }, []);
 
-  const handleWordTap = (index: number) => {
-    if (gameOver || gameWin) return;
-    const word = activeWords[index];
-    if (word.tapped) return;
-
-    const copy = [...activeWords];
-    copy[index].tapped = true;
-    setActiveWords(copy);
-
-    if (word.isStopword) {
-      setScore((prev) => prev + 15);
-      // Check if all stopwords are swept
-      const remainingStopwords = copy.filter(w => w.isStopword && !w.tapped);
-      if (remainingStopwords.length === 0) {
-        setGameWin(true);
-      }
-    } else {
-      setLives((prev) => {
-        const nextLives = prev - 1;
-        if (nextLives <= 0) {
-          setGameOver(true);
-        }
-        return nextLives;
-      });
-    }
-  };
-
-  const resetGame = () => {
-    initGameLevel(level);
-  };
-
-  const nextLevel = () => {
-    const nextLvl = (level + 1) % GAME_LEVELS.length;
-    initGameLevel(nextLvl);
-  };
-
   if (mode === "fun") {
-    // ── FUN MODE: STOPWORD SWEEP GAME ─────────────────────────────────────
+    const currentWord = STREAM_WORDS[currentIndex];
+    const mult = Math.min(5, Math.floor(streak / 3) + 1);
+
+    // ── 10/10 FUN MODE: SWIPE RADAR & BUBBLING BEAKER ──────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
-        {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-2xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-650 dark:text-orange-500">
-            <Gamepad className="w-4 h-4" />
-            <span>LEVEL 5: SEMANTIC CLEANSER</span>
+      <div className="font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#fdfcfa] bg-[radial-gradient(#e5e7eb_1.5px,transparent_1.5px)] [background-size:24px_24px] text-zinc-900 dark:bg-[#121110] dark:bg-[radial-gradient(#292524_1.5px,transparent_1.5px)] dark:text-amber-100 animate-in fade-in duration-300">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3.5px solid #000;
+              box-shadow: 6px 6px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3.5px solid #f59e0b;
+              box-shadow: 6px 6px 0px 0px #f59e0b;
+            }
+            .radar-bubble {
+              border: 3.5px solid #000;
+              box-shadow: 4px 4px 0px 0px #000;
+              animation: radar-float 1.5s ease-in-out infinite alternate;
+            }
+            .dark .radar-bubble {
+              border: 3.5px solid #f59e0b;
+              box-shadow: 4px 4px 0px 0px #f59e0b;
+            }
+            @keyframes radar-float {
+              0% { transform: scale(1) translateY(0); }
+              100% { transform: scale(1.05) translateY(-5px); }
+            }
+            .boiling-fluid {
+              background-image: radial-gradient(circle, rgba(16,185,129,0.3) 10%, transparent 10%);
+              background-size: 14px 14px;
+              transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+          `
+        }} />
+
+        {/* Header HUD */}
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>📡 LEVEL 5: SIGNAL EXTRACTOR 📡</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            STOPWORD SWEEP
+          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
+            SWIPE RADAR
           </h2>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-455 uppercase tracking-wider">
-            Tap and sweep away only the grammatical stopwords to extract the core words!
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
+            Extract semantic signal words and sweep stopwords before the beaker overflows!
           </p>
         </div>
 
-        {/* Game Area */}
-        <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-xl w-full flex flex-col items-center gap-8 shadow-inner">
-          <div className="w-full flex items-center justify-between border-b border-zinc-250 dark:border-zinc-800/80 pb-3 text-xs font-bold text-zinc-450 dark:text-zinc-550">
-            <span>LEVEL {level + 1} / {GAME_LEVELS.length}</span>
-            <div className="flex gap-1 items-center">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Heart
-                  key={i}
-                  className={`w-4 h-4 ${i < lives ? "text-red-505 fill-current" : "text-zinc-200 dark:text-zinc-800"}`}
+        {!isPlaying ? (
+          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+            <div className="text-5xl">📡</div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                Start Swiping Signal?
+              </h3>
+              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
+                Nouns and verbs must be kept. Grammar stopwords (conjunctions/prepositions) must be cut. Unsorted or wrong decisions fill the Noise Beaker. Reach 100% noise and the lab explodes!
+              </p>
+            </div>
+            {score > 0 && (
+              <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-amber-950/20 dark:border-amber-500">
+                PREVIOUS SCORE: {score} PTS
+              </div>
+            )}
+            <button
+              onClick={startGame}
+              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
+            >
+              Start Swiping
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl items-stretch">
+            
+            {/* Left Column: Bubbling Noise Beaker */}
+            <div className="md:col-span-1 flex flex-col items-center justify-between cartoon-border rounded-2xl p-6 bg-white dark:bg-[#1c1a19] dark:border-amber-500">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">NOISE LEVEL</span>
+              
+              {/* Beaker Container */}
+              <div className="relative w-24 h-56 border-[4px] border-black dark:border-amber-500 rounded-b-3xl overflow-hidden bg-zinc-50 dark:bg-black mt-4 flex flex-col justify-end shadow-inner">
+                {/* Tick marks */}
+                <div className="absolute inset-y-0 right-2 flex flex-col justify-between text-[7px] font-black py-4 text-zinc-400 select-none z-10">
+                  <span>BOIL 💥</span>
+                  <span>80%</span>
+                  <span>60%</span>
+                  <span>40%</span>
+                  <span>20%</span>
+                  <span>SAFE 🟢</span>
+                </div>
+
+                {/* Bubbling liquid */}
+                <div
+                  style={{ height: `${noiseLevel}%` }}
+                  className={`boiling-fluid w-full border-t-4 border-black transition-all duration-300 ${
+                    noiseLevel >= 75
+                      ? "bg-red-500 dark:bg-red-950"
+                      : noiseLevel >= 50
+                      ? "bg-yellow-400 dark:bg-yellow-950/50"
+                      : "bg-emerald-400 dark:bg-emerald-950/50"
+                  }`}
                 />
-              ))}
+              </div>
+
+              <div className="text-center mt-4">
+                <span className="text-2xl font-black block text-black dark:text-amber-400">{noiseLevel}%</span>
+                <span className="text-[9px] font-bold text-zinc-500 uppercase">NOISE VOLUME</span>
+              </div>
+            </div>
+
+            {/* Right Column: Streaming radar target & decision buttons */}
+            <div className="md:col-span-2 flex flex-col justify-between gap-6">
+              
+              {/* Radar Area */}
+              <div className="cartoon-border rounded-2xl p-8 bg-zinc-100/50 dark:bg-black dark:border-amber-500 flex-grow flex flex-col items-center justify-center relative overflow-hidden">
+                <span className="absolute top-2 left-3 text-[9px] font-black text-zinc-550 uppercase">
+                  RADAR SIGNAL ({currentIndex + 1}/{STREAM_WORDS.length})
+                </span>
+
+                {/* The word bubble target */}
+                {!gameOver && !gameWin && (
+                  <div className="radar-bubble px-8 py-5 rounded-3xl bg-white dark:bg-[#1c1a19] text-3xl font-black text-black dark:text-white tracking-wider z-10 border-2 border-black dark:border-amber-500">
+                    {currentWord.text}
+                  </div>
+                )}
+
+                {/* Feedback Splash Bubble */}
+                {feedback && (
+                  <div className="absolute inset-0 bg-white/95 dark:bg-black/95 flex flex-col items-center justify-center animate-in fade-in duration-200 z-20">
+                    <span className={`text-4xl font-black uppercase tracking-widest rotate-6 ${
+                      feedback === "miss" ? "text-red-550" : "text-green-600"
+                    }`}>
+                      {feedback === "miss" ? "NOISE CLOG!" : feedback === "keep" ? "SAVED!" : "CLEANED!"}
+                    </span>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase mt-2">
+                      Reason: {currentWord.reason}
+                    </p>
+                  </div>
+                )}
+
+                {/* Time Indicator bar */}
+                {!feedback && !gameOver && !gameWin && (
+                  <div className="absolute bottom-0 inset-x-0 h-2 bg-zinc-200 dark:bg-zinc-800">
+                    <div
+                      style={{ width: `${(timeLeft / 2.5) * 100}%` }}
+                      className="h-full bg-amber-500 transition-all duration-100"
+                    />
+                  </div>
+                )}
+
+                {/* Game over / Victory overlays */}
+                {gameOver && (
+                  <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
+                    <span className="text-5xl">💥</span>
+                    <h3 className="text-2xl font-black text-red-550 uppercase">LAB OVERFLOW!</h3>
+                    <p className="text-xs font-semibold text-zinc-550">The noise beaker boiled over and clogged the parser!</p>
+                    <button
+                      onClick={startGame}
+                      className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
+                    >
+                      TRY AGAIN
+                    </button>
+                  </div>
+                )}
+
+                {gameWin && (
+                  <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
+                    <span className="text-5xl">🏆</span>
+                    <h3 className="text-2xl font-black text-green-600 dark:text-amber-400 uppercase">SIGNAL CLEANSED!</h3>
+                    <p className="text-xs font-semibold text-zinc-550 font-black">All stopwords filtered. Perfect linguistic signal!</p>
+                    <button
+                      onClick={startGame}
+                      className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
+                    >
+                      REPLAY
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Swipe/Decision Buttons */}
+              {!gameOver && !gameWin && (
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    disabled={feedback !== null}
+                    onClick={() => handleDecision(false)}
+                    className="cartoon-border py-4 bg-red-200 hover:bg-red-300 dark:bg-red-950/60 dark:hover:bg-red-955 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
+                  >
+                    🗑️ CUT STOPWORD
+                  </button>
+                  <button
+                    disabled={feedback !== null}
+                    onClick={() => handleDecision(true)}
+                    className="cartoon-border py-4 bg-cyan-200 hover:bg-cyan-300 dark:bg-cyan-900/60 dark:hover:bg-cyan-900 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
+                  >
+                    💾 KEEP SIGNAL
+                  </button>
+                </div>
+              )}
+
+              {/* Score HUD */}
+              <div className="cartoon-border rounded-lg bg-zinc-100 dark:bg-[#1c1a19] p-3.5 flex justify-between items-center text-[10px] font-black text-zinc-500 dark:text-amber-500/85">
+                <span>SCORE: {score} PTS</span>
+                <span className="flex items-center gap-1.5">
+                  <span>STREAK: {streak}</span>
+                  <span className="px-1.5 py-0.5 border border-black bg-amber-400 text-black text-[9px] rounded">
+                    {mult}X MULTIPLIER
+                  </span>
+                </span>
+              </div>
+
             </div>
           </div>
-
-          {/* Word Bubble Grid */}
-          <div className="flex flex-wrap gap-4 items-center justify-center min-h-[120px] p-6 rounded bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-850">
-            {activeWords.map((word, i) => (
-              <button
-                disabled={word.tapped || gameOver || gameWin}
-                onClick={() => handleWordTap(i)}
-                key={i}
-                className={`px-4 py-3 rounded-full text-xs font-bold font-sans transition-all active:scale-95 cursor-pointer border ${
-                  word.tapped
-                    ? word.isStopword
-                      ? "border-emerald-500/20 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-450/40 line-through cursor-not-allowed"
-                      : "border-red-500/20 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10 text-red-550 dark:text-red-500/40 cursor-not-allowed"
-                    : "border-blue-500/30 bg-white dark:border-amber-500/40 dark:bg-zinc-900/60 text-blue-600 dark:text-amber-300 hover:border-blue-500 dark:hover:border-amber-500 hover:bg-blue-50/30 dark:hover:bg-amber-500/5"
-                }`}
-              >
-                {word.text}
-              </button>
-            ))}
-          </div>
-
-          {/* End Level / Retry HUD */}
-          <div className="w-full flex items-center justify-between border-t border-dashed border-zinc-250 dark:border-zinc-800/80 pt-4">
-            <span className="text-[10px] font-bold text-zinc-450 dark:text-zinc-550">SCORE: {score} PTS</span>
-
-            {gameOver && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-red-550">GAME OVER</span>
-                <button
-                  onClick={resetGame}
-                  className="px-4 py-1.5 bg-zinc-100 border border-zinc-250 dark:bg-zinc-900 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-zinc-200 cursor-pointer"
-                >
-                  RETRY
-                </button>
-              </div>
-            )}
-
-            {gameWin && (
-              <div className="flex items-center gap-3 animate-bounce">
-                <span className="text-xs font-bold text-blue-600 dark:text-emerald-405 flex items-center gap-1">
-                  <CheckCircle2 className="w-4.5 h-4.5" /> CLEARED!
-                </span>
-                <button
-                  onClick={nextLevel}
-                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 text-white dark:text-black text-[10px] font-bold rounded-lg hover:bg-zinc-900 cursor-pointer uppercase"
-                >
-                  NEXT LEVEL
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -220,72 +407,71 @@ console.log(result); // Text string with grammatical stopwords filtered`;
             <X className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
-            Stopwords Removal Stage
+            Stopword Extraction Console
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Strip highly recurrent function words (e.g. preposition markers, coordinating links) to focus query evaluation strictly on vocabulary nodes.
+          Strip highly frequent syntactic connectors (e.g. እና, በ, ከ) to isolate high-entropy keyword terms for retrieval indexing.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Input Panel */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
               <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
-                <span className="text-[9px] font-bold text-zinc-405 dark:text-zinc-500 uppercase tracking-wider font-mono">
-                  Input Corpus
+                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                  Stopword Filtering Testbed
                 </span>
                 {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-500" />}
               </div>
-              <div className="p-4 flex flex-col">
+              <div className="p-4">
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   className="w-full min-h-[160px] bg-transparent border-0 outline-hidden focus:outline-hidden ring-0 focus:ring-0 text-sm font-sans font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed placeholder-zinc-400 resize-none overflow-y-auto"
+                  placeholder="Type Amharic text..."
                 />
+              </div>
+              <div className="p-4 bg-zinc-50 dark:bg-zinc-955/60 border-t border-zinc-200 dark:border-zinc-900 flex justify-end">
                 <button
                   onClick={() => runStopwords(text)}
-                  disabled={loading}
-                  className="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg active:scale-95 transition-all cursor-pointer"
+                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer font-mono"
                 >
-                  Filter Text
+                  Apply Filter
                 </button>
               </div>
             </div>
 
-            <CodeSnippet title="Node.js Integration Code" code={codeSnippet} />
+            <CodeSnippet title="Pipeline Step Node Example" code={codeSnippet} />
           </div>
 
-          {/* Clean Output Comparison */}
+          {/* Results Comparison Panel */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="premium-card p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Before */}
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold text-zinc-405 uppercase tracking-wider font-mono">
-                  Original Source Corpus
-                </h3>
-                <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 text-sm font-sans font-medium leading-relaxed text-zinc-800 dark:text-zinc-300">
-                  {text}
+            <div className="premium-card flex flex-col overflow-hidden">
+              <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                  Stopword Stripped Results
+                </span>
+              </div>
+              <div className="p-6 space-y-6 font-mono text-xs">
+                <div>
+                  <span className="text-zinc-400 dark:text-zinc-650 block text-[9px] uppercase tracking-wider mb-1">Before Filter</span>
+                  <div className="p-4 bg-zinc-100/50 dark:bg-zinc-955 rounded-lg text-zinc-800 dark:text-zinc-300 font-medium select-all leading-relaxed">
+                    {text}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-zinc-400 dark:text-zinc-650 block text-[9px] uppercase tracking-wider mb-1">After Filter</span>
+                  <div className="p-4 bg-zinc-100/50 dark:bg-zinc-955 rounded-lg text-blue-600 dark:text-emerald-400 font-bold select-all leading-relaxed">
+                    {cleanText || "-"}
+                  </div>
                 </div>
               </div>
-
-              {/* After */}
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold text-zinc-405 uppercase tracking-wider font-mono">
-                  Cleaned Index Target
-                </h3>
-                <div className="p-4 rounded-lg bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 dark:border-blue-900/30 text-sm font-sans font-medium leading-relaxed text-blue-650 dark:text-sky-400">
-                  {cleanText || "-"}
-                </div>
-              </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>

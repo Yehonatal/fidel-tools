@@ -180,7 +180,7 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
         setIsUnlocked(true);
       } else {
         const json = await res.json().catch(() => ({}));
-        setErrorMsg(json.message || "Invalid passkey or passphrase. Access denied.");
+        setErrorMsg(json.message || json.error || "Invalid passkey or passphrase. Access denied.");
       }
     } catch (err) {
       setErrorMsg("Failed to verify access. Ensure the API server is listening.");

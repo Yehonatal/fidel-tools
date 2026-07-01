@@ -1,30 +1,64 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
 import TokenBadge from "@/components/TokenBadge";
-import { Search, Plus, RefreshCw, AlertTriangle, Trash2, Gamepad, Sword, Heart, Shield, CheckCircle2 } from "lucide-react";
+import { Search, Plus, RefreshCw, AlertTriangle, Trash2, Gamepad, CheckCircle2, XCircle, ChevronUp, ChevronDown, ArrowRight, Star } from "lucide-react";
 
-const INITIAL_DOCS = [
-  { id: "doc-1", content: "የሀገሪቱ ሐኪሞች በሙሉ በሆስፒታሉ ውስጥ ይሰበሰባሉ።" },
-  { id: "doc-2", content: "ሃኪሙ ትላንትና ማታ ወደ መርካቶ ሄዶ ነበረ።" },
-  { id: "doc-3", content: "ልጆች ትምህርት ቤት ሄደው አዲስ እውቀት ይማራሉ።" },
-  { id: "doc-4", content: "የገንዘብ ሚኒስቴር ለት/ቤቶች ተጨማሪ በጀት ፈቀደ።" },
-  { id: "doc-5", content: "አ.አ ውስጥ የሚኖሩት ሰራተኞች አዲስ አበባ ከተማን ያደንቃሉ።" },
-];
+interface SearchDoc {
+  id: string;
+  content: string;
+}
 
-const GAME_QUERIES = [
-  { query: "ልጆች", correctDocId: "doc-3" },
-  { query: "ሀኪም", correctDocId: "doc-2" }, // matches ሃኪሙ via stem
-  { query: "ከተማ", correctDocId: "doc-5" }, // matches አዲስ አበባ ከተማን
-  { query: "ት/ቤት", correctDocId: "doc-4" }, // matches ለት/ቤቶች
+interface SearchChallenge {
+  id: number;
+  query: string;
+  documents: SearchDoc[];
+}
+
+const SEARCH_CHALLENGES: SearchChallenge[] = [
+  {
+    id: 1,
+    query: "ትምህርት ቤት",
+    documents: [
+      { id: "doc-1", content: "ልጆቹ ትላንትና ወደ ትምህርት ቤት ሄዱ።" },
+      { id: "doc-2", content: "ትምህርት ለሀገር እድገት እጅግ ጠቃሚ ነው።" },
+      { id: "doc-3", content: "በአዲስ አበባ ውስጥ ትልቅ ት/ቤት ተከፈተ።" }, // matches ት/ቤት via expansion
+      { id: "doc-4", content: "ዛሬ ፀሀይ በምስራቅ በኩል ወጣች።" }, // 0 relevance
+    ],
+  },
+  {
+    id: 2,
+    query: "ሐኪም ሰላም",
+    documents: [
+      { id: "doc-1", content: "ሐኪሙ ሠላምታ ሰጥቶን ሄደ።" }, // double match
+      { id: "doc-2", content: "በሀገራችን ሰላም ሰፈነ።" }, // single match
+      { id: "doc-3", content: "ሀኪም ኀይሉ ወደ ከተማ መጣ።" }, // single match
+      { id: "doc-4", content: "ዛሬ መጽሐፍ ማንበብ እፈልጋለሁ።" }, // 0 relevance
+    ],
+  },
+  {
+    id: 3,
+    query: "ከተማ ሚኒስቴር",
+    documents: [
+      { id: "doc-1", content: "አ.አ ውስጥ የሚኖሩት ሰራተኞች አዲስ አበባ ከተማን ያደንቃሉ።" },
+      { id: "doc-2", content: "የገንዘብ ሚኒስቴር አዲስ ረቂቅ አዋጅ አወጣ።" },
+      { id: "doc-3", content: "የከተማው ከንቲባ ሚኒስቴሩን ጎበኙ።" }, // double match
+      { id: "doc-4", content: "ልጅ ትምህርት ቤት መሄድ አለበት።" },
+    ],
+  },
 ];
 
 export default function SearchPage() {
   const { mode } = useLabMode();
   const [query, setQuery] = useState("ሐኪም");
-  const [docs, setDocs] = useState(INITIAL_DOCS);
+  const [docs, setDocs] = useState([
+    { id: "doc-1", content: "የሀገሪቱ ሐኪሞች በሙሉ በሆስፒታሉ ውስጥ ይሰበሰባሉ።" },
+    { id: "doc-2", content: "ሃኪሙ ትላንትና ማታ ወደ መርካቶ ሄዶ ነበረ።" },
+    { id: "doc-3", content: "ልጆች ትምህርት ቤት ሄደው አዲስ እውቀት ይማራሉ።" },
+    { id: "doc-4", content: "የገንዘብ ሚኒስቴር ለት/ቤቶች ተጨማሪ በጀት ፈቀደ።" },
+  ]);
   const [newDocText, setNewDocText] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [queryStems, setQueryStems] = useState<string[]>([]);
@@ -34,13 +68,17 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"results" | "index" | "weights">("results");
 
-  // Search Showdown Game States
+  // Rank Royale States
   const [isPlaying, setIsPlaying] = useState(false);
-  const [round, setRound] = useState(0);
-  const [playerHp, setPlayerHp] = useState(100);
-  const [enemyHp, setEnemyHp] = useState(100);
-  const [combatLog, setCombatLog] = useState<string>("BATTLE COMMENCING! Select the highest matching document card!");
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [roundIdx, setRoundIdx] = useState(0);
+  const [playerRankings, setPlayerRankings] = useState<SearchDoc[]>([]);
+  const [correctRankings, setCorrectRankings] = useState<any[]>([]); // Results returned from backend search scoring
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentChallenge = SEARCH_CHALLENGES[roundIdx];
 
   const performSearch = async (currentQuery: string) => {
     if (!currentQuery.trim() || docs.length === 0) {
@@ -73,8 +111,10 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
-    performSearch(query);
-  }, [docs]);
+    if (mode === "academic") {
+      performSearch(query);
+    }
+  }, [docs, mode]);
 
   const handleAddDocument = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,170 +136,319 @@ export default function SearchPage() {
     performSearch(query);
   };
 
-  // Game Logic
+  // Game initialization
   const startShowdown = () => {
     setIsPlaying(true);
-    setRound(0);
-    setPlayerHp(100);
-    setEnemyHp(100);
-    setCombatLog("BATTLE COMMENCING! Find the document matching: " + GAME_QUERIES[0].query);
-    setSelectedCardId(null);
+    setRoundIdx(0);
+    setScore(0);
+    setHasSubmitted(false);
+    initRound(0);
   };
 
-  const handleCardSelect = (docId: string) => {
-    if (playerHp <= 0 || enemyHp <= 0 || selectedCardId !== null) return;
-    setSelectedCardId(docId);
+  const initRound = (idx: number) => {
+    setTimeLeft(15);
+    setHasSubmitted(false);
+    setScore(0);
+    setCorrectRankings([]);
 
-    const correctId = GAME_QUERIES[round].correctDocId;
-    const isCorrect = docId === correctId;
+    // Shuffle the documents initially to avoid giving away any ranking
+    const shuffled = [...SEARCH_CHALLENGES[idx].documents].sort(() => Math.random() - 0.5);
+    setPlayerRankings(shuffled);
 
-    if (isCorrect) {
-      setEnemyHp((prev) => Math.max(prev - 25, 0));
-      setCombatLog("DIRECT HIT! Your indexed document matched the term stems perfectly! dealt 25 DMG!");
-    } else {
-      setPlayerHp((prev) => Math.max(prev - 25, 0));
-      setCombatLog("CRITICAL BLOCK! The query missed your selected document stems! You took 25 DMG!");
-    }
-
-    setTimeout(() => {
-      if (round < GAME_QUERIES.length - 1 && playerHp > 25 && enemyHp > 25) {
-        setRound((prev) => prev + 1);
-        setSelectedCardId(null);
-        setCombatLog("NEXT ROUND! Find the document matching: " + GAME_QUERIES[round + 1].query);
-      } else {
-        // Game Over evaluation
-        if (enemyHp <= 25 && isCorrect) {
-          setCombatLog("VICTORY! You routed the search query monster!");
-        } else {
-          setCombatLog("DEFEAT! The query monster bypassed your inverted index!");
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    gameTimerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(gameTimerRef.current!);
+          submitRankings(shuffled, true); // Auto-submit on timeout
+          return 0;
         }
-      }
-    }, 2000);
+        return prev - 1;
+      });
+    }, 1000);
   };
+
+  const handleMoveUp = (idx: number) => {
+    if (idx === 0 || hasSubmitted) return;
+    const copy = [...playerRankings];
+    const temp = copy[idx];
+    copy[idx] = copy[idx - 1];
+    copy[idx - 1] = temp;
+    setPlayerRankings(copy);
+  };
+
+  const handleMoveDown = (idx: number) => {
+    if (idx === playerRankings.length - 1 || hasSubmitted) return;
+    const copy = [...playerRankings];
+    const temp = copy[idx];
+    copy[idx] = copy[idx + 1];
+    copy[idx + 1] = temp;
+    setPlayerRankings(copy);
+  };
+
+  const submitRankings = async (currentOrder = playerRankings, timedOut = false) => {
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    setHasSubmitted(true);
+    setLoading(true);
+
+    try {
+      // POST the documents and query to /api/search to get TF-IDF relevance scores
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: currentChallenge.query,
+          documents: currentChallenge.documents,
+        }),
+      });
+      const data = await response.json();
+      const trueRankedResults = data.results || [];
+      setCorrectRankings(trueRankedResults);
+
+      if (timedOut) {
+        setScore(0);
+        setLoading(false);
+        return;
+      }
+
+      // Calculate Spearman correlation
+      // trueRankedResults is sorted descending by relevance score.
+      // Rank 1 = index 0, Rank 2 = index 1, etc.
+      let squaredDiffSum = 0;
+      currentOrder.forEach((doc, userIdx) => {
+        const userRank = userIdx + 1;
+        const trueIdx = trueRankedResults.findIndex((r: any) => r.id === doc.id);
+        const trueRank = trueIdx !== -1 ? trueIdx + 1 : 4;
+        const diff = userRank - trueRank;
+        squaredDiffSum += diff * diff;
+      });
+
+      // Max D for N=4 is 20. Rho = 1 - (D / 10).
+      const rho = 1 - squaredDiffSum / 10;
+      const finalScore = Math.max(0, Math.round(rho * 100));
+      setScore(finalScore);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNextRound = () => {
+    if (roundIdx < SEARCH_CHALLENGES.length - 1) {
+      setRoundIdx((r) => r + 1);
+      initRound(roundIdx + 1);
+    } else {
+      setIsPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    };
+  }, []);
 
   if (mode === "fun") {
-    // ── FUN MODE: BATTLE CARD SHOWDOWN ─────────────────────────────────────
+    // ── FUN MODE: CARTOON RANK ROYALE ──────────────────────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
+      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#faf8f5] text-zinc-900 dark:bg-[#121110] dark:text-amber-100">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3px solid #000;
+              box-shadow: 4px 4px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3px solid #f59e0b;
+              box-shadow: 4px 4px 0px 0px #f59e0b;
+            }
+            .cartoon-card {
+              border: 3px solid #000;
+              box-shadow: 5px 5px 0px 0px #000;
+            }
+            .dark .cartoon-card {
+              border: 3px solid #f59e0b;
+              box-shadow: 5px 5px 0px 0px #f59e0b;
+            }
+            .cartoon-speech {
+              border: 3px solid #000;
+              position: relative;
+            }
+            .dark .cartoon-speech {
+              border: 3px solid #f59e0b;
+            }
+          `
+        }} />
+
         {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-2xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-655 dark:text-orange-500">
-            <Gamepad className="w-4 h-4" />
-            <span>LEVEL 9: SEARCH SHOWDOWN</span>
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>👑 LEVEL 9: RELEVANCE RANKING 👑</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            SEARCH SHOWDOWN
+          <h2 className="text-4xl font-black tracking-wider text-black dark:text-amber-500">
+            RANK ROYALE
           </h2>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-450 uppercase tracking-wider">
-            Defeat the index monster by picking the highest matching document card!
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider">
+            Reorder the 4 document combat cards to match their true TF-IDF search relevance!
           </p>
         </div>
 
         {!isPlaying ? (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full text-center space-y-6 shadow-inner">
-            <div className="text-5xl">⚔️</div>
+          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+            <div className="text-5xl">👑</div>
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-blue-600 dark:text-amber-400 uppercase tracking-wider">
-                Index Arena
+              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                Start Rank Royale?
               </h3>
               <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                Match incoming queries with the correct document card from your hand. High BM25 matching stems deal critical damage!
+                You will be given a search query and four documents. Rank the documents from most relevant to least relevant before the timer runs out. Scored via Spearman distance!
               </p>
             </div>
+            {score > 0 && (
+              <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-[#25201c] dark:border-amber-500 dark:text-amber-400">
+                PREVIOUS SCORE: {score} PTS
+              </div>
+            )}
             <button
               onClick={startShowdown}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-black font-bold uppercase tracking-widest text-xs rounded-lg active:scale-98 transition-all cursor-pointer font-mono"
+              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
             >
-              Start Duel
+              Start Arena
             </button>
           </div>
         ) : (
           <div className="w-full max-w-4xl space-y-6 flex flex-col items-center">
-            {/* Health Bars HUD */}
-            <div className="w-full grid grid-cols-2 gap-8 border-b border-zinc-200 dark:border-zinc-800 pb-4 text-xs font-bold text-zinc-600 dark:text-zinc-400">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>PLAYER HP</span>
-                  <span>{playerHp}/100</span>
-                </div>
-                <div className="h-4 bg-zinc-150 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-0.5 rounded overflow-hidden">
-                  <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${playerHp}%` }} />
-                </div>
-              </div>
-
-              <div className="space-y-2 text-right">
-                <div className="flex justify-between">
-                  <span>ENEMY HP</span>
-                  <span>{enemyHp}/100</span>
-                </div>
-                <div className="h-4 bg-zinc-150 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-0.5 rounded overflow-hidden">
-                  <div className="h-full bg-red-500 transition-all duration-300" style={{ width: `${enemyHp}%` }} />
-                </div>
-              </div>
+            
+            {/* Top HUD */}
+            <div className="w-full cartoon-border rounded-lg bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-3.5 flex justify-between items-center text-xs font-black">
+              <span>ROUND {roundIdx + 1} / {SEARCH_CHALLENGES.length}</span>
+              <span className="text-red-500 animate-pulse">⏰ TIMER: {timeLeft}S</span>
             </div>
 
-            {/* Combat Log Console */}
-            <div className="w-full p-4 rounded-lg bg-zinc-100 dark:bg-zinc-950 border border-blue-500/25 dark:border-amber-500/25 text-center text-xs font-semibold text-blue-600 dark:text-amber-300 leading-normal animate-pulse min-h-[50px] flex items-center justify-center">
-              {combatLog}
+            {/* Active search query speech bubble */}
+            <div className="cartoon-border p-6 bg-cyan-100 dark:bg-[#1c1a19] dark:border-amber-500 rounded-xl text-center space-y-1 w-full max-w-md">
+              <span className="text-[10px] text-cyan-600 dark:text-amber-500 font-black uppercase tracking-wider block">ACTIVE SEARCH QUERY</span>
+              <span className="text-3xl font-black text-black dark:text-white block font-sans">
+                "{currentChallenge.query}"
+              </span>
             </div>
 
-            {/* Current Query Target Card */}
-            {round < GAME_QUERIES.length && playerHp > 0 && enemyHp > 0 && (
-              <div className="p-6 border-2 border-blue-500/40 bg-blue-50/5 dark:border-orange-500/40 dark:bg-orange-500/5 rounded-xl text-center space-y-2 max-w-sm animate-bounce">
-                <span className="text-[10px] text-blue-600 dark:text-orange-550 font-bold uppercase tracking-wider block">ACTIVE SEARCH QUERY</span>
-                <span className="text-3xl font-extrabold text-zinc-850 dark:text-white block font-sans">
-                  {GAME_QUERIES[round].query}
-                </span>
-              </div>
-            )}
-
-            {/* Document Deck (Hand) */}
-            <div className="w-full space-y-3">
-              <span className="text-[10px] text-zinc-400 dark:text-zinc-550 uppercase tracking-widest font-bold block text-center">YOUR DECK HAND (SELECT ONE)</span>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {INITIAL_DOCS.map((doc) => {
-                  const isSelected = selectedCardId === doc.id;
-                  return (
-                    <div
-                      key={doc.id}
-                      onClick={() => handleCardSelect(doc.id)}
-                      className={`p-4 border-2 rounded-xl bg-white dark:bg-zinc-950/60 cursor-pointer transition-all duration-300 select-none flex flex-col justify-between text-left min-h-[140px] hover:border-blue-500 dark:hover:border-amber-500 hover:bg-blue-50/10 dark:hover:bg-amber-500/5 ${
-                        isSelected 
-                          ? "border-blue-500 bg-blue-50/30 dark:border-amber-500 dark:bg-amber-500/5 scale-95 opacity-80" 
-                          : "border-zinc-200 dark:border-zinc-800"
-                      }`}
-                    >
-                      <span className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500 font-bold uppercase">
-                        {doc.id}
+            {/* Reorderable Document List */}
+            <div className="w-full space-y-4 max-w-2xl">
+              {playerRankings.map((doc, idx) => {
+                const trueData = correctRankings.find((r: any) => r.id === doc.id);
+                
+                return (
+                  <div
+                    key={doc.id}
+                    className="cartoon-card p-4 bg-white dark:bg-[#1c1a19] rounded-xl flex items-center justify-between gap-4 border-2 border-black dark:border-amber-500 relative"
+                  >
+                    {/* Rank Badge */}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="w-8 h-8 rounded-full border-2 border-black bg-amber-400 text-black font-black flex items-center justify-center text-sm shadow-[1px_1px_0px_0px_#000]">
+                        #{idx + 1}
                       </span>
-                      <p className="text-[10px] text-zinc-650 dark:text-zinc-305 font-semibold leading-relaxed my-2 font-sans">
+                      
+                      {/* Arrow Controllers */}
+                      {!hasSubmitted && (
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => handleMoveUp(idx)}
+                            disabled={idx === 0}
+                            className="p-1 border border-black bg-zinc-100 dark:bg-zinc-800 dark:border-amber-500 rounded disabled:opacity-40"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5 text-black dark:text-white" />
+                          </button>
+                          <button
+                            onClick={() => handleMoveDown(idx)}
+                            disabled={idx === playerRankings.length - 1}
+                            className="p-1 border border-black bg-zinc-100 dark:bg-zinc-800 dark:border-amber-500 rounded disabled:opacity-40"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5 text-black dark:text-white" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-grow">
+                      <span className="text-[8px] font-black uppercase text-zinc-550 block mb-1">DOCUMENT ({doc.id})</span>
+                      <p className="text-xs font-bold leading-relaxed text-zinc-800 dark:text-zinc-205 font-sans">
                         {doc.content}
                       </p>
-                      <div className="flex justify-end pt-1">
-                        <Sword className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
-                      </div>
                     </div>
-                  );
-                })}
-              </div>
+
+                    {/* Post-Round TF-IDF Reveal Stats */}
+                    {hasSubmitted && trueData && (
+                      <div className="shrink-0 p-3 bg-cyan-50 dark:bg-black border-2 border-black dark:border-amber-500 rounded-lg text-right text-[10px] font-black animate-in slide-in-from-right-4 duration-300">
+                        <p className="text-cyan-600 dark:text-amber-500 uppercase tracking-widest text-[8px]">TF-IDF SCORE</p>
+                        <p className="text-lg text-black dark:text-white font-black">{trueData.score.toFixed(3)}</p>
+                        <div className="flex flex-wrap gap-1 justify-end mt-1">
+                          {trueData.matchedStems.length > 0 ? (
+                            trueData.matchedStems.map((stem: string) => (
+                              <span key={stem} className="px-1.5 py-0.2 bg-white text-black border border-black rounded text-[8px]">
+                                {stem}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-zinc-400 italic text-[8px]">no match</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Bottom retry */}
-            {(playerHp <= 0 || enemyHp <= 0 || round >= GAME_QUERIES.length) && (
-              <button
-                onClick={startShowdown}
-                className="px-6 py-3 border-2 border-blue-500 hover:bg-blue-50 dark:border-amber-500 dark:hover:bg-amber-500/10 text-blue-600 dark:text-amber-555 font-bold text-xs uppercase rounded-lg active:scale-95 transition-all cursor-pointer font-mono"
-              >
-                Rematch
-              </button>
-            )}
+            {/* Submission HUD */}
+            <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4 max-w-2xl">
+              <div>
+                {!hasSubmitted ? (
+                  <button
+                    onClick={() => submitRankings()}
+                    disabled={loading}
+                    className="px-6 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer font-mono dark:border-amber-500"
+                  >
+                    {loading ? "CALCULATING..." : "Submit Rankings"}
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <div className="cartoon-border px-4 py-3 bg-white dark:bg-[#1c1a19] dark:border-amber-500 flex flex-col justify-center">
+                      <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest block">ROYALE SCORE</span>
+                      <span className="text-xl font-black text-black dark:text-amber-400">{score} / 100 PTS</span>
+                    </div>
+
+                    <button
+                      onClick={handleNextRound}
+                      className="px-5 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] flex items-center gap-1.5 cursor-pointer font-mono dark:border-amber-500"
+                    >
+                      <span>{roundIdx < SEARCH_CHALLENGES.length - 1 ? "Next Level" : "Finish Arcade"}</span>
+                      <ArrowRight className="w-4 h-4 animate-pulse" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {hasSubmitted && (
+                <div className="cartoon-border p-4 bg-cyan-150 dark:bg-cyan-950/20 text-[10px] font-black rounded-lg border-2 border-black max-w-sm">
+                  <span className="text-cyan-600 dark:text-amber-550 uppercase tracking-widest block mb-1">SPEARMAN RANK DISTANCE</span>
+                  <p className="text-zinc-650 dark:text-zinc-400 font-semibold leading-relaxed">
+                    A distance close to the TF-IDF order (swapping adjacent items) yields high partial credit. Inverting the deck yields 0 points.
+                  </p>
+                </div>
+              )}
+            </div>
+
           </div>
         )}
       </div>
     );
   }
 
-  // ── ACADEMIC MODE: CONSOLE & DATA REFERENCE ──────────────────────────────
+  // ── ACADEMIC MODE: SEARCH CONSOLE ─────────────────────────────────────────
   const codeSnippet = `import { indexDocument, score } from './search'
 
 const docStems = indexDocument(documentText)
@@ -321,7 +510,7 @@ const relevanceScore = score(docStems, queryStems)`;
                 />
                 <button
                   type="submit"
-                  className="p-2 border border-zinc-250 dark:border-zinc-850 bg-white dark:bg-zinc-950 rounded-lg hover:border-blue-500 hover:text-blue-500 cursor-pointer flex items-center justify-center"
+                  className="p-2 border border-zinc-250 dark:border-zinc-855 bg-white dark:bg-zinc-950 rounded-lg hover:border-blue-500 hover:text-blue-500 cursor-pointer flex items-center justify-center"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -362,7 +551,7 @@ const relevanceScore = score(docStems, queryStems)`;
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search corpus..."
-                        className="flex-grow bg-white dark:bg-zinc-950 border border-zinc-250 dark:border-zinc-850 px-4 py-2.5 text-xs rounded-lg text-zinc-800 dark:text-white"
+                        className="flex-grow bg-white dark:bg-zinc-950 border border-zinc-250 dark:border-zinc-850 px-4 py-2.5 text-xs rounded-lg text-zinc-805 dark:text-white"
                       />
                       <button
                         type="submit"

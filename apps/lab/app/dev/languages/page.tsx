@@ -1,15 +1,64 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
-import { BookOpen, Shield, Award, RefreshCw, Sparkles } from "lucide-react";
+import { BookOpen, RefreshCw, Star, HelpCircle } from "lucide-react";
+
+interface LanguageInfo {
+  code: string;
+  name: string;
+  nativeName: string;
+  script: string;
+  proverb: string;
+  gloss: string;
+  glyphs: string[];
+}
+
+const LANGUAGES_DATA: LanguageInfo[] = [
+  {
+    code: "am",
+    name: "Amharic",
+    nativeName: "አማርኛ",
+    script: "Ge'ez (ፊደል)",
+    proverb: "ካላወቁበት ድመት ዝሆን ትሆናለች።",
+    gloss: "If you don't know how to handle it, a cat can become an elephant.",
+    glyphs: ["ሀ", "ለ", "ሐ", "መ", "ረ", "ሰ", "ሸ", "ቀ", "በ", "ተ", "ቸ", "ነ"],
+  },
+  {
+    code: "ti",
+    name: "Tigrinya",
+    nativeName: "ትግርኛ",
+    script: "Ge'ez (ፊደል)",
+    proverb: "እንተ ዘይፈልጡሉስ ድሙ ኣንጭዋ ትኸውን።",
+    gloss: "If you don't know how to handle it, a cat becomes a mouse.",
+    glyphs: ["ሠ", "ረ", "ሰ", "ሸ", "ቀ", "በ", "ተ", "ቸ", "ነ", "ኘ", "አ", "ከ"],
+  },
+  {
+    code: "om",
+    name: "Oromo",
+    nativeName: "Afaan Oromoo",
+    script: "Latin (Qubee)",
+    proverb: "Beekumsa caalaa hubannootu caala.",
+    gloss: "Insight is better than knowledge.",
+    glyphs: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"],
+  },
+];
 
 export default function LanguagesPage() {
   const { mode } = useLabMode();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
-  const [chosenChar, setChosenChar] = useState<string | null>(null);
+
+  // 10/10 Proverb Wheel States
+  const [selectedLang, setSelectedLang] = useState<string | null>(null);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [rotationDegrees, setRotationDegrees] = useState(0);
+  const [activeGlyph, setActiveGlyph] = useState("❓");
+  const [revealedProverb, setRevealedProverb] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
+  const spinIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchLanguages = async () => {
     setLoading(true);
@@ -28,132 +77,277 @@ export default function LanguagesPage() {
     fetchLanguages();
   }, []);
 
-  const characters = [
-    {
-      id: "am",
-      name: "Amharic Warrior",
-      description: "Guardian of the Semitic highlands. Master of homophone collapsing and prefix zapping.",
-      specialAbility: "Homophone Collapse Shield",
-      stats: { power: 90, defense: 75, agility: 60, vocabulary: 85 },
-      element: "Fire",
-      avatar: "🛡️",
-    },
-    {
-      id: "ti",
-      name: "Tigrinya Ranger",
-      description: "Swift scout of the northern ridges. Specializes in advanced suffix parsing and stem pruning.",
-      specialAbility: "Suffix Pruning Blade",
-      stats: { power: 75, defense: 60, agility: 95, vocabulary: 80 },
-      element: "Air",
-      avatar: "🏹",
-    },
-    {
-      id: "om",
-      name: "Oromo Mystic",
-      description: "Ancient sage of the fertile plains. Harmonizes phonetic structures and filters stopwords effortlessly.",
-      specialAbility: "Stopword Cleansing Wave",
-      stats: { power: 65, defense: 85, agility: 70, vocabulary: 95 },
-      element: "Earth",
-      avatar: "✨",
-    },
-  ];
+  // Proverb Wheel spin execution
+  const handleSpin = () => {
+    if (isSpinning || isTyping) return;
+    setIsSpinning(true);
+    setSelectedLang(null);
+    setRevealedProverb("");
+
+    let elapsed = 0;
+    const spinDuration = 1800; // spin for 1.8s
+    let spinSpeed = 80;
+
+    // Fast rotation degrees updates
+    const rotateInterval = setInterval(() => {
+      setRotationDegrees((r) => r + 25);
+    }, 40);
+
+    const spinTick = () => {
+      const allGlyphs = LANGUAGES_DATA.flatMap((l) => l.glyphs);
+      const randomGlyph = allGlyphs[Math.floor(Math.random() * allGlyphs.length)];
+      setActiveGlyph(randomGlyph);
+
+      elapsed += spinSpeed;
+      if (elapsed >= spinDuration) {
+        // Stop spinning and select a random pack
+        clearInterval(rotateInterval);
+        const selected = LANGUAGES_DATA[Math.floor(Math.random() * LANGUAGES_DATA.length)];
+        setSelectedLang(selected.code);
+        setActiveGlyph(selected.glyphs[0]);
+        setIsSpinning(false);
+        triggerTypewriter(selected);
+      } else {
+        // Slow down spinning
+        spinSpeed += 15;
+        spinIntervalRef.current = setTimeout(spinTick, spinSpeed);
+      }
+    };
+
+    spinTick();
+  };
+
+  const triggerTypewriter = (lang: LanguageInfo) => {
+    setIsTyping(true);
+    let idx = 0;
+    const target = lang.proverb;
+    
+    const typeInterval = setInterval(() => {
+      setRevealedProverb((prev) => prev + target[idx]);
+      idx++;
+      if (idx >= target.length) {
+        clearInterval(typeInterval);
+        setIsTyping(false);
+      }
+    }, 60);
+  };
+
+  const handleChooseDirect = (code: string) => {
+    if (isSpinning || isTyping) return;
+    const selected = LANGUAGES_DATA.find((l) => l.code === code)!;
+    setSelectedLang(code);
+    setActiveGlyph(selected.glyphs[0]);
+    setRevealedProverb("");
+    triggerTypewriter(selected);
+  };
 
   if (mode === "fun") {
-    // ── FUN MODE: CHARACTER SELECT ─────────────────────────────────────────
+    const selectedData = LANGUAGES_DATA.find((l) => l.code === selectedLang);
+
+    // ── 10/10 FUN MODE: THE PROVERB WHEEL ──────────────────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
-        {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-600 dark:text-orange-500">
-            <Award className="w-4 h-4 animate-bounce" />
-            <span>SELECT HERO CLASS</span>
+      <div className="font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#fdfcfa] bg-[radial-gradient(#e5e7eb_1.5px,transparent_1.5px)] [background-size:24px_24px] text-zinc-900 dark:bg-[#121110] dark:bg-[radial-gradient(#292524_1.5px,transparent_1.5px)] dark:text-amber-100 animate-in fade-in duration-300">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3.5px solid #000;
+              box-shadow: 6px 6px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3.5px solid #f59e0b;
+              box-shadow: 6px 6px 0px 0px #f59e0b;
+            }
+            .cartoon-btn {
+              border: 3.5px solid #000;
+              box-shadow: 5px 5px 0px 0px #000;
+              transition: all 0.1s ease-out;
+            }
+            .dark .cartoon-btn {
+              border: 3.5px solid #f59e0b;
+              box-shadow: 5px 5px 0px 0px #f59e0b;
+            }
+            .cartoon-btn:hover {
+              transform: translate(1px, 1px);
+              box-shadow: 4px 4px 0px 0px #000;
+            }
+            .dark .cartoon-btn:hover {
+              box-shadow: 4px 4px 0px 0px #f59e0b;
+            }
+            .cartoon-btn:active {
+              transform: translate(3px, 3px);
+              box-shadow: 2px 2px 0px 0px #000;
+            }
+            .dark .cartoon-btn:active {
+              box-shadow: 2px 2px 0px 0px #f59e0b;
+            }
+            .wobbly-circle {
+              border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+              animation: wobble-shape 4s ease-in-out infinite alternate;
+            }
+            @keyframes wobble-shape {
+              0% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+              100% { border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%; }
+            }
+            .cartoon-speech-bubble::after {
+              content: '';
+              position: absolute;
+              bottom: -20px;
+              left: 50px;
+              border-width: 20px 20px 0;
+              border-style: solid;
+              border-color: #fef08a transparent;
+              display: block;
+              width: 0;
+            }
+            .cartoon-speech-bubble-border::after {
+              content: '';
+              position: absolute;
+              bottom: -23px;
+              left: 48px;
+              border-width: 22px 22px 0;
+              border-style: solid;
+              border-color: #000 transparent;
+              display: block;
+              width: 0;
+              z-index: 10;
+            }
+          `
+        }} />
+
+        {/* Header HUD */}
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6 relative">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>🎡 LEVEL 1: CHOOSE YOUR LANGUAGE 🎡</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            CHOOSE YOUR LINGUIST
+          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
+            THE PROVERB WHEEL
           </h2>
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
+            Spin the wobbly wheel to cycle languages, or click direct packs to unlock!
+          </p>
         </div>
 
-        {/* Character Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-          {characters.map((char) => {
-            const isSelected = chosenChar === char.id;
-            return (
+        {/* Main interactive panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-5xl items-center">
+          
+          {/* Left Side: The Spinning Wheel */}
+          <div className="flex flex-col items-center space-y-6">
+            <div className="relative w-64 h-64 flex items-center justify-center">
+              {/* Outer Ring with wobbly animation */}
               <div
-                key={char.id}
-                onClick={() => setChosenChar(char.id)}
-                className={`relative rounded-xl border-2 p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-50/50 dark:border-amber-500 dark:bg-amber-500/10 shadow-[0_0_20px_rgba(59,130,246,0.15)] dark:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-                    : "border-zinc-200 bg-white hover:border-blue-500/30 hover:bg-blue-50/20 dark:border-zinc-800 dark:bg-[#120f0d] dark:hover:border-amber-500/50 dark:hover:bg-amber-500/5"
-                }`}
+                style={{ transform: `rotate(${rotationDegrees}deg)` }}
+                className={`wobbly-circle absolute inset-0 border-[4px] border-black bg-yellow-100 dark:bg-zinc-900 dark:border-amber-500 shadow-[6px_6px_0px_0px_#000] dark:shadow-[6px_6px_0px_0px_#f59e0b] flex items-center justify-center transition-transform duration-100`}
               >
-                {isSelected && (
-                  <div className="absolute -top-3 -right-3 px-2 py-0.5 rounded-md bg-blue-500 dark:bg-amber-500 text-white dark:text-black text-[9px] font-bold tracking-wider uppercase animate-bounce">
-                    CHOSEN
-                  </div>
-                )}
+                {/* Visual sectors */}
+                <div className="absolute w-[2px] h-full bg-black/10 dark:bg-amber-500/10" />
+                <div className="absolute h-[2px] w-full bg-black/10 dark:bg-amber-500/10" />
                 
-                <div className="space-y-4">
-                  {/* Avatar bubble */}
-                  <div className="text-4xl w-14 h-14 rounded-lg border border-zinc-200 dark:border-amber-500/30 bg-zinc-50 dark:bg-black flex items-center justify-center select-none shadow-inner">
-                    {char.avatar}
-                  </div>
-                  
-                  {/* Name & Title */}
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-bold uppercase tracking-wider text-blue-600 dark:text-amber-400">
-                      {char.name}
-                    </h3>
-                    <p className="text-[10px] text-zinc-500 dark:text-orange-500 font-bold uppercase tracking-widest">
-                      CLASS: {char.element}
-                    </p>
-                  </div>
-                  
-                  {/* Description */}
-                  <p className="text-xs text-zinc-650 dark:text-zinc-400 font-semibold leading-relaxed">
-                    {char.description}
-                  </p>
-                </div>
+                {/* Secondary icons around ring */}
+                <span className="absolute top-4 text-xs font-black select-none">አማ</span>
+                <span className="absolute bottom-4 text-xs font-black select-none">ትግ</span>
+                <span className="absolute left-4 text-xs font-black select-none">Oro</span>
+                <span className="absolute right-4 text-xs font-black select-none">Ge'ez</span>
+              </div>
 
-                {/* Stats */}
-                <div className="space-y-3 mt-6 pt-4 border-t border-dashed border-zinc-250 dark:border-zinc-800/80">
-                  <div className="text-[10px] text-blue-500 dark:text-amber-500/80 font-bold uppercase tracking-wider">
-                    ABILITY: <span className="text-blue-600 dark:text-amber-300">{char.specialAbility}</span>
+              {/* Central spinning hub with active glyph */}
+              <div className="relative w-24 h-24 rounded-full border-[3px] border-black bg-white dark:bg-black dark:border-amber-500 flex items-center justify-center shadow-inner z-10">
+                <span className={`text-4xl font-black text-black dark:text-amber-400 transition-all select-none ${
+                  isSpinning ? "scale-125" : "scale-100"
+                }`}>
+                  {activeGlyph}
+                </span>
+              </div>
+            </div>
+
+            {/* Spin Button */}
+            <button
+              onClick={handleSpin}
+              disabled={isSpinning || isTyping}
+              className="cartoon-btn px-8 py-4 bg-amber-400 text-black text-sm font-black uppercase tracking-widest rounded-xl disabled:opacity-40"
+            >
+              {isSpinning ? "SPINNING..." : "SPIN THE WHEEL 🎡"}
+            </button>
+          </div>
+
+          {/* Right Side: Proverb Speech Bubble & Selectors */}
+          <div className="space-y-8">
+            {/* Quick direct select buttons */}
+            <div className="cartoon-border p-5 rounded-2xl bg-white dark:bg-[#1a1c1d] dark:border-amber-500 space-y-3">
+              <span className="text-[10px] font-black uppercase text-zinc-500 block">DIRECT SELECT CLASS</span>
+              <div className="grid grid-cols-3 gap-3">
+                {LANGUAGES_DATA.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => handleChooseDirect(l.code)}
+                    disabled={isSpinning || isTyping}
+                    className={`p-3 border-2 border-black rounded-xl text-center text-xs font-black tracking-wide cursor-pointer transition-all dark:border-amber-500 ${
+                      selectedLang === l.code
+                        ? "bg-amber-400 text-black"
+                        : "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white"
+                    }`}
+                  >
+                    <p>{l.name}</p>
+                    <p className="text-[9px] font-bold opacity-70 mt-0.5">{l.nativeName}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Speech bubble proverb display */}
+            {selectedLang && (
+              <div className="relative animate-in zoom-in-75 duration-300">
+                {/* Speech Bubble Border */}
+                <div className="cartoon-speech-bubble-border absolute inset-0 rounded-2xl bg-black" />
+                
+                {/* Actual Speech Bubble */}
+                <div className="cartoon-speech-bubble border-[3.5px] border-black bg-yellow-100 dark:bg-[#201d18] dark:border-amber-500 rounded-2xl p-8 space-y-4 text-black dark:text-amber-100 z-20 relative">
+                  <div className="flex justify-between items-center border-b-2 border-dashed border-black/10 dark:border-amber-500/10 pb-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-800 dark:text-amber-400">
+                      NATIVE PROVERB REVEALED
+                    </span>
+                    <span className="px-2 py-0.5 border border-black bg-white rounded text-[8px] font-black dark:bg-zinc-900">
+                      {selectedData?.script}
+                    </span>
                   </div>
-                  
-                  {/* Stat bars */}
-                  <div className="space-y-1.5">
-                    {Object.entries(char.stats).map(([stat, val]) => (
-                      <div key={stat} className="flex items-center justify-between text-[9px] uppercase font-bold">
-                        <span className="text-zinc-400 dark:text-zinc-500">{stat}</span>
-                        <div className="flex gap-0.5 items-center">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <span 
-                              key={i} 
-                              className={`w-1.5 h-2 ${i < val / 10 ? "bg-blue-500 dark:bg-amber-500" : "bg-zinc-200 dark:bg-zinc-800"}`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+
+                  {/* Typewritten Proverb */}
+                  <div className="min-h-[50px] flex items-center justify-center py-2">
+                    <span className="text-2xl md:text-3xl font-black text-center text-zinc-900 dark:text-white leading-relaxed font-sans block select-all">
+                      {revealedProverb}
+                      {isTyping && (
+                        <span className="inline-block w-2.5 h-6 ml-1 bg-amber-500 animate-pulse" />
+                      )}
+                    </span>
                   </div>
+
+                  {/* Translation Gloss */}
+                  {!isTyping && (
+                    <div className="text-center pt-3 border-t border-dashed border-black/10 dark:border-amber-500/10 animate-in fade-in duration-300">
+                      <span className="text-[9px] font-black text-zinc-500 block uppercase">GLOSS / MEANING</span>
+                      <p className="text-xs font-semibold text-zinc-800 dark:text-amber-250 italic mt-1 leading-relaxed">
+                        "{selectedData?.gloss}"
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            )}
 
-        {/* Selected character details */}
-        {chosenChar && (
-          <div className="mt-10 p-6 rounded-xl border border-dashed border-blue-500/30 dark:border-amber-500/40 bg-blue-500/5 dark:bg-amber-500/5 max-w-md text-center space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-sm font-bold text-blue-600 dark:text-amber-400 tracking-widest uppercase">
-              READY FOR COMBAT!
-            </h4>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">
-              You selected the <span className="font-bold text-blue-600 dark:text-amber-300">{characters.find(c => c.id === chosenChar)?.name}</span>. Click another sidebar route to unleash your linguistics special ability in the games!
-            </p>
+            {/* Hint stamp */}
+            {!selectedLang && !isSpinning && (
+              <div className="cartoon-border p-6 rounded-2xl bg-cyan-100 dark:bg-cyan-950/20 dark:border-amber-500 flex items-center gap-4 animate-bounce">
+                <span className="text-3xl select-none">🎡</span>
+                <div>
+                  <h4 className="text-xs font-black uppercase text-black dark:text-amber-400">HOW TO PLAY</h4>
+                  <p className="text-[10px] font-semibold text-zinc-650 dark:text-zinc-400 mt-0.5 uppercase">
+                    Spin the central proverb wheel to land on a language pack and reveal its ancient proverb!
+                  </p>
+                </div>
+              </div>
+            )}
+
           </div>
-        )}
+        </div>
       </div>
     );
   }
@@ -177,7 +371,7 @@ console.log(supported); // Output: ["am"]`;
             <BookOpen className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
-            Supported Languages & Metadata Reference
+            Supported Languages & Reference Console
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
@@ -187,7 +381,6 @@ console.log(supported); // Output: ["am"]`;
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Documentation / Snippets */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card p-6 space-y-4">
@@ -230,7 +423,6 @@ console.log(supported); // Output: ["am"]`;
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

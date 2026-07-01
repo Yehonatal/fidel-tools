@@ -4,19 +4,32 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLabMode } from "@/components/mode-context";
 import CodeSnippet from "@/components/CodeSnippet";
 import DiffHighlighter from "@/components/DiffHighlighter";
-import { Type, Gamepad, Play, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import { Type, Gamepad, Play, CheckCircle2, XCircle, RefreshCw, AlertTriangle } from "lucide-react";
 
-const GAME_WORDS = [
-  { word: "ሰላም", normalized: true, reason: "Canonical form for 'peace'" },
-  { word: "ሠላም", normalized: false, reason: "Alternative spelling (uses character ሠ instead of ሰ)" },
-  { word: "ሀኪም", normalized: true, reason: "Canonical form for 'doctor'" },
-  { word: "ሐኪም", normalized: false, reason: "Alternative spelling (uses character ሐ instead of ሀ)" },
-  { word: "አለም", normalized: true, reason: "Canonical form for 'world'" },
-  { word: "ዓለም", normalized: false, reason: "Alternative spelling (uses character ዓ instead of አ)" },
-  { word: "ፀሐይ", normalized: false, reason: "Alternative spelling (uses characters ፀ and ሐ)" },
-  { word: "ጸሀይ", normalized: true, reason: "Canonical form for 'sun'" },
-  { word: "ንጉስ", normalized: true, reason: "Canonical form for 'king'" },
-  { word: "ንጉሥ", normalized: false, reason: "Alternative spelling (uses character ሥ instead of ስ)" },
+interface NormalizationWord {
+  displayWord: string;
+  canonicalWord: string;
+  variantWord: string;
+  isCanonical: boolean;
+  rule: string;
+  meaning: string;
+}
+
+const GAME_PAIRS: NormalizationWord[] = [
+  { displayWord: "ሠላም", canonicalWord: "ሰላም", variantWord: "ሠላም", isCanonical: false, rule: "ሠ → ሰ", meaning: "peace" },
+  { displayWord: "ሰላም", canonicalWord: "ሰላም", variantWord: "ሠላም", isCanonical: true, rule: "ሠ → ሰ", meaning: "peace" },
+  { displayWord: "ሐኪም", canonicalWord: "ሀኪም", variantWord: "ሐኪም", isCanonical: false, rule: "ሐ → ሀ", meaning: "doctor" },
+  { displayWord: "ሀኪም", canonicalWord: "ሀኪም", variantWord: "ሐኪም", isCanonical: true, rule: "ሐ → ሀ", meaning: "doctor" },
+  { displayWord: "ዓለም", canonicalWord: "አለም", variantWord: "ዓለም", isCanonical: false, rule: "ዓ → አ", meaning: "world" },
+  { displayWord: "አለም", canonicalWord: "አለም", variantWord: "ዓለም", isCanonical: true, rule: "ዓ → አ", meaning: "world" },
+  { displayWord: "ንጉሥ", canonicalWord: "ንጉስ", variantWord: "ንጉሥ", isCanonical: false, rule: "ሥ → ስ", meaning: "king" },
+  { displayWord: "ንጉስ", canonicalWord: "ንጉስ", variantWord: "ንጉሥ", isCanonical: true, rule: "ሥ → ስ", meaning: "king" },
+  { displayWord: "ኀይል", canonicalWord: "ሀይል", variantWord: "ኀይል", isCanonical: false, rule: "ኀ → ሀ", meaning: "power" },
+  { displayWord: "ሀይል", canonicalWord: "ሀይል", variantWord: "ኀይል", isCanonical: true, rule: "ኀ → ሀ", meaning: "power" },
+  { displayWord: "ጸሀይ", canonicalWord: "ጸሀይ", variantWord: "ጸሐይ", isCanonical: true, rule: "ሐ → ሀ", meaning: "sun" },
+  { displayWord: "ጸሐይ", canonicalWord: "ጸሀይ", variantWord: "ጸሐይ", isCanonical: false, rule: "ሐ → ሀ", meaning: "sun" },
+  { displayWord: "ጽሁፍ", canonicalWord: "ጽሁፍ", variantWord: "ፅሁፍ", isCanonical: true, rule: "ፅ → ጽ", meaning: "writing" },
+  { displayWord: "ፅሁፍ", canonicalWord: "ጽሁፍ", variantWord: "ፅሁፍ", isCanonical: false, rule: "ፅ → ጽ", meaning: "writing" },
 ];
 
 export default function NormalizePage() {
@@ -28,10 +41,15 @@ export default function NormalizePage() {
 
   // Game States
   const [isPlaying, setIsPlaying] = useState(false);
-  const [round, setRound] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(3);
-  const [answerFeedback, setAnswerFeedback] = useState<"correct" | "incorrect" | "timeout" | null>(null);
+  
+  // Feedback and Reveal state
+  const [answerState, setAnswerState] = useState<"correct" | "incorrect" | "timeout" | null>(null);
+  const [revealRule, setRevealRule] = useState<NormalizationWord | null>(null);
+  
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const performNormalization = async (textToNormalize: string) => {
@@ -58,34 +76,38 @@ export default function NormalizePage() {
   };
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      performNormalization(rawText);
-    }, 450);
+    if (mode === "academic") {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        performNormalization(rawText);
+      }, 450);
+    }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [rawText]);
+  }, [rawText, mode]);
 
-  // Start Game
   const startGame = () => {
     setIsPlaying(true);
-    setRound(0);
+    setCurrentIndex(0);
     setScore(0);
-    setAnswerFeedback(null);
+    setStreak(0);
+    setAnswerState(null);
+    setRevealRule(null);
     startRound(0);
   };
 
-  const startRound = (roundNum: number) => {
+  const startRound = (idx: number) => {
     setTimeLeft(3);
-    setAnswerFeedback(null);
+    setAnswerState(null);
+    setRevealRule(null);
     if (timerRef.current) clearInterval(timerRef.current);
     
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
-          handleAnswer(false, true); // Timeout counts as incorrect/skip
+          handleSort(null, true);
           return 0;
         }
         return prev - 1;
@@ -93,29 +115,37 @@ export default function NormalizePage() {
     }, 1000);
   };
 
-  const handleAnswer = (userGuessedCanonical: boolean, isTimeout = false) => {
+  const handleSort = (userGuessedCanonical: boolean | null, isTimeout = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
+    const currentWordObj = GAME_PAIRS[currentIndex];
     
     if (isTimeout) {
-      setAnswerFeedback("timeout");
+      setAnswerState("timeout");
+      setStreak(0);
     } else {
-      const isCorrect = userGuessedCanonical === GAME_WORDS[round].normalized;
+      const isCorrect = userGuessedCanonical === currentWordObj.isCanonical;
       if (isCorrect) {
-        setScore((prev) => prev + 10);
-        setAnswerFeedback("correct");
+        setAnswerState("correct");
+        setStreak((prev) => prev + 1);
+        const currentMultiplier = Math.min(5, Math.floor(streak / 3) + 1);
+        setScore((prev) => prev + 10 * currentMultiplier);
       } else {
-        setAnswerFeedback("incorrect");
+        setAnswerState("incorrect");
+        setStreak(0);
       }
     }
 
+    setRevealRule(currentWordObj);
+
     setTimeout(() => {
-      if (round < GAME_WORDS.length - 1) {
-        setRound((prev) => prev + 1);
-        startRound(round + 1);
+      if (currentIndex < GAME_PAIRS.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        startRound(currentIndex + 1);
       } else {
         setIsPlaying(false);
+        if (timerRef.current) clearInterval(timerRef.current);
       }
-    }, 1500);
+    }, 1600);
   };
 
   useEffect(() => {
@@ -125,107 +155,170 @@ export default function NormalizePage() {
   }, []);
 
   if (mode === "fun") {
-    // ── FUN MODE: NORMALIZE OR NOT GAME ────────────────────────────────────
+    const currentWordObj = GAME_PAIRS[currentIndex];
+    const currentMultiplier = Math.min(5, Math.floor(streak / 3) + 1);
+
+    // ── 10/10 FUN MODE: FALLING PAPER SORT ─────────────────────────────────
     return (
-      <div className="animate-in fade-in duration-300 font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-zinc-50 text-zinc-800 dark:bg-[#0c0a09] dark:text-amber-500">
-        {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-2xl border-b-2 border-dashed border-zinc-250 dark:border-amber-550/30 pb-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-blue-600 dark:text-orange-500">
-            <Gamepad className="w-4 h-4" />
-            <span>LEVEL 3: ORTHOGRAPHY GUESSER</span>
+      <div className="font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#fdfcfa] bg-[radial-gradient(#e5e7eb_1.5px,transparent_1.5px)] [background-size:24px_24px] text-zinc-900 dark:bg-[#121110] dark:bg-[radial-gradient(#292524_1.5px,transparent_1.5px)] dark:text-amber-100 animate-in fade-in duration-300">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .cartoon-border {
+              border: 3.5px solid #000;
+              box-shadow: 6px 6px 0px 0px #000;
+            }
+            .dark .cartoon-border {
+              border: 3.5px solid #f59e0b;
+              box-shadow: 6px 6px 0px 0px #f59e0b;
+            }
+            .paper-sheet {
+              background: linear-gradient(135deg, #fff 85%, #fef08a 100%);
+              border: 3.5px solid #000;
+              box-shadow: 6px 6px 0px 0px #000;
+              animation: paper-wobble 2.5s ease-in-out infinite alternate;
+            }
+            .dark .paper-sheet {
+              background: linear-gradient(135deg, #1c1a19 85%, #25201c 100%);
+              border: 3.5px solid #f59e0b;
+              box-shadow: 6px 6px 0px 0px #f59e0b;
+            }
+            @keyframes paper-wobble {
+              0% { transform: rotate(-2deg) translateY(0px); }
+              100% { transform: rotate(2deg) translateY(-8px); }
+            }
+            .bin-hover:hover {
+              transform: scale(1.03) rotate(-1deg);
+            }
+          `
+        }} />
+
+        {/* Header HUD */}
+        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
+          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
+            <span>⚖️ LEVEL 3: SPELLING BINNING ⚖️</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-widest text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-amber-400 dark:to-orange-500 bg-clip-text">
-            NORMALIZE OR NOT
+          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
+            FALLING PAPER SORT
           </h2>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-455 uppercase tracking-wider">
-            Is the word in its canonical normalized form, or an alternative spelling homophone?
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
+            Sort alternative spelling variants from canonical indexing baselines!
           </p>
         </div>
 
         {!isPlaying ? (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full text-center space-y-6 shadow-inner">
+          <div className="cartoon-border rounded-2xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
             <div className="text-5xl">🎯</div>
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-blue-600 dark:text-amber-400 uppercase tracking-wider">
-                Ready to guess?
+              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                Begin Orthographic sorting?
               </h3>
               <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                You have 3 seconds per word. Choose whether the word represents the canonical base form used in Fidel indexing or not.
+                Papers will drop down. Decide if the spelling is the normalized index standard (Canonical) or an orthographic variant (Alternative).
               </p>
             </div>
             {score > 0 && (
-              <div className="text-sm font-bold text-blue-600 dark:text-amber-400 border border-blue-500/20 dark:border-amber-500/20 bg-blue-500/5 dark:bg-amber-500/5 py-2 rounded">
-                PREVIOUS SCORE: {score} / 100 PTS
+              <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-amber-950/20 dark:border-amber-500">
+                PREVIOUS SCORE: {score} PTS
               </div>
             )}
             <button
               onClick={startGame}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-black font-bold uppercase tracking-widest text-xs rounded-lg active:scale-98 transition-all cursor-pointer font-mono"
+              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
             >
               Start Game
             </button>
           </div>
         ) : (
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#120f0d] p-8 max-w-md w-full flex flex-col items-center justify-between shadow-inner min-h-[360px] relative overflow-hidden">
-            {/* Round info & timer */}
-            <div className="w-full flex items-center justify-between border-b border-dashed border-zinc-250 dark:border-zinc-800/80 pb-3">
-              <span className="text-[10px] font-bold text-zinc-450 dark:text-zinc-550 uppercase tracking-wider">
-                ROUND {round + 1} / {GAME_WORDS.length}
+          <div className="max-w-md w-full flex flex-col items-center justify-between min-h-[480px] relative space-y-6">
+            
+            {/* Top stats HUD */}
+            <div className="w-full cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-3.5 flex justify-between items-center text-xs font-black">
+              <span className="text-zinc-500 dark:text-zinc-400 uppercase">
+                ROUND {currentIndex + 1} / {GAME_PAIRS.length}
               </span>
-              <span className="text-xs font-bold text-blue-600 dark:text-orange-500">
-                TIMER: {timeLeft}S
-              </span>
+              <span className="text-red-500 animate-pulse">⏰ TIMER: {timeLeft}S</span>
             </div>
 
-            {/* Main Word Card */}
-            <div className="my-8 text-center space-y-4">
-              <span className="text-5xl font-bold tracking-tight text-zinc-800 dark:text-white block font-sans">
-                {GAME_WORDS[round].word}
-              </span>
+            {/* Falling notebook page sheet */}
+            <div className="w-full flex-grow flex items-center justify-center py-6">
+              <div className="paper-sheet w-full max-w-[280px] p-8 rounded-2xl text-center space-y-4 relative">
+                
+                {/* Lined notebook decoration lines */}
+                <div className="absolute inset-x-0 top-6 h-[1.5px] bg-red-400/30" />
+                <div className="absolute inset-x-0 top-12 h-[1.5px] bg-blue-300/30" />
+                <div className="absolute inset-x-0 top-18 h-[1.5px] bg-blue-300/30" />
 
-              {/* Feedback overlay */}
-              <div className="min-h-[20px]">
-                {answerFeedback === "correct" && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 animate-bounce">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Correct!
-                  </span>
-                )}
-                {answerFeedback === "incorrect" && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-500">
-                    <XCircle className="w-3.5 h-3.5" /> Incorrect!
-                  </span>
-                )}
-                {answerFeedback === "timeout" && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-blue-500 dark:text-orange-500 animate-pulse">
-                    ⏱️ TIME OUT!
-                  </span>
-                )}
+                <span className="text-4xl font-black tracking-wider text-zinc-950 dark:text-white block font-sans select-none relative z-10 pt-4">
+                  {currentWordObj.displayWord}
+                </span>
+
+                {/* Stamp Feedback banner */}
+                <div className="absolute top-2 right-2 min-h-[28px] z-20">
+                  {answerState === "correct" && (
+                    <span className="inline-block py-1 px-2 border-2 border-black bg-green-400 text-black text-[9px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                      CORRECT!
+                    </span>
+                  )}
+                  {answerState === "incorrect" && (
+                    <span className="inline-block py-1 px-2 border-2 border-black bg-red-400 text-white text-[9px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                      WRONG!
+                    </span>
+                  )}
+                  {answerState === "timeout" && (
+                    <span className="inline-block py-1 px-2 border-2 border-black bg-yellow-400 text-black text-[9px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                      TIME OUT!
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Answer choice buttons */}
-            <div className="w-full grid grid-cols-2 gap-4">
+            {/* Character Substitution Reveal block */}
+            {revealRule && (
+              <div className="w-full cartoon-border p-4 bg-cyan-50 dark:bg-cyan-950/20 text-xs font-bold rounded-xl text-center animate-in fade-in zoom-in duration-200 dark:border-amber-500">
+                <p className="uppercase text-[8px] font-black text-cyan-600 dark:text-amber-500 mb-1">
+                  SPELLING DIALECT RESOLVED
+                </p>
+                <p className="text-zinc-800 dark:text-amber-250">
+                  <span className="font-black text-base font-sans">{revealRule.variantWord}</span> (Alternative Variant) ↔ <span className="font-black text-base font-sans">{revealRule.canonicalWord}</span> (Canonical base)
+                </p>
+                <p className="text-[9px] text-zinc-550 dark:text-zinc-400 font-black uppercase mt-1">
+                  Rule swap: {revealRule.rule} ({revealRule.meaning})
+                </p>
+              </div>
+            )}
+
+            {/* Sorting bins */}
+            <div className="w-full grid grid-cols-2 gap-6">
+              {/* Bin 1: Canonical */}
               <button
-                disabled={answerFeedback !== null}
-                onClick={() => handleAnswer(true)}
-                className="py-3 border-2 border-emerald-500/50 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-455 font-bold uppercase tracking-wider text-xs rounded-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                disabled={answerState !== null}
+                onClick={() => handleSort(true)}
+                className="cartoon-border bin-hover py-4 bg-cyan-200 hover:bg-cyan-300 dark:bg-cyan-900/65 dark:text-white font-black uppercase tracking-wider text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center transition-transform"
               >
-                Canonical
+                📥 CANONICAL FILING
               </button>
+              {/* Bin 2: Variant */}
               <button
-                disabled={answerFeedback !== null}
-                onClick={() => handleAnswer(false)}
-                className="py-3 border-2 border-red-500/50 hover:bg-red-500/10 text-red-600 dark:text-red-500 font-bold uppercase tracking-wider text-xs rounded-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                disabled={answerState !== null}
+                onClick={() => handleSort(false)}
+                className="cartoon-border bin-hover py-4 bg-yellow-200 hover:bg-yellow-300 dark:bg-amber-500/20 dark:text-amber-300 font-black uppercase tracking-wider text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center transition-transform border-black dark:border-amber-500"
               >
-                Alternative
+                🗑️ VARIANT TRASH
               </button>
             </div>
 
-            {/* Streak scorecard */}
-            <div className="w-full mt-6 pt-3 border-t border-dashed border-zinc-250 dark:border-zinc-800/80 flex items-center justify-between text-[10px] font-bold text-zinc-450 dark:text-zinc-550">
+            {/* Scoreboard HUD */}
+            <div className="w-full cartoon-border rounded-lg bg-zinc-100 dark:bg-[#1c1a19] dark:border-amber-500 p-3 flex justify-between items-center text-[10px] font-black text-zinc-550 dark:text-amber-500/80">
               <span>SCORE: {score} PTS</span>
-              <span>STREAK: {score / 10}</span>
+              <span className="flex items-center gap-1.5">
+                <span>STREAK: {streak}</span>
+                <span className="px-1.5 py-0.5 border border-black bg-amber-400 text-black text-[9px] rounded">
+                  {currentMultiplier}X MULTIPLIER
+                </span>
+              </span>
             </div>
+
           </div>
         )}
       </div>
@@ -264,7 +357,6 @@ const handleInputChange = async (val: string) => {
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Input Panel */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -300,7 +392,6 @@ const handleInputChange = async (val: string) => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

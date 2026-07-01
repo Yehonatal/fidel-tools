@@ -9,38 +9,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid text input" }, { status: 400 });
     }
 
-    const honoSteps = steps || ["normalize", "tokenize", "stopwords", "stem"];
+    const pipelineSteps = steps || ["normalize", "lexAnalyze", "removeStopwords", "stem", "transliterate"];
     
-    const data = await callFidelApi("/pipeline", {
-      method: "POST",
-      body: { text, lang, steps: honoSteps },
-    });
+    let current = text;
+    const trace: Record<string, string> = {};
 
-    // Remap Hono keys to match expected lab trace structure if needed
-    // Hono output keys: input, lang, normalized, sentences, tokens, stopwordsRemoved, stems
-    const trace = {
-      input: data.input,
-      normalize: data.normalized,
-      lexAnalyze: data.normalized, // Fallback mapping
-      removeStopwords: data.stopwordsRemoved,
-      stem: data.stems,
-      transliterate: data.stems ? data.stems.join(" ") : "", // Will be overwritten by actual transliteration on frontend or server
-    };
-
-    // If transliterate is in steps, perform transliteration query to Hono
-    if (honoSteps.includes("transliterate")) {
-      try {
-        const transData = await callFidelApi("/transliterate", {
+    for (const step of pipelineSteps) {
+      if (step === "normalize") {
+        const data = await callFidelApi("/normalize", {
           method: "POST",
-          body: { text: data.stopwordsRemoved || text, direction: "am", type: "felig", lang },
+          body: { text: current, lang },
         });
-        trace.transliterate = transData.result;
-      } catch (err) {
-        console.error("Transliteration sub-query failed:", err);
+        current = data.normalized;
+        trace.normalize = current;
+      } else if (step === "lexAnalyze") {
+        const data = await callFidelApi("/lexical-analyze", {
+          method: "POST",
+          body: { text: current, lang },
+        });
+        current = data.result;
+        trace.lexAnalyze = current;
+      } else if (step === "removeStopwords") {
+        const data = await callFidelApi("/remove-stopwords", {
+          method: "POST",
+          body: { text: current, lang },
+        });
+        current = data.result;
+        trace.removeStopwords = current;
+      } else if (step === "stem") {
+        const words = current.split(/\s+/).filter(Boolean);
+        const data = await callFidelApi("/stem", {
+          method: "POST",
+          body: { words, lang },
+        });
+        current = data.stems ? data.stems.join(" ") : current;
+        trace.stem = current;
+      } else if (step === "transliterate") {
+        const data = await callFidelApi("/transliterate", {
+          method: "POST",
+          body: { text: current, direction: "am", type: "felig", lang },
+        });
+        current = data.result;
+        trace.transliterate = current;
       }
     }
 
-    return NextResponse.json({ trace, final: trace.transliterate || trace.removeStopwords || text });
+    return NextResponse.json({ trace, final: current });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
   }
