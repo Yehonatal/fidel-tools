@@ -29,12 +29,25 @@ function evaluateNormalization() {
   let wasmMatches = 0;
   const total = dataset.length;
   
-  for (const { input, expected } of dataset) {
+  // Track categories
+  const categories = {};
+  
+  for (const { input, expected, category } of dataset) {
     const jsResult = normalize(input, amPack);
     const wasmResult = pipeline.normalize(input);
     
-    if (jsResult === expected) jsMatches++;
-    if (wasmResult === expected) wasmMatches++;
+    const jsIsMatch = jsResult === expected;
+    const wasmIsMatch = wasmResult === expected;
+    
+    if (jsIsMatch) jsMatches++;
+    if (wasmIsMatch) wasmMatches++;
+    
+    if (!categories[category]) {
+      categories[category] = { total: 0, jsMatches: 0, wasmMatches: 0 };
+    }
+    categories[category].total++;
+    if (jsIsMatch) categories[category].jsMatches++;
+    if (wasmIsMatch) categories[category].wasmMatches++;
   }
   
   const jsAcc = (jsMatches / total) * 100;
@@ -43,7 +56,14 @@ function evaluateNormalization() {
   console.log(`  JS Normalizer Accuracy  : ${jsAcc.toFixed(2)}% (${jsMatches}/${total})`);
   console.log(`  WASM Normalizer Accuracy: ${wasmAcc.toFixed(2)}% (${wasmMatches}/${total})`);
   
-  return { jsAcc, wasmAcc };
+  console.log('  Category Breakdown:');
+  for (const [cat, stats] of Object.entries(categories)) {
+    const jsCatAcc = (stats.jsMatches / stats.total) * 100;
+    const wasmCatAcc = (stats.wasmMatches / stats.total) * 100;
+    console.log(`    - ${cat}: JS: ${jsCatAcc.toFixed(2)}% (${stats.jsMatches}/${stats.total}) | WASM: ${wasmCatAcc.toFixed(2)}% (${stats.wasmMatches}/${stats.total})`);
+  }
+  
+  return { jsAcc, wasmAcc, categories };
 }
 
 function evaluateStemming() {
@@ -54,16 +74,33 @@ function evaluateStemming() {
   let matches = 0;
   const total = dataset.length;
   
-  for (const { input, expected } of dataset) {
+  // Track categories
+  const categories = {};
+  
+  for (const { input, expected, category } of dataset) {
     const result = pipeline.stem(input);
-    if (result === expected) {
+    const isMatch = result === expected;
+    if (isMatch) {
       matches++;
     }
+    
+    if (!categories[category]) {
+      categories[category] = { total: 0, matches: 0 };
+    }
+    categories[category].total++;
+    if (isMatch) categories[category].matches++;
   }
   
   const acc = (matches / total) * 100;
   console.log(`  Stemmer Accuracy        : ${acc.toFixed(2)}% (${matches}/${total})`);
-  return { acc };
+  
+  console.log('  Category Breakdown:');
+  for (const [cat, stats] of Object.entries(categories)) {
+    const catAcc = (stats.matches / stats.total) * 100;
+    console.log(`    - ${cat}: ${catAcc.toFixed(2)}% (${stats.matches}/${stats.total})`);
+  }
+  
+  return { acc, categories };
 }
 
 function evaluateTokenization() {
@@ -78,7 +115,10 @@ function evaluateTokenization() {
   
   const total = dataset.length;
   
-  for (const { input, expected } of dataset) {
+  // Track categories
+  const categories = {};
+  
+  for (const { input, expected, category } of dataset) {
     const result = pipeline.sentenceTokenize(input);
     
     // Check exact array match
@@ -94,11 +134,22 @@ function evaluateTokenization() {
     totalTokenPairs += expected.length;
     generatedTokens += result.length;
     
+    let currentCorrect = 0;
     for (const resToken of result) {
       if (expectedSet.has(resToken)) {
         correctTokenPairs++;
+        currentCorrect++;
       }
     }
+    
+    if (!categories[category]) {
+      categories[category] = { total: 0, exactMatches: 0, generatedTokens: 0, expectedTokens: 0, correctTokens: 0 };
+    }
+    categories[category].total++;
+    if (isExact) categories[category].exactMatches++;
+    categories[category].generatedTokens += result.length;
+    categories[category].expectedTokens += expected.length;
+    categories[category].correctTokens += currentCorrect;
   }
   
   const exactAcc = (exactMatches / total) * 100;
@@ -111,7 +162,16 @@ function evaluateTokenization() {
   console.log(`  Tokenizer Exact Match   : ${exactAcc.toFixed(2)}% (${exactMatches}/${total})`);
   console.log(`  Tokenizer F1 Score      : ${f1.toFixed(2)}% (P: ${(precision * 100).toFixed(2)}%, R: ${(recall * 100).toFixed(2)}%)`);
   
-  return { exactAcc, f1 };
+  console.log('  Category Breakdown:');
+  for (const [cat, stats] of Object.entries(categories)) {
+    const catExactAcc = (stats.exactMatches / stats.total) * 100;
+    const catPrec = stats.correctTokens / (stats.generatedTokens || 1);
+    const catRec = stats.correctTokens / (stats.expectedTokens || 1);
+    const catF1 = (2 * catPrec * catRec) / ((catPrec + catRec) || 1) * 100;
+    console.log(`    - ${cat}: Exact Match: ${catExactAcc.toFixed(2)}% | F1 Score: ${catF1.toFixed(2)}%`);
+  }
+  
+  return { exactAcc, f1, categories };
 }
 
 const normResults = evaluateNormalization();

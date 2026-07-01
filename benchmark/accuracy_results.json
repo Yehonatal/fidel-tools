@@ -1,13 +1,72 @@
 {
   "normalization": {
-    "jsAcc": 100,
-    "wasmAcc": 100
+    "jsAcc": 67.05,
+    "wasmAcc": 67.05,
+    "categories": {
+      "homophones": {
+        "total": 751,
+        "jsMatches": 751,
+        "wasmMatches": 751
+      },
+      "gemination": {
+        "total": 606,
+        "jsMatches": 32,
+        "wasmMatches": 32
+      },
+      "labialization": {
+        "total": 186,
+        "jsMatches": 186,
+        "wasmMatches": 186
+      },
+      "clean": {
+        "total": 457,
+        "jsMatches": 372,
+        "wasmMatches": 372
+      }
+    }
   },
   "stemming": {
-    "acc": 100
+    "acc": 32.1,
+    "categories": {
+      "regular": {
+        "total": 1038,
+        "matches": 265
+      },
+      "irregular": {
+        "total": 370,
+        "matches": 287
+      },
+      "ambiguous": {
+        "total": 592,
+        "matches": 90
+      }
+    }
   },
   "tokenization": {
-    "exactAcc": 100,
-    "f1": 100
+    "exactAcc": 82.89999999999999,
+    "f1": 68.76599094666405,
+    "categories": {
+      "standard": {
+        "total": 1158,
+        "exactMatches": 1158,
+        "generatedTokens": 2151,
+        "expectedTokens": 2151,
+        "correctTokens": 2151
+      },
+      "word_separator": {
+        "total": 342,
+        "exactMatches": 0,
+        "generatedTokens": 2987,
+        "expectedTokens": 871,
+        "correctTokens": 342
+      },
+      "abbreviation": {
+        "total": 500,
+        "exactMatches": 500,
+        "generatedTokens": 1001,
+        "expectedTokens": 1001,
+        "correctTokens": 1001
+      }
+    }
   }
 }

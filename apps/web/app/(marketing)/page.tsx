@@ -5,6 +5,8 @@ import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import LandingPlayground from "@/components/landing-playground";
 import { useSession } from "@/lib/auth-client";
+import speedData from "../../../../benchmark/speed_results.json";
+import pySpeedData from "../../../../benchmark/python_speed_results.json";
 import {
   Code,
   Globe,
@@ -33,6 +35,44 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCodeTab, setActiveCodeTab] = useState<CodeTab>("cli");
   const [copiedText, setCopiedText] = useState(false);
+
+  const jsOps = speedData.medium.js.throughput;
+  const wasmOps = speedData.medium.wasm.throughput;
+  const pyOps = pySpeedData.medium.throughput;
+
+  const maxOps = Math.max(jsOps, wasmOps, pyOps);
+  
+  const jsPercent = `${(jsOps / maxOps * 100).toFixed(0)}%`;
+  const wasmPercent = `${(wasmOps / maxOps * 100).toFixed(0)}%`;
+  const pyPercent = `${(pyOps / maxOps * 100).toFixed(0)}%`;
+
+  const minOps = Math.min(jsOps, wasmOps, pyOps);
+  const maxSpeedup = (maxOps / minOps).toFixed(2);
+
+  const getCardClass = (ops: number) => {
+    const isFastest = ops === maxOps;
+    return `border p-6 rounded-xl relative overflow-hidden bg-white dark:bg-[#070709] space-y-4 transition-all duration-300 ${
+      isFastest 
+        ? "shadow-lg shadow-emerald-500/5 dark:shadow-emerald-500/2 border-emerald-500/30" 
+        : "border-slate-200 dark:border-zinc-900"
+    }`;
+  };
+
+  const getLabelClass = (ops: number) => {
+    return ops === maxOps 
+      ? "text-[10px] font-mono text-emerald-555 uppercase font-bold" 
+      : "text-[10px] font-mono text-zinc-550 dark:text-zinc-500 uppercase font-bold";
+  };
+
+  const getValueClass = (ops: number) => {
+    return ops === maxOps 
+      ? "text-2xl font-extrabold text-emerald-555 font-mono" 
+      : "text-2xl font-extrabold text-zinc-850 dark:text-zinc-200 font-mono";
+  };
+
+  const getBarColor = (ops: number) => {
+    return ops === maxOps ? "bg-emerald-500" : "bg-blue-500";
+  };
 
   const codeSnippets: Record<CodeTab, string> = {
     cli: `npm install @fidel-tools/core @fidel-tools/lang-am\n\n# Initialize local pipeline\n# import { Pipeline } from '@fidel-tools/core';\n# import amPack from '@fidel-tools/lang-am';`,
@@ -339,46 +379,58 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* JS Fallback */}
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] space-y-4">
+            <div className={getCardClass(jsOps)}>
+              {jsOps === maxOps && (
+                <div className="absolute right-4 top-4 bg-emerald-500/10 text-emerald-555 text-[8px] font-bold font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  {maxSpeedup}x FASTEST
+                </div>
+              )}
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase font-bold">JavaScript Fallback</span>
-                <span className="text-xs font-mono text-zinc-500">16.46 μs</span>
+                <span className={getLabelClass(jsOps)}>JavaScript Fallback</span>
+                <span className={`text-xs font-mono ${jsOps === maxOps ? 'text-emerald-555' : 'text-zinc-500'}`}>{speedData.medium.js.p50.toFixed(2)} μs</span>
               </div>
               <div className="space-y-2">
-                <div className="text-2xl font-extrabold text-zinc-850 dark:text-zinc-200 font-mono">60,756 <span className="text-xs text-zinc-500 font-sans">ops/s</span></div>
+                <div className={getValueClass(jsOps)}>{Math.round(jsOps).toLocaleString()} <span className="text-xs text-zinc-500 font-sans">ops/s</span></div>
                 <div className="h-2 rounded-full bg-slate-100 dark:bg-zinc-950 overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: "74%" }} />
+                  <div className={`h-full ${getBarColor(jsOps)} rounded-full`} style={{ width: jsPercent }} />
                 </div>
               </div>
             </div>
 
             {/* WASM/Rust Engine */}
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] relative overflow-hidden shadow-lg shadow-emerald-500/5 border-emerald-500/30">
-              <div className="absolute right-4 top-4 bg-emerald-500/10 text-emerald-555 text-[8px] font-bold font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
-                1.35x FASTEST
-              </div>
+            <div className={getCardClass(wasmOps)}>
+              {wasmOps === maxOps && (
+                <div className="absolute right-4 top-4 bg-emerald-500/10 text-emerald-555 text-[8px] font-bold font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  {maxSpeedup}x FASTEST
+                </div>
+              )}
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono text-emerald-555 uppercase font-bold">WASM/Rust Engine</span>
-                <span className="text-xs font-mono text-emerald-555">12.20 μs</span>
+                <span className={getLabelClass(wasmOps)}>WASM/Rust Engine</span>
+                <span className={`text-xs font-mono ${wasmOps === maxOps ? 'text-emerald-555' : 'text-zinc-500'}`}>{speedData.medium.wasm.p50.toFixed(2)} μs</span>
               </div>
               <div className="space-y-2">
-                <div className="text-2xl font-extrabold text-emerald-555 font-mono">81,996 <span className="text-xs text-emerald-555/70 font-sans">ops/s</span></div>
-                <div className="h-2 rounded-full bg-slate-105 dark:bg-zinc-950 overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: "100%" }} />
+                <div className={getValueClass(wasmOps)}>{Math.round(wasmOps).toLocaleString()} <span className="text-xs text-zinc-500 font-sans">ops/s</span></div>
+                <div className="h-2 rounded-full bg-slate-100 dark:bg-zinc-950 overflow-hidden">
+                  <div className={`h-full ${getBarColor(wasmOps)} rounded-full`} style={{ width: wasmPercent }} />
                 </div>
               </div>
             </div>
 
             {/* Python Package */}
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] space-y-4">
+            <div className={getCardClass(pyOps)}>
+              {pyOps === maxOps && (
+                <div className="absolute right-4 top-4 bg-emerald-500/10 text-emerald-555 text-[8px] font-bold font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  {maxSpeedup}x FASTEST
+                </div>
+              )}
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase font-bold">Python PyO3</span>
-                <span className="text-xs font-mono text-zinc-500">113.53 μs</span>
+                <span className={getLabelClass(pyOps)}>Python PyO3</span>
+                <span className={`text-xs font-mono ${pyOps === maxOps ? 'text-emerald-555' : 'text-zinc-500'}`}>{pySpeedData.medium.avg.toFixed(2)} μs</span>
               </div>
               <div className="space-y-2">
-                <div className="text-2xl font-extrabold text-zinc-850 dark:text-zinc-200 font-mono">8,808 <span className="text-xs text-zinc-500 font-sans">ops/s</span></div>
+                <div className={getValueClass(pyOps)}>{Math.round(pyOps).toLocaleString()} <span className="text-xs text-zinc-500 font-sans">ops/s</span></div>
                 <div className="h-2 rounded-full bg-slate-105 dark:bg-zinc-950 overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: "11%" }} />
+                  <div className={`h-full ${getBarColor(pyOps)} rounded-full`} style={{ width: pyPercent }} />
                 </div>
               </div>
             </div>
