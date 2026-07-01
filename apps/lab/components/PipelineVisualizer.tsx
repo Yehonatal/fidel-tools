@@ -8,7 +8,7 @@ interface PipelineVisualizerProps {
     normalize?: string;
     lexAnalyze?: string;
     removeStopwords?: string;
-    stem?: string[];
+    stem?: string;
     transliterate?: string;
   };
 }
@@ -156,8 +156,8 @@ export default function PipelineVisualizer({ inputText, trace }: PipelineVisuali
             Trims inflectional prefixes and suffixes, leaving the root stem of each Amharic word.
           </p>
           <div className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-zinc-50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-900/60 max-h-[140px] overflow-y-auto">
-            {trace.stem && trace.stem.length > 0 ? (
-              trace.stem.map((s, idx) => <TokenBadge key={idx} token={s} type="stem" />)
+            {trace.stem ? (
+              getWordTokens(trace.stem).map((s, idx) => <TokenBadge key={idx} token={s} type="stem" />)
             ) : (
               <span className="text-xs text-zinc-400 italic">Processing...</span>
             )}

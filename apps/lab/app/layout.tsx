@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Fidel Lab — Interactive NLP Console",
   description:
     "Interactive playground, transliteration sandbox, and tokenization tools for Amharic language processing.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 import { ModeProvider } from "@/components/mode-context";

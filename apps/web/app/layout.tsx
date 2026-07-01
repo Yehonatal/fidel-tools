@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Fidel Tools — Developer Dashboard",
   description:
     "API key telemetry, usage logs, and developer infrastructure for the premier Amharic NLP toolkit.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
