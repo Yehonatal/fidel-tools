@@ -8,6 +8,7 @@ import { weighTerms } from "./term_weighter.js";
 import type { DocIndexData, QueryIndexData } from "./indexer.js";
 import { normalize } from "./normalizer.js";
 import { sentenceTokenize } from "./sentence_tokenizer.js";
+import * as coreNativeModule from "@fidel-tools/core-native";
 
 type CoreNativeModule = {
     initNormalizer: () => void;
@@ -20,22 +21,16 @@ type CoreNativeModule = {
     };
 };
 
-// Dynamically load native module in Node environment without triggering bundler errors in browser
-let coreNative: CoreNativeModule | null = null;
+const coreNative = coreNativeModule as unknown as CoreNativeModule;
 let wasmSupported = false;
 
-if (typeof (globalThis as any).window === "undefined") {
-    try {
-        const { createRequire } = await import(/* webpackIgnore: true */ "node:module");
-        const require = createRequire(import.meta.url);
-        coreNative = require("@fidel-tools/core-native") as CoreNativeModule;
-        if (coreNative) {
-            coreNative.initNormalizer();
-            wasmSupported = true;
-        }
-    } catch {
-        // Silently fallback to JS implementation
+try {
+    if (coreNative && typeof coreNative.initNormalizer === "function") {
+        coreNative.initNormalizer();
+        wasmSupported = true;
     }
+} catch {
+    // Silently fallback to JS implementation
 }
 
 export class Pipeline {
