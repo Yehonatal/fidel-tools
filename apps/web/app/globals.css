@@ -300,3 +300,12 @@ html, body, * {
   border-color: #e4e4e7;
   color: #18181b;
 }
+
+/* ── Prevent transition/animation lag during theme toggle ── */
+.no-transitions,
+.no-transitions *,
+.no-transitions *::before,
+.no-transitions *::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+}

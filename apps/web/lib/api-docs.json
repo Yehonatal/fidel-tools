@@ -1,0 +1,412 @@
+{
+  "info": {
+    "title": "ፊደል (Fidel) Tools API Reference",
+    "description": "ፊደል (Fidel) Tools is a developer-first suite of high-performance natural language processing APIs built specifically for Ethiopic languages. This reference provides interactive documentation for our production-grade NLP preprocessing endpoints.",
+    "baseUrl": "https://api.fidel.tools"
+  },
+  "endpoints": [
+    {
+      "id": "languages",
+      "name": "Get Supported Languages",
+      "method": "GET",
+      "path": "/api/v1/nlp/languages",
+      "category": "General",
+      "description": "Returns a list of supported language codes (e.g. 'am' for Amharic) and the default language pack configuration.",
+      "auth": true,
+      "requestBody": {},
+      "responses": {
+        "200": {
+          "description": "Supported languages retrieved successfully",
+          "example": {
+            "supported": ["am"],
+            "default": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "pipeline",
+      "name": "Execute Pipeline Steps",
+      "method": "POST",
+      "path": "/api/v1/nlp/pipeline",
+      "category": "Core NLP",
+      "description": "Runs a configurable sequence of NLP preprocessing operations (normalization, tokenization, stopword removal, and morphological stemming) on input text in a single request.",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Input text to process",
+          "example": "ልጆች በኢትዮጵያ"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code of the input text",
+          "example": "am"
+        },
+        "steps": {
+          "type": "string[]",
+          "required": false,
+          "description": "List of pipeline steps to run ('normalize', 'tokenize', 'stopwords', 'stem')",
+          "example": ["normalize", "tokenize", "stopwords", "stem"]
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Pipeline executed successfully",
+          "example": {
+            "input": "ልጆች በኢትዮጵያ",
+            "lang": "am",
+            "normalized": "ልጆች በኢትዮጵያ",
+            "sentences": ["ልጆች በኢትዮጵያ"],
+            "tokens": ["ልጆች", "በኢትዮጵያ"],
+            "stopwordsRemoved": "ልጆች ኢትዮጵያ",
+            "stems": ["ልጅ", "ኢትዮጵያ"]
+          }
+        }
+      }
+    },
+    {
+      "id": "normalize",
+      "name": "Normalize Ethiopic Text",
+      "method": "POST",
+      "path": "/api/v1/nlp/normalize",
+      "category": "Core NLP",
+      "description": "Standardizes Ethiopic characters, maps variant symbols to canonical characters (homophone harmonization), and cleans text formatting.",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Input text to normalize",
+          "example": "ሃይማኖት"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code of the input text",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Text normalized successfully",
+          "example": {
+            "input": "ሃይማኖት",
+            "normalized": "ሃይማኖት",
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "tokenize",
+      "name": "Tokenize Sentences & Words",
+      "method": "POST",
+      "path": "/api/v1/nlp/tokenize",
+      "category": "Core NLP",
+      "description": "Segments an input corpus into individual sentences and splits sentences into arrays of tokens (words).",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Input text to tokenize",
+          "example": "ፊደል ቱልስ። በጣም ጥሩ ነው።"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Text tokenized successfully",
+          "example": {
+            "input": "ፊደል ቱልስ። በጣም ጥሩ ነው።",
+            "sentences": ["ፊደል ቱልስ።", "በጣም ጥሩ ነው።"],
+            "words": ["ፊደል", "ቱልስ።", "በጣም", "ጥሩ", "ነው።"],
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "remove-stopwords",
+      "name": "Remove Stopwords",
+      "method": "POST",
+      "path": "/api/v1/nlp/remove-stopwords",
+      "category": "Core NLP",
+      "description": "Filters out common functional words (prepositions, conjunctions, pronouns) from the input text to isolate semantically meaningful terms.",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Input text to filter",
+          "example": "ይህ ልጅ በጣም ጎበዝ ነው"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Stopwords removed successfully",
+          "example": {
+            "input": "ይህ ልጅ በጣም ጎበዝ ነው",
+            "result": "ልጅ በጣም ጎበዝ",
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "stem",
+      "name": "Morphological Stemmer",
+      "method": "POST",
+      "path": "/api/v1/nlp/stem",
+      "category": "Core NLP",
+      "description": "Extracts grammatical root stems from a single word or an array of words by strips prefixes, infixes, and suffixes based on linguistic patterns.",
+      "auth": true,
+      "requestBody": {
+        "word": {
+          "type": "string",
+          "required": false,
+          "description": "Single word to stem",
+          "example": "ልጆቻቸውን"
+        },
+        "words": {
+          "type": "string[]",
+          "required": false,
+          "description": "Array of multiple words to stem",
+          "example": ["ወንበሮች", "ቤቶች"]
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Stemming completed successfully",
+          "example": {
+            "input": "ልጆቻቸውን",
+            "stem": "ልጅ",
+            "stems": [
+              { "word": "ወንበሮች", "stem": "ወንበር" },
+              { "word": "ቤቶች", "stem": "ቤት" }
+            ],
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "transliterate",
+      "name": "Transliterate Ethiopic Text",
+      "method": "POST",
+      "path": "/api/v1/nlp/transliterate",
+      "category": "Core NLP",
+      "description": "Transliterates text between the Ge'ez script and the Latin alphabet using Felig or SERA rules.",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Text content to transliterate",
+          "example": "ኢትዮጵያ"
+        },
+        "direction": {
+          "type": "string",
+          "required": false,
+          "description": "Target script direction ('am' for Ge'ez, 'en' for Latin)",
+          "example": "am"
+        },
+        "type": {
+          "type": "string",
+          "required": false,
+          "description": "Transliteration system ('felig' or 'sera')",
+          "example": "felig"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Text transliterated successfully",
+          "example": {
+            "input": "ኢትዮጵያ",
+            "direction": "am",
+            "type": "felig",
+            "result": "ityop'ya",
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "lexical-analyze",
+      "name": "Lexical Expansion & Analysis",
+      "method": "POST",
+      "path": "/api/v1/nlp/lexical-analyze",
+      "category": "Core NLP",
+      "description": "Expands abbreviations (e.g. 'ት/ቤት' to 'ትምህርት ቤት'), splits hyphenated compound terms, and strips out non-word punctuation or number markings.",
+      "auth": true,
+      "requestBody": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Text to analyze",
+          "example": "ት/ቤት ሄደ"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Text lexically analyzed successfully",
+          "example": {
+            "input": "ት/ቤት ሄደ",
+            "result": "ትምህርት ቤት ሄደ",
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "index-documents",
+      "name": "Index Document Corpus",
+      "method": "POST",
+      "path": "/api/v1/nlp/index-documents",
+      "category": "Search & Indexing",
+      "description": "Preprocesses and constructs an inverted search index representation of a list of document IDs and text contents, suitable for search queries.",
+      "auth": true,
+      "requestBody": {
+        "docs": {
+          "type": "object[]",
+          "required": true,
+          "description": "List of document objects containing 'id' (string) and 'content' (string)",
+          "example": [
+            { "id": "doc1", "content": "ልጆች በኢትዮጵያ" }
+          ]
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Documents indexed successfully",
+          "example": {
+            "index": {
+              "corpus_size": 1,
+              "corpus_word_count": { "doc1": 2 },
+              "words": {
+                "ልጅ": [{ "doc1": 1 }],
+                "ኢትዮጵያ": [{ "doc1": 1 }]
+              }
+            },
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "index-query",
+      "name": "Index Search Query",
+      "method": "POST",
+      "path": "/api/v1/nlp/index-query",
+      "category": "Search & Indexing",
+      "description": "Preprocesses and indexes a raw user query string, returning a matching vector representation of its stems.",
+      "auth": true,
+      "requestBody": {
+        "query": {
+          "type": "string",
+          "required": true,
+          "description": "Search query string to index",
+          "example": "ልጆች"
+        },
+        "lang": {
+          "type": "string",
+          "required": false,
+          "description": "Language code",
+          "example": "am"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Query indexed successfully",
+          "example": {
+            "index": {
+              "corpus_size": 1,
+              "corpus_word_count": 1,
+              "words": { "ልጅ": 1 }
+            },
+            "lang": "am"
+          }
+        }
+      }
+    },
+    {
+      "id": "weigh-terms",
+      "name": "Weigh Terms (TF-IDF)",
+      "method": "POST",
+      "path": "/api/v1/nlp/weigh-terms",
+      "category": "Search & Indexing",
+      "description": "Calculates normalized TF-IDF weight scores for an index payload representing either document collections or search queries.",
+      "auth": true,
+      "requestBody": {
+        "index": {
+          "type": "object",
+          "required": true,
+          "description": "Index object returned from document indexer or query indexer",
+          "example": {
+            "corpus_size": 1,
+            "corpus_word_count": { "doc1": 2 },
+            "words": {
+              "ልጅ": [{ "doc1": 1 }],
+              "ኢትዮጵያ": [{ "doc1": 1 }]
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "description": "Type of weight calculation ('doc' or 'query')",
+          "example": "doc"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "TF-IDF weights calculated successfully",
+          "example": {
+            "weights": {
+              "ልጅ": [{ "doc1": 0.5 }],
+              "ኢትዮጵያ": [{ "doc1": 0.5 }]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import type { MiddlewareHandler } from "hono";
 import { pool } from "../db.js";
+import crypto from "crypto";
 
 export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
   let apiKey = c.req.header("x-api-key");
@@ -23,7 +24,11 @@ export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
   }
 
   try {
-    const result = await pool.query("SELECT key, owner FROM api_keys WHERE key = $1", [apiKey]);
+    const hash = crypto.createHash("sha256").update(apiKey).digest("hex");
+    const result = await pool.query(
+      "SELECT id, user_id, name FROM api_keys WHERE key_hash = $1 AND status = 'active'",
+      [hash],
+    );
 
     if (result.rowCount === 0) {
       return c.json(
@@ -36,7 +41,7 @@ export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
     }
 
     // Store developer info in execution context for routing handlers
-    c.set("apiKeyOwner", result.rows[0].owner);
+    c.set("apiKeyOwner", result.rows[0].user_id);
     c.set("apiKey", apiKey);
   } catch (err: any) {
     console.error("Authentication DB query failed:", err);

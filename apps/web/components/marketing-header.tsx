@@ -39,8 +39,7 @@ export default function MarketingHeader() {
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-6">
               <Link
-                href="https://fidel-tools.vercel.app/docs"
-                target="_blank"
+                href="/docs"
                 className="text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
               >
                 Docs
@@ -176,8 +175,7 @@ export default function MarketingHeader() {
 
           <div className="relative z-10 flex flex-col gap-6 text-lg font-bold">
             <Link
-              href="https://fidel-tools.vercel.app/docs"
-              target="_blank"
+              href="/docs"
               onClick={() => setMobileMenuOpen(false)}
               className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
             >

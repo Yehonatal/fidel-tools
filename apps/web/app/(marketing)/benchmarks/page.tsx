@@ -236,18 +236,24 @@ export default function BenchmarksPage() {
 
     // Calculate scaling factor based on text length to match host benchmarks
     const len = inputText.length;
-    let pyFactor = 9.3; // Default for medium
-    if (len < 30) {
-      pyFactor = 3.2; // Short text overhead
-    } else if (len > 800) {
-      pyFactor = 10.1; // Large text overhead
+    let pyRatio = 1.25; // Default for medium (Python is ~1.25x faster than WASM)
+    if (len < 15) {
+      pyRatio = 1.11; // Short text (Python is ~1.11x faster than WASM)
+    } else if (len > 2000) {
+      pyRatio = 1.09; // Large text (Python is ~1.09x faster than WASM)
     } else {
-      // Linear interpolation between short and medium/large
-      const t = (len - 30) / 770;
-      pyFactor = 3.2 + t * (10.1 - 3.2);
+      // Linear interpolation between short (15 chars, 1.11) and medium (200 chars, 1.25)
+      // or medium (200 chars, 1.25) and large (2000 chars, 1.09)
+      if (len < 200) {
+        const t = (len - 15) / 185;
+        pyRatio = 1.11 + t * (1.25 - 1.11);
+      } else {
+        const t = (len - 200) / 1800;
+        pyRatio = 1.25 - t * (1.09 - 1.25);
+      }
     }
 
-    const pyTime = wasmTime * pyFactor;
+    const pyTime = wasmTime / pyRatio;
 
     setJsResult({
       time: (jsTime / runs) * 1000,
@@ -357,11 +363,11 @@ export default function BenchmarksPage() {
                       <span className="text-zinc-600 select-none">{">"}</span>
                       <span
                         className={
-                          log.startsWith("[JS]")
+                          log?.startsWith("[JS]")
                             ? "text-blue-400"
-                            : log.startsWith("[WASM]")
+                            : log?.startsWith("[WASM]")
                               ? "text-emerald-400"
-                              : log.startsWith("[PY]")
+                              : log?.startsWith("[PY]")
                                 ? "text-amber-400"
                                 : "text-slate-350"
                         }
@@ -681,7 +687,7 @@ const InteractiveBenchmarkDashboard = () => {
 };
 
 const ProcessingFlow = () => (
-  <div className="w-full border border-slate-205 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/10 transition-all duration-300">
+  <div className="w-full border border-slate-200 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300">
     <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-zinc-900 pb-4">
       <Cpu className="w-5 h-5 text-blue-500" />
       <div>
@@ -891,7 +897,7 @@ const CIHostBenchmarkTable = () => {
 };
 
 const CorpusDetail = () => (
-  <div className="border border-slate-205 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/10 transition-all duration-300">
+  <div className="border border-slate-200 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300">
     <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-zinc-900 pb-4">
       <Scale className="w-5 h-5 text-blue-500" />
       <div>
@@ -1107,7 +1113,7 @@ const CorpusDetail = () => (
 );
 
 const LinguisticAnalysis = () => (
-  <div className="border border-slate-205 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-5 hover:border-blue-500/10 transition-all duration-300">
+  <div className="border border-slate-200 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-5 hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300">
     <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-zinc-900 pb-4">
       <Info className="w-5 h-5 text-blue-500" />
       <div>
@@ -1165,7 +1171,7 @@ const LinguisticAnalysis = () => (
 );
 
 const QualityTargetsTable = () => (
-  <div className="border border-slate-205 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/10 transition-all duration-300">
+  <div className="border border-slate-200 dark:border-zinc-900 bg-white/70 dark:bg-[#070709]/70 backdrop-blur-md rounded-xl p-6 shadow-2xl space-y-6 hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300">
     <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-zinc-900 pb-4">
       <Scale className="w-5 h-5 text-blue-500" />
       <div>

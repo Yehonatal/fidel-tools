@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
 
+
   // Allow server-only packages in API routes
   serverExternalPackages: ["nodemailer"],
 

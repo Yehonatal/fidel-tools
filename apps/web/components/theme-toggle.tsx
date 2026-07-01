@@ -32,6 +32,8 @@ export default function ThemeToggle() {
     localStorage.setItem("fidel-theme", nextTheme);
 
     const root = document.documentElement;
+    root.classList.add("no-transitions");
+
     if (nextTheme === "dark") {
       root.classList.add("dark");
       document.body.classList.add("dark");
@@ -43,6 +45,14 @@ export default function ThemeToggle() {
       document.body.style.backgroundColor = "#fafafa";
       document.body.style.color = "#09090b";
     }
+
+    // Force reflow to flush styles, then remove the no-transitions class
+    // in the next paint cycle to avoid transition lag.
+    window.requestAnimationFrame(() => {
+      setTimeout(() => {
+        root.classList.remove("no-transitions");
+      }, 20);
+    });
 
     // Dispatch custom event to notify all other toggles
     window.dispatchEvent(new Event("fidel-theme-changed"));

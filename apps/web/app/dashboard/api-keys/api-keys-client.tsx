@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Copy,
   Check,
@@ -586,15 +587,13 @@ print(response.json())`;
           </div>
 
           <div className="pt-2 border-t border-slate-200/50 dark:border-zinc-900">
-            <a
-              href="https://fidel-tools.vercel.app/docs"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/docs"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-zinc-300 hover:underline cursor-pointer"
             >
               <span>Explore API Reference Docs</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>

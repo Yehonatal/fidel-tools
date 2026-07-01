@@ -1,4 +1,5 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { Hono } from "hono";
+import { z } from "zod";
 import { getPack, getPipeline, SUPPORTED_LANGS } from "../lang-registry.js";
 import { authenticateApiKey } from "../middleware/auth.js";
 import { apiRateLimiter } from "../middleware/rateLimiter.js";
@@ -8,37 +9,84 @@ import {
   stem,
   removeStopwords,
   felig_transliterate,
+  lexAnalyze,
+  indexDocuments,
+  indexQuery,
+  weighTerms,
 } from "@fidel-tools/core";
 
-const nlpRouter = new OpenAPIHono();
+const nlpRouter = new Hono();
 
 // Apply auth and rate limiting to all NLP endpoints
 nlpRouter.use("*", authenticateApiKey);
 nlpRouter.use("*", apiRateLimiter);
 
-// 1. Get supported languages metadata
-const languagesRoute = createRoute({
-  method: "get",
-  path: "/languages",
-  tags: ["NLP Tools"],
-  summary: "Get supported languages",
-  description: "Returns a list of supported language codes and the default language pack.",
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            supported: z.array(z.string()).openapi({ example: ["am"] }),
-            default: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Supported languages retrieved successfully",
-    },
-  },
+// Schemas
+const commonSchema = z.object({
+  text: z.string().min(1),
+  lang: z.string().optional().default("am"),
 });
 
-nlpRouter.openapi(languagesRoute, (c) => {
+const pipelineSchema = z.object({
+  text: z.string().min(1),
+  lang: z.string().optional().default("am"),
+  steps: z
+    .array(z.enum(["normalize", "tokenize", "stopwords", "stem"]))
+    .optional()
+    .default(["normalize", "tokenize", "stopwords", "stem"]),
+});
+
+const stemSchema = z.object({
+  word: z.string().optional(),
+  words: z.array(z.string()).optional(),
+  lang: z.string().optional().default("am"),
+});
+
+const transliterateSchema = z.object({
+  text: z.string().min(1),
+  direction: z.enum(["am", "en"]).optional().default("am"),
+  type: z.enum(["felig", "sera"]).optional().default("felig"),
+  lang: z.string().optional().default("am"),
+});
+
+const indexDocumentsSchema = z.object({
+  docs: z
+    .array(
+      z.object({
+        id: z.string(),
+        content: z.string(),
+      })
+    )
+    .min(1),
+  lang: z.string().optional().default("am"),
+});
+
+const indexQuerySchema = z.object({
+  query: z.string().min(1),
+  lang: z.string().optional().default("am"),
+});
+
+const weighTermsSchema = z.object({
+  index: z.any(),
+  type: z.enum(["doc", "query"]),
+});
+
+// Helper for parsing JSON body and validating
+async function parseAndValidate<T>(c: any, schema: z.Schema<T>): Promise<T | null> {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const parse = schema.safeParse(body);
+    if (!parse.success) {
+      return null;
+    }
+    return parse.data;
+  } catch {
+    return null;
+  }
+}
+
+// 1. Get supported languages metadata
+nlpRouter.get("/languages", (c) => {
   return c.json(
     {
       supported: SUPPORTED_LANGS,
@@ -49,93 +97,14 @@ nlpRouter.openapi(languagesRoute, (c) => {
 });
 
 // 2. Custom execution Pipeline
-const pipelineRoute = createRoute({
-  method: "post",
-  path: "/pipeline",
-  tags: ["NLP Tools"],
-  summary: "Execute NLP pipeline steps",
-  description: "Runs configurable NLP steps (normalize, tokenize, stopwords, stem) on input text.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            text: z
-              .string()
-              .min(1)
-              .openapi({ description: "Input text to process", example: "ልጆች በኢትዮጵያ" }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-            steps: z
-              .array(z.enum(["normalize", "tokenize", "stopwords", "stem"]))
-              .optional()
-              .default(["normalize", "tokenize", "stopwords", "stem"])
-              .openapi({ description: "Pipeline steps to execute" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().openapi({ example: "ልጆች በኢትዮጵያ" }),
-            lang: z.string().openapi({ example: "am" }),
-            normalized: z.string().optional().openapi({ example: "ልጆች በኢትዮጵያ" }),
-            sentences: z
-              .array(z.string())
-              .optional()
-              .openapi({ example: ["ልጆች በኢትዮጵያ"] }),
-            tokens: z
-              .array(z.string())
-              .optional()
-              .openapi({ example: ["ልጆች", "በኢትዮጵያ"] }),
-            stopwordsRemoved: z.string().optional().openapi({ example: "ልጆች ኢትዮጵያ" }),
-            stems: z
-              .array(z.string())
-              .optional()
-              .openapi({ example: ["ልጅ", "ኢትዮጵያ"] }),
-          }),
-        },
-      },
-      description: "Pipeline steps executed successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/pipeline", async (c) => {
+  const data = await parseAndValidate(c, pipelineSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(pipelineRoute, async (c) => {
   try {
-    const {
-      text,
-      lang = "am",
-      steps = ["normalize", "tokenize", "stopwords", "stem"],
-    } = c.req.valid("json");
-
+    const { text, lang, steps } = data;
     const pack = await getPack(lang);
     const result: {
       input: string;
@@ -172,71 +141,14 @@ nlpRouter.openapi(pipelineRoute, async (c) => {
 });
 
 // 3. Normalizer
-const normalizeRoute = createRoute({
-  method: "post",
-  path: "/normalize",
-  tags: ["NLP Tools"],
-  summary: "Normalize Ethiopic text",
-  description:
-    "Standardizes Ethiopic characters, maps variants to standard characters, and cleans text.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            text: z
-              .string()
-              .min(1)
-              .openapi({ description: "Input text to normalize", example: "ሃይማኖት" }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().openapi({ example: "ሃይማኖት" }),
-            normalized: z.string().openapi({ example: "ሃይማኖት" }),
-            lang: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Text normalized successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/normalize", async (c) => {
+  const data = await parseAndValidate(c, commonSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(normalizeRoute, async (c) => {
   try {
-    const { text, lang = "am" } = c.req.valid("json");
+    const { text, lang } = data;
     const pack = await getPack(lang);
     const result = normalize(text, pack);
     return c.json({ input: text, normalized: result, lang }, 200);
@@ -246,71 +158,14 @@ nlpRouter.openapi(normalizeRoute, async (c) => {
 });
 
 // 4. Tokenizer
-const tokenizeRoute = createRoute({
-  method: "post",
-  path: "/tokenize",
-  tags: ["NLP Tools"],
-  summary: "Tokenize text into sentences/words",
-  description: "Segments the input corpus into sentences and lists of words.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            text: z
-              .string()
-              .min(1)
-              .openapi({ description: "Input text to tokenize", example: "ፊደል ቱልስ። በጣም ጥሩ ነው።" }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().openapi({ example: "ፊደል ቱልስ። በጣም ጥሩ ነው።" }),
-            sentences: z.array(z.string()).openapi({ example: ["ፊደል ቱልስ።", "በጣም ጥሩ ነው።"] }),
-            words: z.array(z.string()).openapi({ example: ["ፊደል", "ቱልስ።", "በጣም", "ጥሩ", "ነው።"] }),
-            lang: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Text tokenized successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/tokenize", async (c) => {
+  const data = await parseAndValidate(c, commonSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(tokenizeRoute, async (c) => {
   try {
-    const { text, lang = "am" } = c.req.valid("json");
+    const { text, lang } = data;
     const pack = await getPack(lang);
     const sentences = sentenceTokenize(text, pack);
     const words = text.split(/\s+/).filter(Boolean);
@@ -321,71 +176,14 @@ nlpRouter.openapi(tokenizeRoute, async (c) => {
 });
 
 // 5. Remove Stopwords
-const removeStopwordsRoute = createRoute({
-  method: "post",
-  path: "/remove-stopwords",
-  tags: ["NLP Tools"],
-  summary: "Remove stop words from text",
-  description:
-    "Strips out common functional words (such as prepositions and conjunctions) based on the language pack rules.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            text: z
-              .string()
-              .min(1)
-              .openapi({ description: "Input text", example: "ይህ ልጅ በጣም ጎበዝ ነው" }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().openapi({ example: "ይህ ልጅ በጣም ጎበዝ ነው" }),
-            result: z.string().openapi({ example: "ልጅ በጣም ጎበዝ" }),
-            lang: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Stopwords removed successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/remove-stopwords", async (c) => {
+  const data = await parseAndValidate(c, commonSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(removeStopwordsRoute, async (c) => {
   try {
-    const { text, lang = "am" } = c.req.valid("json");
+    const { text, lang } = data;
     const pack = await getPack(lang);
     const result = removeStopwords(text, pack);
     return c.json({ input: text, result, lang }, 200);
@@ -395,89 +193,14 @@ nlpRouter.openapi(removeStopwordsRoute, async (c) => {
 });
 
 // 6. Morphological Stemmer
-const stemRoute = createRoute({
-  method: "post",
-  path: "/stem",
-  tags: ["NLP Tools"],
-  summary: "Stem Amharic words",
-  description:
-    "Extracts root stems from an individual word or a list of words using affix-removal algorithms.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            word: z
-              .string()
-              .optional()
-              .openapi({ description: "Single word to stem", example: "ልጆቻቸውን" }),
-            words: z
-              .array(z.string())
-              .optional()
-              .openapi({ description: "List of words to stem", example: ["ወንበሮች", "ቤቶች"] }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().optional().openapi({ example: "ልጆቻቸውን" }),
-            stem: z.string().optional().openapi({ example: "ልጅ" }),
-            stems: z
-              .array(
-                z.object({
-                  word: z.string().openapi({ example: "ልጆቻቸውን" }),
-                  stem: z.string().nullable().openapi({ example: "ልጅ" }),
-                }),
-              )
-              .optional()
-              .openapi({
-                example: [
-                  { word: "ወንበሮች", stem: "ወንበር" },
-                  { word: "ቤቶች", stem: "ቤት" },
-                ],
-              }),
-            lang: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Stemming completed successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/stem", async (c) => {
+  const data = await parseAndValidate(c, stemSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(stemRoute, async (c) => {
   try {
-    const { word, words, lang = "am" } = c.req.valid("json");
+    const { word, words, lang } = data;
     const pack = await getPack(lang);
 
     if (word && typeof word === "string") {
@@ -497,82 +220,14 @@ nlpRouter.openapi(stemRoute, async (c) => {
 });
 
 // 7. Transliteration (Felig / SERA)
-const transliterateRoute = createRoute({
-  method: "post",
-  path: "/transliterate",
-  tags: ["NLP Tools"],
-  summary: "Transliterate Ethiopic text",
-  description:
-    "Converts text between Amharic (Ge'ez) and English characters using Felig or SERA transliteration systems.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            text: z
-              .string()
-              .min(1)
-              .openapi({ description: "Text to transliterate", example: "ኢትዮጵያ" }),
-            direction: z.enum(["am", "en"]).optional().default("am").openapi({
-              description:
-                "Target alphabet direction ('am' for Ge'ez output, 'en' for English Latin output)",
-            }),
-            type: z
-              .enum(["felig", "sera"])
-              .optional()
-              .default("felig")
-              .openapi({ description: "Transliteration system/engine engine to use" }),
-            lang: z
-              .string()
-              .optional()
-              .default("am")
-              .openapi({ description: "Language code", example: "am" }),
-          }),
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            input: z.string().openapi({ example: "ኢትዮጵያ" }),
-            direction: z.string().openapi({ example: "am" }),
-            type: z.string().openapi({ example: "felig" }),
-            result: z.string().openapi({ example: "ityop'ya" }),
-            lang: z.string().openapi({ example: "am" }),
-          }),
-        },
-      },
-      description: "Text transliterated successfully",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Invalid request parameters" }),
-          }),
-        },
-      },
-      description: "Invalid input parameters",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            error: z.string().openapi({ example: "Internal server error occurred" }),
-          }),
-        },
-      },
-      description: "Internal server error",
-    },
-  },
-});
+nlpRouter.post("/transliterate", async (c) => {
+  const data = await parseAndValidate(c, transliterateSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
 
-nlpRouter.openapi(transliterateRoute, async (c) => {
   try {
-    const { text, direction = "am", type = "felig", lang = "am" } = c.req.valid("json");
+    const { text, direction, type, lang } = data;
     const pack = await getPack(lang);
     const result = felig_transliterate(text, direction === "en" ? "en" : "am", pack);
 
@@ -586,6 +241,73 @@ nlpRouter.openapi(transliterateRoute, async (c) => {
       },
       200,
     );
+  } catch (err: any) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+// 8. Lexical Analyzer
+nlpRouter.post("/lexical-analyze", async (c) => {
+  const data = await parseAndValidate(c, commonSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
+
+  try {
+    const { text, lang } = data;
+    const pack = await getPack(lang);
+    const result = lexAnalyze(text, pack);
+    return c.json({ input: text, result, lang }, 200);
+  } catch (err: any) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+// 9. Document Indexer
+nlpRouter.post("/index-documents", async (c) => {
+  const data = await parseAndValidate(c, indexDocumentsSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
+
+  try {
+    const { docs, lang } = data;
+    const pack = await getPack(lang);
+    const index = indexDocuments(docs, pack);
+    return c.json({ index, lang }, 200);
+  } catch (err: any) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+// 10. Query Indexer
+nlpRouter.post("/index-query", async (c) => {
+  const data = await parseAndValidate(c, indexQuerySchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
+
+  try {
+    const { query, lang } = data;
+    const pack = await getPack(lang);
+    const index = indexQuery(query, pack);
+    return c.json({ index, lang }, 200);
+  } catch (err: any) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+// 11. Term Weighter
+nlpRouter.post("/weigh-terms", async (c) => {
+  const data = await parseAndValidate(c, weighTermsSchema);
+  if (!data) {
+    return c.json({ error: "Invalid request parameters" }, 400);
+  }
+
+  try {
+    const { index, type } = data;
+    const weights = weighTerms(index, type);
+    return c.json({ weights }, 200);
   } catch (err: any) {
     return c.json({ error: err.message }, 400);
   }

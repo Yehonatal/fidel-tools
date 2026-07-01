@@ -74,9 +74,8 @@ const navCategories: NavCategory[] = [
     items: [
       {
         label: "Documentation",
-        href: "https://fidel-tools.vercel.app/docs",
+        href: "/docs",
         icon: <BookOpen className="w-4 h-4" />,
-        external: true,
       },
       {
         label: "Monorepo SDKs",

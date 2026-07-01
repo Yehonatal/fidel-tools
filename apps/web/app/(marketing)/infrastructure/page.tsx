@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Command, ArrowRight } from "lucide-react";
+import UnderConstructionOverlay from "@/components/under-construction-overlay";
 
 export default function InfrastructurePage() {
   const [activePlan, setActivePlan] = useState<"starter" | "pro" | "enterprise">("pro");
@@ -80,14 +81,19 @@ export default function InfrastructurePage() {
   ];
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow space-y-16 transition-colors duration-300">
+    <main className="relative w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow space-y-16 transition-colors duration-300">
+      <UnderConstructionOverlay
+        title="Managed API Infrastructure"
+        description="We are currently provisioning our high-performance clusters and global edge caches. This feature will be live soon."
+        badge="PROVISIONING INFRASTRUCTURE"
+      />
       {/* ── Top Pricing Hero & Selector Flow ──────────────────────── */}
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
         {/* Left Column Description */}
         <div className="lg:w-[35%] flex flex-col justify-between py-1 space-y-6 lg:space-y-0">
           <div className="space-y-4">
             <span className="text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest block">
-              02 / MANAGED INFRASTRUCTURE
+              03 / MANAGED INFRASTRUCTURE
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-none font-sans">
               Managed API Infrastructure

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import pg from "pg";
+import crypto from "crypto";
 const { Pool } = pg;
 
 const connectionString = process.env.DATABASE_URL;
@@ -27,31 +28,71 @@ export async function initDb() {
   try {
     // Create subscribers table
     await client.query(`
-            CREATE TABLE IF NOT EXISTS subscribers (
-                id SERIAL PRIMARY KEY,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
+      CREATE TABLE IF NOT EXISTS subscribers (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-    // Create api_keys table
+    // Create users table matching Drizzle schema
     await client.query(`
-            CREATE TABLE IF NOT EXISTS api_keys (
-                key VARCHAR(255) PRIMARY KEY,
-                owner VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        email_verified BOOLEAN NOT NULL DEFAULT false,
+        image TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        tier TEXT NOT NULL DEFAULT 'free',
+        monthly_quota INTEGER NOT NULL DEFAULT 10000
+      );
+    `);
+
+    // Create api_key_status enum type if it does not exist
+    await client.query(`
+      DO $$ BEGIN
+        CREATE TYPE api_key_status AS ENUM ('active', 'revoked');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `);
+
+    // Create api_keys table matching Drizzle schema
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        key_hash TEXT UNIQUE NOT NULL,
+        key_prefix TEXT NOT NULL,
+        status api_key_status NOT NULL DEFAULT 'active',
+        last_used_at TIMESTAMP,
+        expires_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    // Seed default developer user
+    await client.query(`
+      INSERT INTO users (id, name, email) 
+      VALUES ('default-developer', 'Default Developer', 'default@fidel.tools') 
+      ON CONFLICT (id) DO NOTHING;
+    `);
 
     // Insert a default API key for development/demo purposes
     const defaultKey = process.env.DEMO_API_KEY || "fidel_dev_key_2026";
-    const checkKey = await client.query("SELECT key FROM api_keys WHERE key = $1", [defaultKey]);
+    const hash = crypto.createHash("sha256").update(defaultKey).digest("hex");
+    const prefix = defaultKey.slice(0, 10);
+
+    const checkKey = await client.query("SELECT id FROM api_keys WHERE key_hash = $1", [hash]);
     if (checkKey.rowCount === 0) {
-      await client.query("INSERT INTO api_keys (key, owner) VALUES ($1, $2)", [
-        defaultKey,
-        "default-developer",
-      ]);
-      console.log(`Default API key generated: ${defaultKey}`);
+      await client.query(
+        "INSERT INTO api_keys (user_id, name, key_hash, key_prefix) VALUES ($1, $2, $3, $4)",
+        ["default-developer", "Default Developer Key", hash, prefix],
+      );
+      console.log(`Default API key generated and registered: ${defaultKey}`);
     }
 
     console.log("Database tables initialized successfully.");

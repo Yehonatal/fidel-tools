@@ -51,7 +51,7 @@ export default function HomePage() {
 
   const getCardClass = (ops: number) => {
     const isFastest = ops === maxOps;
-    return `border p-6 rounded-xl relative overflow-hidden bg-white dark:bg-[#070709] space-y-4 transition-all duration-300 ${
+    return `border p-6 rounded-xl relative overflow-hidden bg-white dark:bg-[#070709] space-y-4 transition-all duration-300 hover:border-blue-500/20 dark:hover:border-blue-500/10 ${
       isFastest
         ? "shadow-lg shadow-emerald-500/5 dark:shadow-emerald-500/2 border-emerald-500/30"
         : "border-slate-200 dark:border-zinc-900"
@@ -272,7 +272,7 @@ export default function HomePage() {
           ].map((feat, i) => (
             <div
               key={i}
-              className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/10 transition-colors flex flex-col justify-between"
+              className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300 flex flex-col justify-between"
               data-aos="fade-up"
               data-aos-delay={i * 100}
             >
@@ -330,7 +330,7 @@ export default function HomePage() {
           </div>
 
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] space-y-3">
+            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300 space-y-3">
               <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
                 <Globe className="w-4 h-4" />
               </div>
@@ -345,7 +345,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] space-y-3">
+            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300 space-y-3">
               <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
                 <Layers className="w-4 h-4" />
               </div>
@@ -363,7 +363,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] space-y-3">
+            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300 space-y-3">
               <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
                 <Terminal className="w-4 h-4" />
               </div>
@@ -377,7 +377,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-[#070709] dark:bg-[#070709] space-y-3">
+            <div className="border border-slate-200 dark:border-zinc-900 p-6 rounded-xl bg-white dark:bg-[#070709] hover:border-blue-500/20 dark:hover:border-blue-500/10 transition-all duration-300 space-y-3">
               <div className="w-8 h-8 rounded bg-blue-50/80 dark:bg-zinc-900 flex items-center justify-center text-blue-600 dark:text-zinc-400">
                 <Sparkles className="w-4 h-4" />
               </div>

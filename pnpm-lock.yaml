@@ -38,12 +38,6 @@ importers:
       '@hono/node-server':
         specifier: ^2.0.4
         version: 2.0.4(hono@4.12.25)
-      '@hono/zod-openapi':
-        specifier: ^1.4.0
-        version: 1.4.0(hono@4.12.25)(zod@4.4.3)
-      '@scalar/hono-api-reference':
-        specifier: ^0.11.3
-        version: 0.11.3(hono@4.12.25)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -290,11 +284,6 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
-
-  '@asteasolutions/zod-to-openapi@8.5.0':
-    resolution: {integrity: sha512-SABbKiObg5dLRiTFnqiW1WWwGcg1BJfmHtT2asIBnBHg6Smy/Ms2KHc650+JI4Hw7lSkdiNebEGXpwoxfben8Q==}
-    peerDependencies:
-      zod: ^4.0.0
 
   '@authenio/xml-encryption@2.0.2':
     resolution: {integrity: sha512-cTlrKttbrRHEw3W+0/I609A2Matj5JQaRvfLtEIGZvlN0RaPi+3ANsMeqAyCAVlH/lUIW2tmtBlSMni74lcXeg==}
@@ -1434,19 +1423,6 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@hono/zod-openapi@1.4.0':
-    resolution: {integrity: sha512-AFchqR1N/NxfI4hUOSGI2/g8zLROxA1OE7Oh5JJFlTaGxhrdRyH+93gd0tIBpb0z8s9r8hUoNnaOBfHbdb4NMw==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      hono: '>=4.10.0'
-      zod: ^4.0.0
-
-  '@hono/zod-validator@0.8.0':
-    resolution: {integrity: sha512-5uS4S1/LKtZQYvD4BtpPUFkOv8d1wNxHHrChm26buMiEYc1FrHWvDUaKVBwkiVtvSExHSpLGDvcnpI2Copyj9w==}
-    peerDependencies:
-      hono: '>=4.10.0'
-      zod: ^3.25.0 || ^4.0.0
-
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
     engines: {node: '>=18.18.0'}
@@ -1844,32 +1820,6 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
-
-  '@scalar/client-side-rendering@0.2.3':
-    resolution: {integrity: sha512-AazrKedEZ/JR/ze9UGrWCqpRp9T88QlgBZWVOYC8QAMISz5CGUDZKqpayz2iwGzzZAtKF0VW/Y0sbL7ERTvn6w==}
-    engines: {node: '>=22'}
-
-  '@scalar/helpers@0.8.2':
-    resolution: {integrity: sha512-qNbqUjSB3S4Gr4A0oANcm5G1Ip+EqBxICYKhe9YzmnaBpbmW6shxqpiivApTvvuDf+uIhR3uMwWyVQbYcGLsxA==}
-    engines: {node: '>=22'}
-
-  '@scalar/hono-api-reference@0.11.3':
-    resolution: {integrity: sha512-dgBIOKeQnlXzL2G27sPbvlA7RHfp+BuEiNEZBRihdIaohhWDYaE4uw2OkPzeaMWHov+QYxsdgWc3IMIEVdnusw==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      hono: ^4.12.5
-
-  '@scalar/schemas@0.4.3':
-    resolution: {integrity: sha512-YZ/FcxM5ctZ65m07q5DOOUhuQA5SjZvnoyP6jCCfoiaQ/aVXTDF1vZ1+RMYhKqDwfV/QCW36k0H/38aG/8lNyA==}
-    engines: {node: '>=22'}
-
-  '@scalar/types@0.13.3':
-    resolution: {integrity: sha512-+rtVPVC7UPDGaqvBZY8FjXI5cW2xJtJDVsOGuoevRUBkJb3feSiBkGIZxYy0JkJCl9wVUi/PqGEcut6Nb3RnJw==}
-    engines: {node: '>=22'}
-
-  '@scalar/validation@0.6.0':
-    resolution: {integrity: sha512-tpmmG+/xRE2Kn9RpflU3AIyZv08v10+E1ZrJCx7z6+/91zHVxy0M73kC1LT4/8PbYNt85ywyC8+n+D99JdMcGA==}
-    engines: {node: '>=20'}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
@@ -4382,9 +4332,6 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openapi3-ts@4.6.0:
-    resolution: {integrity: sha512-a4sfn6L2sIShhtzJqmjGrARvxAW/3F2BJDdyRVvNF9VhAsZSh5hSyI3a9TNvmzBxXmq66nY5LNT5bQcBxYAZZg==}
-
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -5018,10 +4965,6 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  tagged-tag@1.0.0:
-    resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
-    engines: {node: '>=20'}
-
   tailwindcss@4.3.1:
     resolution: {integrity: sha512-hk+TB1m+K8CYNrP6rjQaq/Y+4Zylwpa87mLYBKCunwnnQ9p+fHb7kmSfGqyEJoxF/O6CDyABWVFEafNSYKll+Q==}
 
@@ -5100,10 +5043,6 @@ packages:
   type-fest@3.13.1:
     resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
     engines: {node: '>=14.16'}
-
-  type-fest@5.7.0:
-    resolution: {integrity: sha512-1URUxUqfHFM1c+zfSPsa3gnkO7Aq21qyH75SIduNYz4SzY964rn1X2vCMQaHSHhktiw+0kPa2iyb6PUpXqB6Vg==}
-    engines: {node: '>=20'}
 
   typed-array-buffer@1.0.3:
     resolution: {integrity: sha512-nAYYwfY3qnzX30IkA6AQZjVbtK6duGontcQm1WSG1MD94YLqK0515GNApXkoxKOWMusVssAHWLh9SeaoefYFGw==}
@@ -5351,11 +5290,6 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
-
-  '@asteasolutions/zod-to-openapi@8.5.0(zod@4.4.3)':
-    dependencies:
-      openapi3-ts: 4.6.0
-      zod: 4.4.3
 
   '@authenio/xml-encryption@2.0.2':
     dependencies:
@@ -6340,19 +6274,6 @@ snapshots:
     dependencies:
       hono: 4.12.25
 
-  '@hono/zod-openapi@1.4.0(hono@4.12.25)(zod@4.4.3)':
-    dependencies:
-      '@asteasolutions/zod-to-openapi': 8.5.0(zod@4.4.3)
-      '@hono/zod-validator': 0.8.0(hono@4.12.25)(zod@4.4.3)
-      hono: 4.12.25
-      openapi3-ts: 4.6.0
-      zod: 4.4.3
-
-  '@hono/zod-validator@0.8.0(hono@4.12.25)(zod@4.4.3)':
-    dependencies:
-      hono: 4.12.25
-      zod: 4.4.3
-
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -6816,33 +6737,6 @@ snapshots:
       react-promise-suspense: 0.3.4
 
   '@rtsao/scc@1.1.0': {}
-
-  '@scalar/client-side-rendering@0.2.3':
-    dependencies:
-      '@scalar/schemas': 0.4.3
-      '@scalar/types': 0.13.3
-      '@scalar/validation': 0.6.0
-
-  '@scalar/helpers@0.8.2': {}
-
-  '@scalar/hono-api-reference@0.11.3(hono@4.12.25)':
-    dependencies:
-      '@scalar/client-side-rendering': 0.2.3
-      hono: 4.12.25
-
-  '@scalar/schemas@0.4.3':
-    dependencies:
-      '@scalar/helpers': 0.8.2
-      '@scalar/validation': 0.6.0
-
-  '@scalar/types@0.13.3':
-    dependencies:
-      '@scalar/helpers': 0.8.2
-      nanoid: 5.1.11
-      type-fest: 5.7.0
-      zod: 4.4.3
-
-  '@scalar/validation@0.6.0': {}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
@@ -9770,10 +9664,6 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openapi3-ts@4.6.0:
-    dependencies:
-      yaml: 2.9.0
-
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -10487,8 +10377,6 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  tagged-tag@1.0.0: {}
-
   tailwindcss@4.3.1: {}
 
   tapable@2.3.3: {}
@@ -10557,10 +10445,6 @@ snapshots:
   type-fest@0.21.3: {}
 
   type-fest@3.13.1: {}
-
-  type-fest@5.7.0:
-    dependencies:
-      tagged-tag: 1.0.0
 
   typed-array-buffer@1.0.3:
     dependencies:

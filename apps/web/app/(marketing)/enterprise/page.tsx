@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Send, Check } from "lucide-react";
+import UnderConstructionOverlay from "@/components/under-construction-overlay";
 
 export default function EnterprisePage() {
   const [submitted, setSubmitted] = useState(false);
@@ -20,13 +21,18 @@ export default function EnterprisePage() {
   };
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow flex flex-col justify-center transition-colors duration-300 font-sans">
+    <main className="relative w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow flex flex-col justify-center transition-colors duration-300 font-sans">
+      <UnderConstructionOverlay
+        title="Enterprise Support Suite"
+        description="We are preparing custom SLA options, dedicated GPU instances, and 24/7 priority support pipelines. This feature will be live soon."
+        badge="PREPARING ENTERPRISE WORKSPACE"
+      />
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
         {/* Left Column Description */}
         <div className="lg:w-[45%] flex flex-col justify-between py-1 space-y-8 lg:space-y-0">
           <div className="space-y-6">
             <span className="text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest block">
-              03 / ENTERPRISE SUPPORT
+              04 / ENTERPRISE SUPPORT
             </span>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.05] font-sans">
               Scale your Ethiopic NLP pipelines.
