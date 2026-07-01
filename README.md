@@ -16,7 +16,7 @@
 <p align="center">
   <a href="https://github.com/Yehonatal/fidel-tools/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
   <a href="https://www.npmjs.com/package/@fidel-tools/core"><img src="https://img.shields.io/npm/v/@fidel-tools/core.svg" alt="NPM Version" /></a>
-  <a href="https://pypi.org/project/fidel-tools/"><img src="https://img.shields.io/pypi/v/fidel-tools.svg" alt="PyPI Version" /></a>
+  <a href="https://pypi.org/project/fidel-tools/"><img src="https://img.shields.io/pypi/v/fidel-tools" alt="PyPI Version" /></a>
   <a href="https://fidel-tools.vercel.app/"><img src="https://img.shields.io/badge/demo-live-brightgreen.svg" alt="Live Demo" /></a>
   <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/maintained%20with-pnpm-ff69b4.svg" alt="pnpm" /></a>
 </p>

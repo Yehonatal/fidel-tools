@@ -33,7 +33,14 @@ jobs:
 
     - name: Publish to NPM
       run: |
-        pnpm --filter @fidel-tools/core-native publish --no-git-checks
+        cd packages/core-native
+        VERSION=$(node -p "require('./package.json').version")
+        if ! npm info @fidel-tools/core-native@$VERSION >/dev/null 2>&1; then
+          npm publish --access public
+        else
+          echo "@fidel-tools/core-native@$VERSION is already published"
+        fi
+        cd ../..
         pnpm --filter @fidel-tools/core publish --no-git-checks
         pnpm --filter @fidel-tools/lang-am publish --no-git-checks
         pnpm --filter @fidel-tools/validate-pack publish --no-git-checks
