@@ -12,91 +12,91 @@ import { initNormalizer, WasmNormalizer } from "@fidel-tools/core-native";
 
 let wasmSupported = false;
 try {
-    initNormalizer();
-    wasmSupported = true;
+  initNormalizer();
+  wasmSupported = true;
 } catch (e) {
-    // Silently fallback to JS implementation
+  // Silently fallback to JS implementation
 }
 
 export class Pipeline {
-    private wasmNormalizer: WasmNormalizer | null = null;
+  private wasmNormalizer: WasmNormalizer | null = null;
 
-    constructor(private pack: LanguagePack) {
-        if (wasmSupported && pack.normalization) {
-            try {
-                this.wasmNormalizer = new WasmNormalizer(
-                    pack.normalization.char_map || {},
-                    pack.normalization.labialized_map || {},
-                    pack.normalization.gemination_threshold
-                );
-            } catch (e) {
-                this.wasmNormalizer = null;
-            }
-        }
+  constructor(private pack: LanguagePack) {
+    if (wasmSupported && pack.normalization) {
+      try {
+        this.wasmNormalizer = new WasmNormalizer(
+          pack.normalization.char_map || {},
+          pack.normalization.labialized_map || {},
+          pack.normalization.gemination_threshold,
+        );
+      } catch (e) {
+        this.wasmNormalizer = null;
+      }
     }
+  }
 
-    get stopwords(): string[] {
-        return this.pack.stopwords || [];
-    }
+  get stopwords(): string[] {
+    return this.pack.stopwords || [];
+  }
 
-    normalize(text: string): string {
-        if (!text) return "";
-        if (this.wasmNormalizer) {
-            try {
-                return this.wasmNormalizer.normalize(text);
-            } catch (e) {
-                // fallback
-            }
-        }
-        return normalize(text, this.pack);
+  normalize(text: string): string {
+    if (!text) return "";
+    if (this.wasmNormalizer) {
+      try {
+        return this.wasmNormalizer.normalize(text);
+      } catch (e) {
+        // fallback
+      }
     }
+    return normalize(text, this.pack);
+  }
 
-    sentenceTokenize(text: string): string[] {
-        if (!text) return [];
-        return sentenceTokenize(text, this.pack);
-    }
+  sentenceTokenize(text: string): string[] {
+    if (!text) return [];
+    return sentenceTokenize(text, this.pack);
+  }
 
-    stem(word: string): string {
-        if (!word) return "";
-        return stem(word, this.pack);
-    }
+  stem(word: string): string {
+    if (!word) return "";
+    return stem(word, this.pack);
+  }
 
-    removeStopwords(corpus: string): string {
-        if (!corpus) return "";
-        return removeStopwords(corpus, this.pack);
-    }
+  removeStopwords(corpus: string): string {
+    if (!corpus) return "";
+    return removeStopwords(corpus, this.pack);
+  }
 
-    lexAnalyze(corpus: string): string {
-        if (!corpus) return "";
-        return lexAnalyze(corpus, this.pack);
-    }
+  lexAnalyze(corpus: string): string {
+    if (!corpus) return "";
+    return lexAnalyze(corpus, this.pack);
+  }
 
-    feligTransliterate(word: string, lang: "am" | "en"): string {
-        if (!word) return "";
-        return felig_transliterate(word, lang, this.pack);
-    }
+  feligTransliterate(word: string, lang: "am" | "en"): string {
+    if (!word) return "";
+    return felig_transliterate(word, lang, this.pack);
+  }
 
-    // Depreciated : Not used across our toolset (just here so we can fix it later)
-    seraTransliterate(word: string, lang: "am" | "en"): string {
-        if (!word) return "";
-        return sera_transliterate(word, lang, this.pack);
+  // Depreciated : Not used across our toolset (just here so we can fix it later)
+  seraTransliterate(word: string, lang: "am" | "en"): string {
+    if (!word) return "";
+    return sera_transliterate(word, lang, this.pack);
+  }
+  indexDocuments(docs: Array<{ id: string; content: string }>): DocIndexData {
+    if (!docs || docs.length === 0) {
+      return { corpus_size: 0, corpus_word_count: {}, words: {} };
     }
-    indexDocuments(docs: Array<{ id: string; content: string }>): DocIndexData {
-        if (!docs || docs.length === 0) {
-            return { corpus_size: 0, corpus_word_count: {}, words: {} };
-        }
-        return indexDocuments(docs, this.pack);
-    }
+    return indexDocuments(docs, this.pack);
+  }
 
-    indexQuery(query: string): QueryIndexData {
-        if (!query) {
-            return { corpus_size: 0, corpus_word_count: 0, words: {} };
-        }
-        return indexQuery(query, this.pack);
+  indexQuery(query: string): QueryIndexData {
+    if (!query) {
+      return { corpus_size: 0, corpus_word_count: 0, words: {} };
     }
+    return indexQuery(query, this.pack);
+  }
 
-    weighTerms(index: DocIndexData | QueryIndexData, type: "doc" | "query") {
-        if (!index) return null;
-        return weighTerms(index, type);
-    }
+  weighTerms(index: DocIndexData | QueryIndexData, type: "doc" | "query") {
+    if (!index) return null;
+    return weighTerms(index, type);
+  }
 }

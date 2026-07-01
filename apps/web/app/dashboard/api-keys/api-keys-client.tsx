@@ -16,7 +16,7 @@ import {
   Calendar,
   Layers,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 interface ApiKey {
@@ -38,11 +38,7 @@ interface NewKey {
 type LangSnippet = "curl" | "javascript" | "python";
 type EndpointOption = "normalize" | "stem" | "tokenize" | "pipeline";
 
-export default function ApiKeysClient({
-  initialKeys,
-}: {
-  initialKeys: ApiKey[];
-}) {
+export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }) {
   const router = useRouter();
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
   const [showCreate, setShowCreate] = useState(false);
@@ -80,7 +76,7 @@ export default function ApiKeysClient({
 
       const data = await res.json();
       setNewKey(data.key);
-      
+
       const createdKey: ApiKey = {
         id: data.key.id || Math.random().toString(),
         name: data.key.name,
@@ -109,9 +105,7 @@ export default function ApiKeysClient({
     setRevoking(id);
     try {
       await fetch(`/api/keys/${id}`, { method: "DELETE" });
-      setKeys((prev) =>
-        prev.map((k) => (k.id === id ? { ...k, status: "revoked" as const } : k))
-      );
+      setKeys((prev) => prev.map((k) => (k.id === id ? { ...k, status: "revoked" as const } : k)));
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -132,26 +126,31 @@ export default function ApiKeysClient({
   }
 
   const apiKeyValue = newKey ? newKey.raw : "ft_your_api_key_here";
-  const currentOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const currentOrigin =
+    typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
   const apiBaseUrl = `${currentOrigin}/api/v1/nlp`;
 
   const payloads: Record<EndpointOption, { path: string; data: object }> = {
     normalize: {
       path: "/normalize",
-      data: { text: "ሃይማኖት", lang: "am" }
+      data: { text: "ሃይማኖት", lang: "am" },
     },
     stem: {
       path: "/stem",
-      data: { word: "ልጆቻቸውን", lang: "am" }
+      data: { word: "ልጆቻቸውን", lang: "am" },
     },
     tokenize: {
       path: "/tokenize",
-      data: { text: "ፊደል ቱልስ። በጣም ጥሩ ነው።", lang: "am" }
+      data: { text: "ፊደል ቱልስ። በጣም ጥሩ ነው።", lang: "am" },
     },
     pipeline: {
       path: "/pipeline",
-      data: { text: "ልጆች በኢትዮጵያ", steps: ["normalize", "tokenize", "stopwords", "stem"], lang: "am" }
-    }
+      data: {
+        text: "ልጆች በኢትዮጵያ",
+        steps: ["normalize", "tokenize", "stopwords", "stem"],
+        lang: "am",
+      },
+    },
   };
 
   const getCodeSnippet = () => {
@@ -198,10 +197,8 @@ print(response.json())`;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start font-sans">
-      
       {/* ── Left/Center Column (2/3 width) ─────────────────────────── */}
       <div className="lg:col-span-2 space-y-6">
-        
         {/* New Key Reveal Banner */}
         {newKey && (
           <div className="bg-amber-500/5 border border-amber-500/20 text-amber-800 dark:text-amber-300 p-5 rounded-lg animate-slide-in relative overflow-hidden">
@@ -215,7 +212,8 @@ print(response.json())`;
                   New API key generated
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-zinc-500 mt-0.5 font-medium leading-relaxed">
-                  Please copy this key now. For security reasons, you will not be able to see it again.
+                  Please copy this key now. For security reasons, you will not be able to see it
+                  again.
                 </p>
               </div>
             </div>
@@ -228,7 +226,11 @@ print(response.json())`;
                 onClick={() => copyToClipboard(newKey.raw)}
                 className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-900 dark:bg-zinc-900 text-white dark:text-zinc-300 hover:bg-black dark:hover:bg-zinc-800 text-xs font-bold cursor-pointer transition-colors border border-slate-950 dark:border-zinc-800"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
                 <span>{copied ? "Copied" : "Copy"}</span>
               </button>
             </div>
@@ -253,7 +255,7 @@ print(response.json())`;
                 Each key provides access to the Amharic preprocessing pipeline.
               </p>
             </div>
-            
+
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -270,7 +272,7 @@ print(response.json())`;
                     className="w-full px-3 py-2 rounded-lg border border-slate-200/50 dark:border-zinc-800 bg-transparent text-slate-900 dark:text-zinc-50 text-sm placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/10 outline-none transition-all"
                   />
                 </div>
-                
+
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-500 font-mono">
                     Expiration
@@ -314,7 +316,7 @@ print(response.json())`;
         ) : (
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest font-mono">
-              Active Credentials ({keys.filter(k => k.status === "active").length})
+              Active Credentials ({keys.filter((k) => k.status === "active").length})
             </h2>
             <button
               onClick={() => setShowCreate(true)}
@@ -357,14 +359,16 @@ print(response.json())`;
                   {keys.map((key) => {
                     const isRevoked = key.status === "revoked";
                     const isExpired = key.expiresAt ? new Date(key.expiresAt) < new Date() : false;
-                    
+
                     return (
                       <tr
                         key={key.id}
                         className="border-b border-slate-200/30 dark:border-zinc-900/50 last:border-b-0 hover:bg-slate-50/30 dark:hover:bg-zinc-900/5 transition-colors"
                       >
                         <td className="px-6 py-4">
-                          <p className={`text-xs font-bold truncate max-w-[150px] ${isRevoked ? "text-slate-400 dark:text-zinc-500 line-through" : "text-slate-800 dark:text-zinc-200"}`}>
+                          <p
+                            className={`text-xs font-bold truncate max-w-[150px] ${isRevoked ? "text-slate-400 dark:text-zinc-500 line-through" : "text-slate-800 dark:text-zinc-200"}`}
+                          >
                             {key.name}
                           </p>
                           <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-mono mt-0.5">
@@ -382,8 +386,8 @@ print(response.json())`;
                               isRevoked
                                 ? "bg-red-500/5 text-red-600 dark:text-red-400 border-red-500/10"
                                 : isExpired
-                                ? "bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/10"
-                                : "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
+                                  ? "bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/10"
+                                  : "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
                             }`}
                           >
                             <span
@@ -391,22 +395,18 @@ print(response.json())`;
                                 isRevoked
                                   ? "bg-red-500"
                                   : isExpired
-                                  ? "bg-amber-500"
-                                  : "bg-emerald-500 animate-pulse-soft"
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500 animate-pulse-soft"
                               }`}
                             />
                             {isRevoked ? "revoked" : isExpired ? "expired" : "active"}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-zinc-500">
-                          {key.expiresAt
-                            ? new Date(key.expiresAt).toLocaleDateString()
-                            : "Never"}
+                          {key.expiresAt ? new Date(key.expiresAt).toLocaleDateString() : "Never"}
                         </td>
                         <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-zinc-500">
-                          {key.lastUsedAt
-                            ? new Date(key.lastUsedAt).toLocaleDateString()
-                            : "Never"}
+                          {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : "Never"}
                         </td>
                         <td className="px-6 py-4 text-right">
                           {key.status === "active" && !isExpired && (
@@ -436,7 +436,8 @@ print(response.json())`;
               No API credentials generated
             </h3>
             <p className="text-xs text-slate-500 dark:text-zinc-500 max-w-sm mx-auto leading-relaxed">
-              Create an API key to securely authenticate and consume the Amharic NLP pre-processing routes.
+              Create an API key to securely authenticate and consume the Amharic NLP pre-processing
+              routes.
             </p>
           </div>
         )}
@@ -450,9 +451,11 @@ print(response.json())`;
                 Interactive SDK Quick Start
               </h3>
             </div>
-            
+
             <div className="flex items-center gap-1.5 select-none">
-              <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 uppercase">Endpoint:</span>
+              <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 uppercase">
+                Endpoint:
+              </span>
               <select
                 value={activeEndpoint}
                 onChange={(e) => setActiveEndpoint(e.target.value as EndpointOption)}
@@ -468,7 +471,8 @@ print(response.json())`;
 
           <div className="px-4 pb-4 space-y-3">
             <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
-              Generate request templates in various languages to test the {activeEndpoint} operation immediately.
+              Generate request templates in various languages to test the {activeEndpoint} operation
+              immediately.
             </p>
 
             {/* Language Tabs */}
@@ -498,17 +502,19 @@ print(response.json())`;
                 className="absolute top-3 right-3 p-1.5 rounded bg-zinc-800/60 dark:bg-zinc-900/60 border border-zinc-750/30 hover:bg-zinc-800 dark:hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer"
                 title="Copy code snippet"
               >
-                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedCode ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
               </button>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* ── Right Column (1/3 width): Best Practices & Resources ─── */}
       <div className="space-y-6">
-        
         {/* Security Best Practices */}
         <div className="bg-white/50 dark:bg-zinc-950/20 rounded-md border border-slate-200/50 dark:border-zinc-900 p-5 space-y-4">
           <div className="flex items-center gap-2">
@@ -517,24 +523,31 @@ print(response.json())`;
               Security Protocol
             </h3>
           </div>
-          
+
           <ul className="space-y-3">
             <li className="flex items-start gap-2.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
               <p className="text-xs text-slate-500 dark:text-zinc-500 leading-relaxed font-semibold">
-                <span className="text-slate-800 dark:text-zinc-300 font-bold">Never expose keys</span> in client-side applications (React/NextJS frontend scripts).
+                <span className="text-slate-800 dark:text-zinc-300 font-bold">
+                  Never expose keys
+                </span>{" "}
+                in client-side applications (React/NextJS frontend scripts).
               </p>
             </li>
             <li className="flex items-start gap-2.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
               <p className="text-xs text-slate-500 dark:text-zinc-500 leading-relaxed font-semibold">
-                <span className="text-slate-800 dark:text-zinc-300 font-bold">Limit lifespan</span> of keys used in script environments by creating short-lived credentials.
+                <span className="text-slate-800 dark:text-zinc-300 font-bold">Limit lifespan</span>{" "}
+                of keys used in script environments by creating short-lived credentials.
               </p>
             </li>
             <li className="flex items-start gap-2.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
               <p className="text-xs text-slate-500 dark:text-zinc-500 leading-relaxed font-semibold">
-                <span className="text-slate-800 dark:text-zinc-300 font-bold">Separate credentials</span> for development, testing, and production servers to isolate access logs.
+                <span className="text-slate-800 dark:text-zinc-300 font-bold">
+                  Separate credentials
+                </span>{" "}
+                for development, testing, and production servers to isolate access logs.
               </p>
             </li>
           </ul>
@@ -550,7 +563,8 @@ print(response.json())`;
           </div>
 
           <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
-            API credentials generated grant full read-write capabilities to the Ge&apos;ez NLP framework suite:
+            API credentials generated grant full read-write capabilities to the Ge&apos;ez NLP
+            framework suite:
           </p>
 
           <div className="space-y-2 pt-1">
@@ -559,9 +573,12 @@ print(response.json())`;
               "Sentence & Word Tokenizer",
               "Amharic Stopword Removal Filters",
               "Affix-Based Morphological Stemmer",
-              "SERA / Felig Transliteration Engine"
+              "SERA / Felig Transliteration Engine",
             ].map((scope, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 font-semibold">
+              <div
+                key={idx}
+                className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 font-semibold"
+              >
                 <ArrowRight className="w-3.5 h-3.5 text-slate-450" />
                 <span>{scope}</span>
               </div>
@@ -580,9 +597,7 @@ print(response.json())`;
             </a>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

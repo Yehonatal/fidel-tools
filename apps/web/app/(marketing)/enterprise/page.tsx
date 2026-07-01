@@ -22,7 +22,6 @@ export default function EnterprisePage() {
   return (
     <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-grow flex flex-col justify-center transition-colors duration-300 font-sans">
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-        
         {/* Left Column Description */}
         <div className="lg:w-[45%] flex flex-col justify-between py-1 space-y-8 lg:space-y-0">
           <div className="space-y-6">
@@ -33,7 +32,9 @@ export default function EnterprisePage() {
               Scale your Ethiopic NLP pipelines.
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-zinc-400 leading-relaxed max-w-sm">
-              Deploy isolated instances, manage custom model weights, negotiate tailored uptime SLAs, and receive 24/7 priority engineer support for high-volume production applications.
+              Deploy isolated instances, manage custom model weights, negotiate tailored uptime
+              SLAs, and receive 24/7 priority engineer support for high-volume production
+              applications.
             </p>
           </div>
 
@@ -60,7 +61,8 @@ export default function EnterprisePage() {
                   MESSAGE SENT
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
-                  Thank you for reaching out. A technical lead will get back to your organization within 2 business hours.
+                  Thank you for reaching out. A technical lead will get back to your organization
+                  within 2 business hours.
                 </p>
               </div>
             ) : (
@@ -72,7 +74,10 @@ export default function EnterprisePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Name */}
                   <div className="space-y-1.5">
-                    <label htmlFor="name" className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
+                    <label
+                      htmlFor="name"
+                      className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest"
+                    >
                       Full Name
                     </label>
                     <input
@@ -88,7 +93,10 @@ export default function EnterprisePage() {
 
                   {/* Company */}
                   <div className="space-y-1.5">
-                    <label htmlFor="company" className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
+                    <label
+                      htmlFor="company"
+                      className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest"
+                    >
                       Company
                     </label>
                     <input
@@ -105,7 +113,10 @@ export default function EnterprisePage() {
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <label htmlFor="email" className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
+                  <label
+                    htmlFor="email"
+                    className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest"
+                  >
                     Company Email
                   </label>
                   <input
@@ -121,7 +132,10 @@ export default function EnterprisePage() {
 
                 {/* Company Size */}
                 <div className="space-y-1.5">
-                  <label htmlFor="size" className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
+                  <label
+                    htmlFor="size"
+                    className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest"
+                  >
                     Company Size
                   </label>
                   <select
@@ -140,7 +154,10 @@ export default function EnterprisePage() {
 
                 {/* Details */}
                 <div className="space-y-1.5">
-                  <label htmlFor="description" className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
+                  <label
+                    htmlFor="description"
+                    className="text-[9px] font-bold font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest"
+                  >
                     What do you need help with?
                   </label>
                   <textarea
@@ -166,7 +183,6 @@ export default function EnterprisePage() {
             )}
           </div>
         </div>
-
       </div>
     </main>
   );

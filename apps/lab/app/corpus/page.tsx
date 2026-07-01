@@ -79,7 +79,7 @@ export default function CorpusPage() {
 
   const filteredStems = invertedIndex
     ? Object.keys(invertedIndex).filter((stem) =>
-        stem.toLowerCase().includes(searchWord.toLowerCase())
+        stem.toLowerCase().includes(searchWord.toLowerCase()),
       )
     : [];
 
@@ -104,7 +104,6 @@ documents.forEach(doc => {
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -116,13 +115,14 @@ documents.forEach(doc => {
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Index document batches simultaneously. This module processes multi-file corpus sets, measures execution latencies, registers vocabulary growth, and exports inverted index mappings.
+          Index document batches simultaneously. This module processes multi-file corpus sets,
+          measures execution latencies, registers vocabulary growth, and exports inverted index
+          mappings.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Document Batch Configurations */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card p-5 space-y-4">
@@ -154,7 +154,10 @@ documents.forEach(doc => {
 
               <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
                 {docs.map((doc, idx) => (
-                  <div key={idx} className="p-3 border border-zinc-150 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/20 rounded-lg">
+                  <div
+                    key={idx}
+                    className="p-3 border border-zinc-150 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/20 rounded-lg"
+                  >
                     <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-555 uppercase">
                       {doc.id}
                     </span>
@@ -193,24 +196,39 @@ documents.forEach(doc => {
               </div>
             ) : stats ? (
               <div className="space-y-6">
-                
                 {/* Performance Metrics cards - Made responsive */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Indexed Files</span>
-                    <span className="text-lg font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">{stats.totalDocuments}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Indexed Files
+                    </span>
+                    <span className="text-lg font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">
+                      {stats.totalDocuments}
+                    </span>
                   </div>
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Total Stems</span>
-                    <span className="text-lg font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">{stats.uniqueStemsCount}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Total Stems
+                    </span>
+                    <span className="text-lg font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">
+                      {stats.uniqueStemsCount}
+                    </span>
                   </div>
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Tokens Processed</span>
-                    <span className="text-lg font-mono font-extrabold text-blue-600 dark:text-sky-405 mt-1 block">{stats.totalTokensProcessed}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Tokens Processed
+                    </span>
+                    <span className="text-lg font-mono font-extrabold text-blue-600 dark:text-sky-405 mt-1 block">
+                      {stats.totalTokensProcessed}
+                    </span>
                   </div>
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Execution Time</span>
-                    <span className="text-lg font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1 block">{stats.processingTimeMs} ms</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Execution Time
+                    </span>
+                    <span className="text-lg font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1 block">
+                      {stats.processingTimeMs} ms
+                    </span>
                   </div>
                 </div>
 
@@ -232,8 +250,13 @@ documents.forEach(doc => {
 
                     <div className="max-h-[360px] overflow-y-auto pr-1 divide-y divide-zinc-100 dark:divide-zinc-900">
                       {filteredStems.map((stem) => (
-                        <div key={stem} className="py-3 flex items-center justify-between gap-4 text-xs font-mono">
-                          <span className="font-bold text-blue-600 dark:text-sky-400 text-sm">{stem}</span>
+                        <div
+                          key={stem}
+                          className="py-3 flex items-center justify-between gap-4 text-xs font-mono"
+                        >
+                          <span className="font-bold text-blue-600 dark:text-sky-400 text-sm">
+                            {stem}
+                          </span>
                           <div className="flex flex-wrap gap-2 text-[10px] text-zinc-500">
                             {invertedIndex[stem].map((occ: any, i: number) => (
                               <span
@@ -258,7 +281,8 @@ documents.forEach(doc => {
                       <span>Unreduced Word Tokens (Vocabulary Coverage Review)</span>
                     </span>
                     <p className="text-xs text-zinc-500 font-semibold leading-relaxed">
-                      The stemmer left the following tokens unmodified (often correct for unique nouns/root verbs, but useful for dictionary auditing):
+                      The stemmer left the following tokens unmodified (often correct for unique
+                      nouns/root verbs, but useful for dictionary auditing):
                     </p>
                     <div className="flex flex-wrap gap-2 pt-1 max-h-[160px] overflow-y-auto">
                       {stats.unreducedTokens.map((tok: string) => (
@@ -272,12 +296,9 @@ documents.forEach(doc => {
                     </div>
                   </div>
                 )}
-
               </div>
             ) : null}
-
           </div>
-
         </div>
       </div>
     </div>

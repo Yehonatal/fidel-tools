@@ -6,7 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Fidel Tools — Developer Dashboard",
-  description: "API key telemetry, usage logs, and developer infrastructure for the premier Amharic NLP toolkit.",
+  description:
+    "API key telemetry, usage logs, and developer infrastructure for the premier Amharic NLP toolkit.",
 };
 
 export default function RootLayout({
@@ -18,16 +19,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function() {
             try {
               const saved = localStorage.getItem("fidel-theme");
@@ -45,11 +44,16 @@ export default function RootLayout({
               }
             } catch (e) {}
           })();
-        `}} />
+        `,
+          }}
+        />
       </head>
-      <body suppressHydrationWarning className="min-h-screen antialiased relative text-slate-900 dark:text-zinc-555 transition-colors duration-300">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen antialiased relative text-slate-900 dark:text-zinc-555 transition-colors duration-300"
+      >
         <PageLoader />
-        
+
         {/* Background elements wrapped to prevent scrolling */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="bg-grid absolute inset-0 text-slate-900/[0.025] dark:text-white/[0.012] transition-colors duration-300"></div>

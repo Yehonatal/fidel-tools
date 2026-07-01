@@ -1,60 +1,66 @@
-import fs from 'fs';
-import path from 'url';
-import pathModule from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
-import os from 'os';
+import fs from "fs";
+import path from "url";
+import pathModule from "path";
+import { fileURLToPath } from "url";
+import { execSync } from "child_process";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = pathModule.dirname(__filename);
 
 const benchmarkDir = __dirname;
-const rootDir = pathModule.resolve(benchmarkDir, '..');
+const rootDir = pathModule.resolve(benchmarkDir, "..");
 
-console.log('==================================================');
-console.log('RUNNING FULL FIDEL TOOLS BENCHMARK SUITE');
-console.log('==================================================');
+console.log("==================================================");
+console.log("RUNNING FULL FIDEL TOOLS BENCHMARK SUITE");
+console.log("==================================================");
 
 try {
   // 1. Run accuracy checks
-  console.log('\nStep 1: Running Accuracy Evaluations...');
-  execSync(`node ${pathModule.join(benchmarkDir, 'accuracy.js')}`, { stdio: 'inherit' });
-  
+  console.log("\nStep 1: Running Accuracy Evaluations...");
+  execSync(`node ${pathModule.join(benchmarkDir, "accuracy.js")}`, { stdio: "inherit" });
+
   // 2. Run speed checks
-  console.log('\nStep 2: Running Speed Benchmarks...');
-  execSync(`node ${pathModule.join(benchmarkDir, 'speed.js')}`, { stdio: 'inherit' });
-  
+  console.log("\nStep 2: Running Speed Benchmarks...");
+  execSync(`node ${pathModule.join(benchmarkDir, "speed.js")}`, { stdio: "inherit" });
+
   // 3. Read results
-  const accuracy = JSON.parse(fs.readFileSync(pathModule.join(benchmarkDir, 'accuracy_results.json'), 'utf8'));
-  const speed = JSON.parse(fs.readFileSync(pathModule.join(benchmarkDir, 'speed_results.json'), 'utf8'));
-  
+  const accuracy = JSON.parse(
+    fs.readFileSync(pathModule.join(benchmarkDir, "accuracy_results.json"), "utf8"),
+  );
+  const speed = JSON.parse(
+    fs.readFileSync(pathModule.join(benchmarkDir, "speed_results.json"), "utf8"),
+  );
+
   // 4. Enforce accuracy threshold against the new honest baselines
-  console.log('\nStep 3: Checking Accuracy Regressions...');
-  
+  console.log("\nStep 3: Checking Accuracy Regressions...");
+
   const normThresh = 65.0;
   if (accuracy.normalization.jsAcc < normThresh || accuracy.normalization.wasmAcc < normThresh) {
-    throw new Error(`Normalization accuracy regression! JS: ${accuracy.normalization.jsAcc}%, WASM: ${accuracy.normalization.wasmAcc}%`);
+    throw new Error(
+      `Normalization accuracy regression! JS: ${accuracy.normalization.jsAcc}%, WASM: ${accuracy.normalization.wasmAcc}%`,
+    );
   }
-  
+
   const stemThresh = 30.0;
   if (accuracy.stemming.acc < stemThresh) {
     throw new Error(`Stemming accuracy regression! Got: ${accuracy.stemming.acc}%`);
   }
-  
+
   const tokenThresh = 65.0; // F1 threshold
   if (accuracy.tokenization.f1 < tokenThresh) {
     throw new Error(`Tokenization F1 regression! Got: ${accuracy.tokenization.f1}%`);
   }
-  console.log('✓ All accuracy metrics met honest regression baselines.');
+  console.log("✓ All accuracy metrics met honest regression baselines.");
 
   // 5. Generate BENCHMARKS.md
-  console.log('\nStep 4: Regenerating BENCHMARKS.md...');
-  
+  console.log("\nStep 4: Regenerating BENCHMARKS.md...");
+
   const systemInfo = {
     os: `${os.type()} ${os.release()} (${os.arch()})`,
     cpu: os.cpus()[0].model,
     cores: os.cpus().length,
-    node: process.version
+    node: process.version,
   };
 
   const getTokF1 = (cat) => {
@@ -62,7 +68,7 @@ try {
     if (!stats) return "N/A";
     const prec = stats.correctTokens / (stats.generatedTokens || 1);
     const rec = stats.correctTokens / (stats.expectedTokens || 1);
-    const f1 = (prec + rec) > 0 ? (2 * prec * rec) / (prec + rec) * 100 : 0;
+    const f1 = prec + rec > 0 ? ((2 * prec * rec) / (prec + rec)) * 100 : 0;
     return `${f1.toFixed(2)}%`;
   };
 
@@ -89,9 +95,9 @@ Comparing current library performance against target benchmarks (Shippable, Comp
 
 | Feature / Component | Metric | Current Actual | Minimum (Shippable) | Target (Competitive) | World-Class | Status / Gap |
 | --- | --- | :---: | :---: | :---: | :---: | --- |
-| **Normalizer** | Homophone recall | **${(accuracy.normalization.categories.homophones.jsMatches / accuracy.normalization.categories.homophones.total * 100).toFixed(2)}%** | 95.00% | 98.00% | 99.50% | **Exceeded** (World-Class) |
-| **Sentence Tokenizer** | F1 on boundaries | **${accuracy.tokenization.f1.toFixed(2)}%** | 90.00% | 95.00% | 98.00% | **Below Minimum** (-${(90.00 - accuracy.tokenization.f1).toFixed(2)}% gap) |
-| **Light Stemmer** | Accuracy (correct root) | **${accuracy.stemming.acc.toFixed(2)}%** | 70.00% | 82.00% | 90.00%+ | **Below Minimum** (-${(70.00 - accuracy.stemming.acc).toFixed(2)}% gap) |
+| **Normalizer** | Homophone recall | **${((accuracy.normalization.categories.homophones.jsMatches / accuracy.normalization.categories.homophones.total) * 100).toFixed(2)}%** | 95.00% | 98.00% | 99.50% | **Exceeded** (World-Class) |
+| **Sentence Tokenizer** | F1 on boundaries | **${accuracy.tokenization.f1.toFixed(2)}%** | 90.00% | 95.00% | 98.00% | **Below Minimum** (-${(90.0 - accuracy.tokenization.f1).toFixed(2)}% gap) |
+| **Light Stemmer** | Accuracy (correct root) | **${accuracy.stemming.acc.toFixed(2)}%** | 70.00% | 82.00% | 90.00%+ | **Below Minimum** (-${(70.0 - accuracy.stemming.acc).toFixed(2)}% gap) |
 | **Stopword Removal** | Precision (no root corruption) | **100.00%** (test set) | 97.00% | 99.00% | 99.80% | **Exceeded** (on test cases) |
 | **Transliterator** | Round-trip accuracy | **100.00%** (test set) | 92.00% | 97.00% | 99.00% | **Exceeded** (on test cases) |
 | **Word Tokenizer** | Token F1 | *Not Evaluated* | 85.00% | 92.00% | 96.00% | *Planned Roadmap* |
@@ -113,20 +119,20 @@ Evaluated against a labeled test corpus of 2,000 sentences/words with independen
 ### Linguistic Category Breakdowns
 
 #### 1. Normalization Breakdown
-- **Homophones Mapping**: ${(accuracy.normalization.categories.homophones.jsMatches / accuracy.normalization.categories.homophones.total * 100).toFixed(2)}%
-- **Labialization Expansion**: ${(accuracy.normalization.categories.labialization.jsMatches / accuracy.normalization.categories.labialization.total * 100).toFixed(2)}%
-- **Gemination Collapse**: ${(accuracy.normalization.categories.gemination.jsMatches / accuracy.normalization.categories.gemination.total * 100).toFixed(2)}%
-- **Clean Text (No Perturbations)**: ${(accuracy.normalization.categories.clean.jsMatches / accuracy.normalization.categories.clean.total * 100).toFixed(2)}%
+- **Homophones Mapping**: ${((accuracy.normalization.categories.homophones.jsMatches / accuracy.normalization.categories.homophones.total) * 100).toFixed(2)}%
+- **Labialization Expansion**: ${((accuracy.normalization.categories.labialization.jsMatches / accuracy.normalization.categories.labialization.total) * 100).toFixed(2)}%
+- **Gemination Collapse**: ${((accuracy.normalization.categories.gemination.jsMatches / accuracy.normalization.categories.gemination.total) * 100).toFixed(2)}%
+- **Clean Text (No Perturbations)**: ${((accuracy.normalization.categories.clean.jsMatches / accuracy.normalization.categories.clean.total) * 100).toFixed(2)}%
 
 #### 2. Stemming Breakdown
-- **Regular Affixes**: ${(accuracy.stemming.categories.regular.matches / accuracy.stemming.categories.regular.total * 100).toFixed(2)}%
-- **Irregular / Protected Words**: ${(accuracy.stemming.categories.irregular.matches / accuracy.stemming.categories.irregular.total * 100).toFixed(2)}%
-- **Ambiguous Roots**: ${(accuracy.stemming.categories.ambiguous.matches / accuracy.stemming.categories.ambiguous.total * 100).toFixed(2)}%
+- **Regular Affixes**: ${((accuracy.stemming.categories.regular.matches / accuracy.stemming.categories.regular.total) * 100).toFixed(2)}%
+- **Irregular / Protected Words**: ${((accuracy.stemming.categories.irregular.matches / accuracy.stemming.categories.irregular.total) * 100).toFixed(2)}%
+- **Ambiguous Roots**: ${((accuracy.stemming.categories.ambiguous.matches / accuracy.stemming.categories.ambiguous.total) * 100).toFixed(2)}%
 
 #### 3. Tokenization Breakdown
-- **Standard Sentence Boundaries (\`።\`, \`?\`, \`!\`, \`.\` )**: Exact Match: ${getTokExact('standard')} | F1 Score: ${getTokF1('standard')}
-- **Word Separators (\`፡\` hulet neteb)**: Exact Match: ${getTokExact('word_separator')} | F1 Score: ${getTokF1('word_separator')}
-- **Abbreviations (e.g. \`ት/ቤት\`, \`ወ/ሮ\`)**: Exact Match: ${getTokExact('abbreviation')} | F1 Score: ${getTokF1('abbreviation')}
+- **Standard Sentence Boundaries (\`።\`, \`?\`, \`!\`, \`.\` )**: Exact Match: ${getTokExact("standard")} | F1 Score: ${getTokF1("standard")}
+- **Word Separators (\`፡\` hulet neteb)**: Exact Match: ${getTokExact("word_separator")} | F1 Score: ${getTokF1("word_separator")}
+- **Abbreviations (e.g. \`ት/ቤት\`, \`ወ/ሮ\`)**: Exact Match: ${getTokExact("abbreviation")} | F1 Score: ${getTokF1("abbreviation")}
 
 ## Linguistic Analysis & Failure Mode Documentation
 
@@ -164,12 +170,11 @@ Comparing pure JavaScript normalization with the compiled WebAssembly (WASM) eng
 1. **Boundary-Crossing Overhead Gate**: WebAssembly runs at near-native compile speeds. However, passing data between JS and WASM requires allocating heap memory and encoding/decoding strings to UTF-8 bytes. On short strings, this boundary-crossing overhead dominates the computation time. On larger payloads (~200 to 2,000+ chars), the actual computation time eclipses the boundary transitions, showing the clear benefits of the compiled Rust normalizer.
 `;
 
-  const mdPath = pathModule.join(rootDir, 'BENCHMARKS.md');
+  const mdPath = pathModule.join(rootDir, "BENCHMARKS.md");
   fs.writeFileSync(mdPath, mdContent);
   console.log(`✓ Successfully regenerated ${mdPath}`);
-  
 } catch (error) {
-  console.error('\n❌ Benchmark run failed!');
+  console.error("\n❌ Benchmark run failed!");
   console.error(error.stack || error.message);
   process.exit(1);
 }

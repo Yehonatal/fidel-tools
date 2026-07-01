@@ -15,7 +15,7 @@ import {
   Sparkles,
   HelpCircle,
   Cpu,
-  Zap
+  Zap,
 } from "lucide-react";
 
 // Initialize local pipeline with imported Amharic pack
@@ -23,19 +23,23 @@ const nlp = new Pipeline(amPack as any);
 
 const previewTabs = [
   { id: "pipeline", label: "Pipeline Analyzer", icon: <Layers className="w-3.5 h-3.5" /> },
-  { id: "transliterator", label: "SERA Transliterator", icon: <Terminal className="w-3.5 h-3.5" /> },
+  {
+    id: "transliterator",
+    label: "SERA Transliterator",
+    icon: <Terminal className="w-3.5 h-3.5" />,
+  },
   { id: "stemmer", label: "Morphology Stemmer", icon: <Activity className="w-3.5 h-3.5" /> },
   { id: "stopword", label: "Stopwords Filter", icon: <Sparkles className="w-3.5 h-3.5" /> },
   { id: "lexical", label: "Lexical Normalizer", icon: <Code2 className="w-3.5 h-3.5" /> },
   { id: "engine", label: "JS vs WASM Bench", icon: <Cpu className="w-3.5 h-3.5" /> },
 ] as const;
 
-type TabId = typeof previewTabs[number]["id"];
+type TabId = (typeof previewTabs)[number]["id"];
 type TransLang = "am" | "en";
 
 export default function LandingPlayground() {
   const [inputText, setInputText] = useState(
-    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት"
+    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት",
   );
   const [activeTab, setActiveTab] = useState<TabId>("pipeline");
   const [transLang, setTransLang] = useState<TransLang>("am");
@@ -101,7 +105,7 @@ import amPack from '@fidel-tools/lang-am';
 // Boots with WebAssembly normalizer if available,
 // falling back to pure JS normalizer transparently.
 const nlp = new Pipeline(amPack);
-const normalized = nlp.normalize("ሐኪም ኀይሉ");`
+const normalized = nlp.normalize("ሐኪም ኀይሉ");`,
   };
 
   const sanitize = (val: string) => val.replace(/[.\?"',/#!$%^&*;:፤።{}=\-_`~()]/g, "");
@@ -112,7 +116,7 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
     let normalized = text;
     const charMap = pack.normalization.char_map || {};
     const labializedMap = pack.normalization.labialized_map || {};
-    
+
     if (Object.keys(charMap).length > 0 || Object.keys(labializedMap).length > 0) {
       const chars = normalized.split("");
       for (let i = 0; i < chars.length; i++) {
@@ -127,10 +131,10 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
       }
       normalized = chars.join("");
     }
-    
+
     const threshold = pack.normalization.gemination_threshold;
     if (threshold !== undefined && threshold > 0) {
-      const regex = new RegExp(`([^\\s])\\1{${threshold},}`, 'g');
+      const regex = new RegExp(`([^\\s])\\1{${threshold},}`, "g");
       normalized = normalized.replace(regex, (match, p1) => p1.repeat(threshold));
     }
     return normalized;
@@ -141,13 +145,13 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
     setBenchmarking(true);
     setTimeout(() => {
       const runs = 2000;
-      
+
       // Warm up
       for (let i = 0; i < 200; i++) {
         localJsNormalize(inputText, amPack);
         nlp.normalize(inputText);
       }
-      
+
       // JS run
       const jsStart = performance.now();
       for (let i = 0; i < runs; i++) {
@@ -155,7 +159,7 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
       }
       const jsEnd = performance.now();
       const jsTime = jsEnd - jsStart;
-      
+
       // WASM run
       const wasmStart = performance.now();
       for (let i = 0; i < runs; i++) {
@@ -163,17 +167,17 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
       }
       const wasmEnd = performance.now();
       const wasmTime = wasmEnd - wasmStart;
-      
+
       setJsResult({
-        time: jsTime / runs * 1000,
-        ops: Math.round((runs / jsTime) * 1000)
+        time: (jsTime / runs) * 1000,
+        ops: Math.round((runs / jsTime) * 1000),
       });
-      
+
       setWasmResult({
-        time: wasmTime / runs * 1000,
-        ops: Math.round((runs / wasmTime) * 1000)
+        time: (wasmTime / runs) * 1000,
+        ops: Math.round((runs / wasmTime) * 1000),
       });
-      
+
       setBenchmarking(false);
     }, 100);
   };
@@ -192,20 +196,37 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
         return (
           <div className="space-y-3">
             <div className="p-3 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/50 dark:border-zinc-900">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">1. Lexical Normalization</span>
-              <span className="block text-xs text-slate-800 dark:text-zinc-200 truncate font-mono">{lexed}</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                1. Lexical Normalization
+              </span>
+              <span className="block text-xs text-slate-800 dark:text-zinc-200 truncate font-mono">
+                {lexed}
+              </span>
             </div>
-            <div className="flex justify-center text-slate-350 dark:text-zinc-700"><ChevronDown size={14} /></div>
+            <div className="flex justify-center text-slate-350 dark:text-zinc-700">
+              <ChevronDown size={14} />
+            </div>
             <div className="p-3 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/50 dark:border-zinc-900">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">2. Stopword Filtering</span>
-              <span className="block text-xs text-slate-800 dark:text-zinc-200 truncate font-mono">{cleaned}</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                2. Stopword Filtering
+              </span>
+              <span className="block text-xs text-slate-800 dark:text-zinc-200 truncate font-mono">
+                {cleaned}
+              </span>
             </div>
-            <div className="flex justify-center text-slate-355 dark:text-zinc-700"><ChevronDown size={14} /></div>
+            <div className="flex justify-center text-slate-355 dark:text-zinc-700">
+              <ChevronDown size={14} />
+            </div>
             <div className="p-3 rounded-lg bg-blue-500/5 dark:bg-sky-400/[0.02] border border-blue-500/10 dark:border-sky-400/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">3. Stemmed Morphologies</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                3. Stemmed Morphologies
+              </span>
               <div className="flex flex-wrap gap-1 mt-1.5 max-h-[70px] overflow-y-auto">
                 {stems.map((s, i) => (
-                  <span key={i} className="bg-slate-900 dark:bg-zinc-800 text-white font-mono text-[9px] px-2 py-0.5 rounded font-bold border border-transparent">
+                  <span
+                    key={i}
+                    className="bg-slate-900 dark:bg-zinc-800 text-white font-mono text-[9px] px-2 py-0.5 rounded font-bold border border-transparent"
+                  >
                     {s}
                   </span>
                 ))}
@@ -219,12 +240,16 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
         return (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono">Direction:</span>
+              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
+                Direction:
+              </span>
               <div className="flex bg-slate-100 dark:bg-zinc-950 p-0.5 rounded border border-slate-200 dark:border-zinc-900">
                 <button
                   onClick={() => setTransLang("am")}
                   className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all ${
-                    transLang === "am" ? "bg-white dark:bg-zinc-805 text-slate-900 dark:text-white shadow-xs" : "text-slate-500"
+                    transLang === "am"
+                      ? "bg-white dark:bg-zinc-805 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500"
                   }`}
                 >
                   AM → ASCII
@@ -232,7 +257,9 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                 <button
                   onClick={() => setTransLang("en")}
                   className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all ${
-                    transLang === "en" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs" : "text-slate-500"
+                    transLang === "en"
+                      ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500"
                   }`}
                 >
                   ASCII → AM
@@ -240,7 +267,9 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
               </div>
             </div>
             <div className="p-4 rounded-lg bg-slate-50 dark:bg-zinc-950/40 border border-slate-200/60 dark:border-zinc-900/60 min-h-[140px] max-h-[160px] overflow-y-auto">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">Transliterated Corpus</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
+                Transliterated Corpus
+              </span>
               <p className="text-xs font-mono font-semibold text-slate-800 dark:text-sky-400 leading-relaxed break-all select-all">
                 {tr}
               </p>
@@ -260,10 +289,17 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
             </div>
             <div className="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto pr-1">
               {stemmed.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-zinc-950/20 border border-slate-200/50 dark:border-zinc-900 text-[11px] font-mono">
-                  <span className="text-slate-700 dark:text-zinc-400 truncate max-w-[120px]">{item.orig}</span>
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-zinc-950/20 border border-slate-200/50 dark:border-zinc-900 text-[11px] font-mono"
+                >
+                  <span className="text-slate-700 dark:text-zinc-400 truncate max-w-[120px]">
+                    {item.orig}
+                  </span>
                   <ArrowRight size={10} className="text-slate-400 dark:text-zinc-500" />
-                  <span className="text-blue-600 dark:text-sky-400 font-bold text-right truncate max-w-[120px]">{item.stem}</span>
+                  <span className="text-blue-600 dark:text-sky-400 font-bold text-right truncate max-w-[120px]">
+                    {item.stem}
+                  </span>
                 </div>
               ))}
             </div>
@@ -319,10 +355,17 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
             <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
               {abbs.length > 0 ? (
                 abbs.map((abbr, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs font-mono bg-slate-50 dark:bg-zinc-950/20 p-2 rounded border border-slate-200/60 dark:border-zinc-900">
-                    <span className="text-slate-800 dark:text-zinc-200 font-semibold">{abbr.orig}</span>
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 text-xs font-mono bg-slate-50 dark:bg-zinc-950/20 p-2 rounded border border-slate-200/60 dark:border-zinc-900"
+                  >
+                    <span className="text-slate-800 dark:text-zinc-200 font-semibold">
+                      {abbr.orig}
+                    </span>
                     <span className="text-slate-400 dark:text-zinc-600">&rarr;</span>
-                    <span className="text-emerald-600 dark:text-sky-400 font-bold">{abbr.expanded}</span>
+                    <span className="text-emerald-600 dark:text-sky-400 font-bold">
+                      {abbr.expanded}
+                    </span>
                   </div>
                 ))
               ) : (
@@ -336,7 +379,7 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
       }
       case "engine": {
         const isWasmSupported = !!(nlp as any).wasmNormalizer;
-        
+
         // Compute speedup ratio
         const speedup = jsResult && wasmResult ? jsResult.time / wasmResult.time : null;
 
@@ -346,11 +389,13 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
               <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-mono">
                 Hybrid Engine Comparison
               </span>
-              <span className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-                isWasmSupported 
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-              }`}>
+              <span
+                className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                  isWasmSupported
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                }`}
+              >
                 {isWasmSupported ? "WASM CORE READY" : "JS FALLBACK ONLY"}
               </span>
             </div>
@@ -362,13 +407,13 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                   <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 dark:text-white">
                     <Zap className="w-3.5 h-3.5 text-blue-500" />
                     <span>
-                      {speedup! > 1 
-                        ? `WASM is ${speedup!.toFixed(2)}x faster!` 
+                      {speedup! > 1
+                        ? `WASM is ${speedup!.toFixed(2)}x faster!`
                         : `JS is ${(1 / speedup!).toFixed(2)}x faster!`}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-semibold leading-normal">
-                    {speedup! > 1 
+                    {speedup! > 1
                       ? "The Rust WebAssembly core is bypassing JIT overhead, optimizing character loops in parallel."
                       : "JavaScript is faster on short strings due to the overhead of crossing the JS-WASM boundary."}
                   </p>
@@ -379,15 +424,19 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                   {/* JS Bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-slate-700 dark:text-zinc-400 font-bold">JavaScript Fallback</span>
+                      <span className="text-slate-700 dark:text-zinc-400 font-bold">
+                        JavaScript Fallback
+                      </span>
                       <span className="text-slate-500 dark:text-zinc-500">
                         {jsResult.ops.toLocaleString()} ops/sec ({jsResult.time.toFixed(1)} μs/op)
                       </span>
                     </div>
                     <div className="h-2 rounded bg-slate-100 dark:bg-zinc-950 overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-blue-500 rounded transition-all duration-500"
-                        style={{ width: `${Math.min(100, (jsResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (jsResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -395,15 +444,20 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                   {/* WASM Bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-slate-700 dark:text-zinc-450 font-bold">WebAssembly (Rust Core)</span>
+                      <span className="text-slate-700 dark:text-zinc-450 font-bold">
+                        WebAssembly (Rust Core)
+                      </span>
                       <span className="text-slate-500 dark:text-zinc-500">
-                        {wasmResult.ops.toLocaleString()} ops/sec ({wasmResult.time.toFixed(1)} μs/op)
+                        {wasmResult.ops.toLocaleString()} ops/sec ({wasmResult.time.toFixed(1)}{" "}
+                        μs/op)
                       </span>
                     </div>
                     <div className="h-2 rounded bg-slate-100 dark:bg-zinc-950 overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-emerald-500 rounded transition-all duration-500"
-                        style={{ width: `${Math.min(100, (wasmResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (wasmResult.ops / Math.max(jsResult.ops, wasmResult.ops)) * 100)}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -429,7 +483,8 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
               <div className="space-y-4">
                 <div className="p-4 text-center border border-dashed border-slate-200 dark:border-zinc-900 rounded bg-slate-50/50 dark:bg-zinc-950/10 space-y-3">
                   <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
-                    Compare performance of pure JS regex rules vs native WebAssembly loops using your current input text.
+                    Compare performance of pure JS regex rules vs native WebAssembly loops using
+                    your current input text.
                   </p>
                   <button
                     onClick={runClientBenchmark}
@@ -444,7 +499,8 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                   <div className="p-2.5 rounded bg-slate-50 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-900/60 space-y-1">
                     <span className="font-bold text-blue-500">JS ENGINE</span>
                     <p className="text-slate-500 dark:text-zinc-500">
-                      Boots instantly. High boundary crossing speed, but slower processing of loops and regexes.
+                      Boots instantly. High boundary crossing speed, but slower processing of loops
+                      and regexes.
                     </p>
                   </div>
                   <div className="p-2.5 rounded bg-slate-50 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-900/60 space-y-1">
@@ -464,7 +520,6 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
 
   return (
     <div className="border border-slate-200/60 dark:border-zinc-900 bg-white dark:bg-[#070709] rounded-md shadow-sm overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[600px]">
-      
       {/* Tab Switcher Left Navigation Column */}
       <div className="w-full lg:w-56 border-b lg:border-b-0 lg:border-r border-slate-200/60 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/20 p-4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible shrink-0 scrollbar-none">
         <h3 className="hidden lg:block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest font-mono mb-2 px-2.5">
@@ -525,7 +580,11 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
                 onClick={() => copyCode(codeSnippets[activeTab])}
                 className="p-1 px-2 rounded border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-[9px] text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
               >
-                {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                {copied ? (
+                  <Check className="w-3 h-3 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
                 <span>{copied ? "Copied" : "Copy"}</span>
               </button>
             </div>
@@ -535,7 +594,6 @@ const normalized = nlp.normalize("ሐኪም ኀይሉ");`
           </div>
         </div>
       </div>
-
     </div>
   );
 }

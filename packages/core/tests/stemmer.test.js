@@ -1,10 +1,8 @@
-import { stem } from "../dist/stemmer.js"
-import fs from "fs"
-import { resolve } from "path"
+import { stem } from "../dist/stemmer.js";
+import fs from "fs";
+import { resolve } from "path";
 
-const amPack = JSON.parse(
-  fs.readFileSync(resolve(__dirname, "../../lang-am/am.json"), "utf8")
-)
+const amPack = JSON.parse(fs.readFileSync(resolve(__dirname, "../../lang-am/am.json"), "utf8"));
 
 const amh_testWords_input = [
   "ወንበር",
@@ -62,7 +60,7 @@ const amh_testWords_input = [
   "የኢትዮጵያ",
   "ዳቦዎች",
   "ዳቦ",
-]
+];
 const amh_testWords_output = [
   "ወንበር",
   "ወንበር",
@@ -119,13 +117,13 @@ const amh_testWords_output = [
   "ኢትዮጵያ",
   "ዳቦ",
   "ዳቦ",
-]
+];
 
 test("Takes Amharic language words and produces a stem", () => {
   for (let index = 0; index < amh_testWords_input.length; index++) {
-    const amh_input = amh_testWords_input[index]
-    const amh_output = amh_testWords_output[index]
+    const amh_input = amh_testWords_input[index];
+    const amh_output = amh_testWords_output[index];
 
-    expect(stem(amh_input, amPack)).toBe(amh_output)
+    expect(stem(amh_input, amPack)).toBe(amh_output);
   }
-})
+});

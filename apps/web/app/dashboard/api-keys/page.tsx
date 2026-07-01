@@ -27,7 +27,7 @@ export default async function ApiKeysPage() {
           Use these credentials to authenticate calls to the Amharic NLP API endpoints.
         </p>
       </div>
-      
+
       <ApiKeysClient initialKeys={keys} />
     </div>
   );

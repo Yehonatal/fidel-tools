@@ -1,40 +1,40 @@
 {
-    "name": "@fidel-tools/validate-pack",
-    "version": "0.1.8",
-    "description": "Validation tool for Fidel Tools language packs",
-    "type": "module",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "bin": {
-        "validate-pack": "./dist/bin.js"
-    },
-    "files": [
-        "dist"
-    ],
-    "publishConfig": {
-        "access": "public"
-    },
-    "keywords": [
-        "Amharic",
-        "NLP",
-        "Ethiopia",
-        "Language Pack",
-        "Validator",
-        "Linter"
-    ],
-    "author": "Fidel Tools Team",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Yehonatal/fidel-tools.git"
-    },
-    "scripts": {
-        "build": "tsc",
-        "validate": "node dist/bin.js"
-    },
-    "dependencies": {},
-    "devDependencies": {
-        "@types/node": "^20.2.4",
-        "typescript": "^5.0.4"
-    }
+  "name": "@fidel-tools/validate-pack",
+  "version": "0.1.8",
+  "description": "Validation tool for Fidel Tools language packs",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "validate-pack": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "Amharic",
+    "NLP",
+    "Ethiopia",
+    "Language Pack",
+    "Validator",
+    "Linter"
+  ],
+  "author": "Fidel Tools Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yehonatal/fidel-tools.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "validate": "node dist/bin.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.2.4",
+    "typescript": "^5.0.4"
+  }
 }

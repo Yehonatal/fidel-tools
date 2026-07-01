@@ -1,47 +1,47 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Pipeline, normalize, sentenceTokenize, stem } from '../packages/core/dist/index.js';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Pipeline, normalize, sentenceTokenize, stem } from "../packages/core/dist/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const amPackPath = path.resolve(__dirname, '../packages/lang-am/am.json');
-const amPack = JSON.parse(fs.readFileSync(amPackPath, 'utf8'));
+const amPackPath = path.resolve(__dirname, "../packages/lang-am/am.json");
+const amPack = JSON.parse(fs.readFileSync(amPackPath, "utf8"));
 
 const pipeline = new Pipeline(amPack);
 
 // Helper to read JSONL
 function readJsonl(filePath) {
-  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const fileContent = fs.readFileSync(filePath, "utf8");
   return fileContent
-    .split('\n')
-    .filter(line => line.trim())
-    .map(line => JSON.parse(line));
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line));
 }
 
 function evaluateNormalization() {
-  console.log('Evaluating Normalization Accuracy...');
-  const corpusPath = path.resolve(__dirname, 'corpus/normalization.jsonl');
+  console.log("Evaluating Normalization Accuracy...");
+  const corpusPath = path.resolve(__dirname, "corpus/normalization.jsonl");
   const dataset = readJsonl(corpusPath);
-  
+
   let jsMatches = 0;
   let wasmMatches = 0;
   const total = dataset.length;
-  
+
   // Track categories
   const categories = {};
-  
+
   for (const { input, expected, category } of dataset) {
     const jsResult = normalize(input, amPack);
     const wasmResult = pipeline.normalize(input);
-    
+
     const jsIsMatch = jsResult === expected;
     const wasmIsMatch = wasmResult === expected;
-    
+
     if (jsIsMatch) jsMatches++;
     if (wasmIsMatch) wasmMatches++;
-    
+
     if (!categories[category]) {
       categories[category] = { total: 0, jsMatches: 0, wasmMatches: 0 };
     }
@@ -49,91 +49,94 @@ function evaluateNormalization() {
     if (jsIsMatch) categories[category].jsMatches++;
     if (wasmIsMatch) categories[category].wasmMatches++;
   }
-  
+
   const jsAcc = (jsMatches / total) * 100;
   const wasmAcc = (wasmMatches / total) * 100;
-  
+
   console.log(`  JS Normalizer Accuracy  : ${jsAcc.toFixed(2)}% (${jsMatches}/${total})`);
   console.log(`  WASM Normalizer Accuracy: ${wasmAcc.toFixed(2)}% (${wasmMatches}/${total})`);
-  
-  console.log('  Category Breakdown:');
+
+  console.log("  Category Breakdown:");
   for (const [cat, stats] of Object.entries(categories)) {
     const jsCatAcc = (stats.jsMatches / stats.total) * 100;
     const wasmCatAcc = (stats.wasmMatches / stats.total) * 100;
-    console.log(`    - ${cat}: JS: ${jsCatAcc.toFixed(2)}% (${stats.jsMatches}/${stats.total}) | WASM: ${wasmCatAcc.toFixed(2)}% (${stats.wasmMatches}/${stats.total})`);
+    console.log(
+      `    - ${cat}: JS: ${jsCatAcc.toFixed(2)}% (${stats.jsMatches}/${stats.total}) | WASM: ${wasmCatAcc.toFixed(2)}% (${stats.wasmMatches}/${stats.total})`,
+    );
   }
-  
+
   return { jsAcc, wasmAcc, categories };
 }
 
 function evaluateStemming() {
-  console.log('Evaluating Stemming Accuracy...');
-  const corpusPath = path.resolve(__dirname, 'corpus/stemming.jsonl');
+  console.log("Evaluating Stemming Accuracy...");
+  const corpusPath = path.resolve(__dirname, "corpus/stemming.jsonl");
   const dataset = readJsonl(corpusPath);
-  
+
   let matches = 0;
   const total = dataset.length;
-  
+
   // Track categories
   const categories = {};
-  
+
   for (const { input, expected, category } of dataset) {
     const result = pipeline.stem(input);
     const isMatch = result === expected;
     if (isMatch) {
       matches++;
     }
-    
+
     if (!categories[category]) {
       categories[category] = { total: 0, matches: 0 };
     }
     categories[category].total++;
     if (isMatch) categories[category].matches++;
   }
-  
+
   const acc = (matches / total) * 100;
   console.log(`  Stemmer Accuracy        : ${acc.toFixed(2)}% (${matches}/${total})`);
-  
-  console.log('  Category Breakdown:');
+
+  console.log("  Category Breakdown:");
   for (const [cat, stats] of Object.entries(categories)) {
     const catAcc = (stats.matches / stats.total) * 100;
     console.log(`    - ${cat}: ${catAcc.toFixed(2)}% (${stats.matches}/${stats.total})`);
   }
-  
+
   return { acc, categories };
 }
 
 function evaluateTokenization() {
-  console.log('Evaluating Tokenization Accuracy...');
-  const corpusPath = path.resolve(__dirname, 'corpus/tokenization.jsonl');
+  console.log("Evaluating Tokenization Accuracy...");
+  const corpusPath = path.resolve(__dirname, "corpus/tokenization.jsonl");
   const dataset = readJsonl(corpusPath);
-  
+
   let exactMatches = 0;
   let totalTokenPairs = 0;
   let correctTokenPairs = 0;
   let generatedTokens = 0;
-  
+
   const total = dataset.length;
-  
+
   // Track categories
   const categories = {};
-  
+
   for (const { input, expected, category } of dataset) {
     const result = pipeline.sentenceTokenize(input);
-    
+
     // Check exact array match
-    const isExact = expected.length === result.length && expected.every((val, index) => val === result[index]);
+    const isExact =
+      expected.length === result.length && expected.every((val, index) => val === result[index]);
     if (isExact) {
       exactMatches++;
     }
-    
+
     // Boundary metrics calculation (token overlapping for Precision, Recall, F1)
     const expectedSet = new Set(expected);
     const resultSet = new Set(result);
-    
+
     totalTokenPairs += expected.length;
     generatedTokens += result.length;
-    
+
     let currentCorrect = 0;
     for (const resToken of result) {
       if (expectedSet.has(resToken)) {
@@ -141,9 +144,15 @@ function evaluateTokenization() {
         currentCorrect++;
       }
     }
-    
+
     if (!categories[category]) {
-      categories[category] = { total: 0, exactMatches: 0, generatedTokens: 0, expectedTokens: 0, correctTokens: 0 };
+      categories[category] = {
+        total: 0,
+        exactMatches: 0,
+        generatedTokens: 0,
+        expectedTokens: 0,
+        correctTokens: 0,
+      };
     }
     categories[category].total++;
     if (isExact) categories[category].exactMatches++;
@@ -151,26 +160,30 @@ function evaluateTokenization() {
     categories[category].expectedTokens += expected.length;
     categories[category].correctTokens += currentCorrect;
   }
-  
+
   const exactAcc = (exactMatches / total) * 100;
-  
+
   // NLP Precision, Recall, F1
   const precision = correctTokenPairs / (generatedTokens || 1);
   const recall = correctTokenPairs / (totalTokenPairs || 1);
-  const f1 = (2 * precision * recall) / ((precision + recall) || 1) * 100;
-  
+  const f1 = ((2 * precision * recall) / (precision + recall || 1)) * 100;
+
   console.log(`  Tokenizer Exact Match   : ${exactAcc.toFixed(2)}% (${exactMatches}/${total})`);
-  console.log(`  Tokenizer F1 Score      : ${f1.toFixed(2)}% (P: ${(precision * 100).toFixed(2)}%, R: ${(recall * 100).toFixed(2)}%)`);
-  
-  console.log('  Category Breakdown:');
+  console.log(
+    `  Tokenizer F1 Score      : ${f1.toFixed(2)}% (P: ${(precision * 100).toFixed(2)}%, R: ${(recall * 100).toFixed(2)}%)`,
+  );
+
+  console.log("  Category Breakdown:");
   for (const [cat, stats] of Object.entries(categories)) {
     const catExactAcc = (stats.exactMatches / stats.total) * 100;
     const catPrec = stats.correctTokens / (stats.generatedTokens || 1);
     const catRec = stats.correctTokens / (stats.expectedTokens || 1);
-    const catF1 = (2 * catPrec * catRec) / ((catPrec + catRec) || 1) * 100;
-    console.log(`    - ${cat}: Exact Match: ${catExactAcc.toFixed(2)}% | F1 Score: ${catF1.toFixed(2)}%`);
+    const catF1 = ((2 * catPrec * catRec) / (catPrec + catRec || 1)) * 100;
+    console.log(
+      `    - ${cat}: Exact Match: ${catExactAcc.toFixed(2)}% | F1 Score: ${catF1.toFixed(2)}%`,
+    );
   }
-  
+
   return { exactAcc, f1, categories };
 }
 
@@ -179,9 +192,16 @@ const stemResults = evaluateStemming();
 const tokenResults = evaluateTokenization();
 
 // Write results to JSON file for report consolidation
-const resultsFile = path.resolve(__dirname, 'accuracy_results.json');
-fs.writeFileSync(resultsFile, JSON.stringify({
-  normalization: normResults,
-  stemming: stemResults,
-  tokenization: tokenResults
-}, null, 2));
+const resultsFile = path.resolve(__dirname, "accuracy_results.json");
+fs.writeFileSync(
+  resultsFile,
+  JSON.stringify(
+    {
+      normalization: normResults,
+      stemming: stemResults,
+      tokenization: tokenResults,
+    },
+    null,
+    2,
+  ),
+);

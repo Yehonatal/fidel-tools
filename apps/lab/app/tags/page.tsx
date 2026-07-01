@@ -7,7 +7,7 @@ import { Tag as TagIcon, AlertTriangle } from "lucide-react";
 
 export default function TagsPage() {
   const [text, setText] = useState(
-    "የአማርኛ ቋንቋ በኢትዮጵያ ውስጥ ሰፊ የህዝብ ቁጥር የሚናገረው ብሔራዊ ቋንቋ ነው። ይህ ቋንቋ የራሱ የፊደል መዋቅር አለው። የአማርኛ ቋንቋ ጥናትና ምርምር በሀገሪቱ ዩኒቨርሲቲዎች ውስጥ በስፋት ይካሄዳል።"
+    "የአማርኛ ቋንቋ በኢትዮጵያ ውስጥ ሰፊ የህዝብ ቁጥር የሚናገረው ብሔራዊ ቋንቋ ነው። ይህ ቋንቋ የራሱ የፊደል መዋቅር አለው። የአማርኛ ቋንቋ ጥናትና ምርምር በሀገሪቱ ዩኒቨርሲቲዎች ውስጥ በስፋት ይካሄዳል።",
   );
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<any[]>([]);
@@ -55,7 +55,6 @@ stems.forEach(s => {
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -67,13 +66,14 @@ stems.forEach(s => {
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Extract meaningful metadata tags from unstructured text. This pipeline filters the ~435 most common Amharic particles and function words so only high-signal noun and verb roots remain.
+          Extract meaningful metadata tags from unstructured text. This pipeline filters the ~435
+          most common Amharic particles and function words so only high-signal noun and verb roots
+          remain.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Editor text area */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -143,10 +143,14 @@ stems.forEach(s => {
             {selectedTag && (
               <div className="premium-card p-5 space-y-3.5 animate-in slide-in-from-bottom-2 duration-250">
                 <h4 className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200">
-                  Trace details for: <span className="text-blue-600 dark:text-sky-400 font-extrabold">{selectedTag.tag}</span>
+                  Trace details for:{" "}
+                  <span className="text-blue-600 dark:text-sky-400 font-extrabold">
+                    {selectedTag.tag}
+                  </span>
                 </h4>
                 <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
-                  The following inflections in the source document were collapsed into the root stem:
+                  The following inflections in the source document were collapsed into the root
+                  stem:
                 </p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {selectedTag.examples.map((ex: string, idx: number) => (
@@ -160,9 +164,7 @@ stems.forEach(s => {
                 </div>
               </div>
             )}
-
           </div>
-
         </div>
       </div>
     </div>

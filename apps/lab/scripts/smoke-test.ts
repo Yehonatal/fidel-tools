@@ -12,4 +12,3 @@ if (stem === "ሀኪም") {
 } else {
   console.log("SMOKE TEST: FAILED!");
 }
-

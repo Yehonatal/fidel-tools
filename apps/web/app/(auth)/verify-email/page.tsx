@@ -18,9 +18,7 @@ export default async function VerifyEmailPage({
 
         {/* Brand */}
         <Link href="/" className="inline-flex items-center gap-2 relative z-10">
-          <span className="font-loga text-4xl font-light text-white select-none">
-            ፊደል
-          </span>
+          <span className="font-loga text-4xl font-light text-white select-none">ፊደል</span>
           <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase mt-2 font-mono">
             Console
           </span>
@@ -35,7 +33,8 @@ export default async function VerifyEmailPage({
             Account Verification
           </h2>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Verify workspace parameters and establish authenticated handshake validation for the NLP service mesh.
+            Verify workspace parameters and establish authenticated handshake validation for the NLP
+            service mesh.
           </p>
         </div>
 
@@ -49,7 +48,6 @@ export default async function VerifyEmailPage({
       {/* ── Right Column (Authentication Form) ──────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
         <div className="w-full max-w-sm animate-fade-in space-y-6 text-center md:text-left">
-          
           {/* Logo representation on mobile */}
           <div className="text-center md:hidden mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">
@@ -72,8 +70,8 @@ export default async function VerifyEmailPage({
             </h1>
             {sent ? (
               <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
-                We sent a verification link to your email address. Click it to
-                activate your account and start using the API.
+                We sent a verification link to your email address. Click it to activate your account
+                and start using the API.
               </p>
             ) : (
               <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
@@ -90,7 +88,6 @@ export default async function VerifyEmailPage({
               &larr; Back to sign in
             </Link>
           </div>
-
         </div>
       </div>
     </div>

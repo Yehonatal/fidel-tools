@@ -44,9 +44,7 @@ export default function SignUpPage() {
 
         {/* Brand */}
         <Link href="/" className="inline-flex items-center gap-2 relative z-10">
-          <span className="font-loga text-4xl font-light text-white select-none">
-            ፊደል
-          </span>
+          <span className="font-loga text-4xl font-light text-white select-none">ፊደል</span>
           <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase mt-2 font-mono">
             Console
           </span>
@@ -61,7 +59,8 @@ export default function SignUpPage() {
             Join the Developer Environment
           </h2>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Configure sandboxes, retrieve telemetry dashboard views, and integrate language processing packages.
+            Configure sandboxes, retrieve telemetry dashboard views, and integrate language
+            processing packages.
           </p>
         </div>
 
@@ -75,7 +74,6 @@ export default function SignUpPage() {
       {/* ── Right Column (Authentication Form) ──────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
         <div className="w-full max-w-sm animate-fade-in space-y-6">
-          
           {/* Logo representation on mobile */}
           <div className="text-center md:hidden mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">
@@ -184,7 +182,6 @@ export default function SignUpPage() {
               </Link>
             </p>
           </div>
-
         </div>
       </div>
     </div>

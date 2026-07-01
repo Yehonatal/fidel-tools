@@ -16,11 +16,7 @@ export function generateApiKey(): {
   return { raw, hash, prefix };
 }
 
-export async function createApiKey(
-  userId: string,
-  name: string,
-  expiresAt?: Date
-) {
+export async function createApiKey(userId: string, name: string, expiresAt?: Date) {
   const { raw, hash, prefix } = generateApiKey();
 
   await db.insert(apiKeys).values({
@@ -35,9 +31,7 @@ export async function createApiKey(
   return { raw, prefix, name };
 }
 
-export async function validateApiKey(
-  raw: string
-): Promise<{
+export async function validateApiKey(raw: string): Promise<{
   valid: boolean;
   userId?: string;
   keyId?: string;

@@ -7,12 +7,8 @@ import TokenBadge from "@/components/TokenBadge";
 import { CopyCheck, ArrowRight, AlertTriangle } from "lucide-react";
 
 export default function DeduplicatePage() {
-  const [textA, setTextA] = useState(
-    "ሐኪሙ ትናንትና ማታ ወደ አዲስ አበባ ሄዶ ነበረ። እዚያም ብዙ ልጆችን አይቷል።"
-  );
-  const [textB, setTextB] = useState(
-    "ሀኪሙ ትላንት ማታ ወደ አ.አ ሄዶ ነበር። በቦታውም በርካታ ልጅ አይቶአል።"
-  );
+  const [textA, setTextA] = useState("ሐኪሙ ትናንትና ማታ ወደ አዲስ አበባ ሄዶ ነበረ። እዚያም ብዙ ልጆችን አይቷል።");
+  const [textB, setTextB] = useState("ሀኪሙ ትላንት ማታ ወደ አ.አ ሄዶ ነበር። በቦታውም በርካታ ልጅ አይቶአል።");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +51,6 @@ const score = jaccardSimilarity(
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -67,17 +62,17 @@ const score = jaccardSimilarity(
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Before normalization, `ሐኪሙ` and `ሀኪሙ` look like different strings. After stemming and abbreviation expansion, they resolve to the same stems. This checker calculates semantic Jaccard similarity.
+          Before normalization, `ሐኪሙ` and `ሀኪሙ` look like different strings. After stemming and
+          abbreviation expansion, they resolve to the same stems. This checker calculates semantic
+          Jaccard similarity.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Document Inputs */}
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               {/* Text A */}
               <div className="premium-card flex flex-col overflow-hidden">
                 <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
@@ -111,7 +106,6 @@ const score = jaccardSimilarity(
                   />
                 </div>
               </div>
-
             </div>
 
             <div className="flex justify-end">
@@ -127,7 +121,6 @@ const score = jaccardSimilarity(
             {/* Stems Categorization Grid */}
             {data && (
               <div className="space-y-6">
-                
                 {/* Intersection */}
                 <div className="premium-card p-5 space-y-3.5">
                   <span className="text-[9px] font-bold text-emerald-505 dark:text-emerald-400 uppercase tracking-wider font-mono block">
@@ -139,14 +132,15 @@ const score = jaccardSimilarity(
                         <TokenBadge key={stem} token={stem} type="highlight" />
                       ))
                     ) : (
-                      <span className="text-xs text-zinc-400 italic">No overlapping stems found.</span>
+                      <span className="text-xs text-zinc-400 italic">
+                        No overlapping stems found.
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {/* Symmetric differences */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
                   {/* Unique A */}
                   <div className="premium-card p-5 space-y-3.5">
                     <span className="text-[9px] font-bold text-zinc-405 dark:text-zinc-500 uppercase tracking-wider font-mono block">
@@ -178,12 +172,9 @@ const score = jaccardSimilarity(
                       )}
                     </div>
                   </div>
-
                 </div>
-
               </div>
             )}
-
           </div>
 
           {/* Sidebar Gauge + Code */}
@@ -199,7 +190,6 @@ const score = jaccardSimilarity(
 
             <CodeSnippet title="Similarity Score Code" code={codeSnippet} />
           </div>
-
         </div>
       </div>
     </div>

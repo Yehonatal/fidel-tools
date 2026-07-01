@@ -28,7 +28,7 @@ export default function ThemeToggle() {
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     localStorage.setItem("fidel-theme", nextTheme);
-    
+
     const root = document.documentElement;
     if (nextTheme === "dark") {
       root.classList.add("dark");

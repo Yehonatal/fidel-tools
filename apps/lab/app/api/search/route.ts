@@ -16,7 +16,26 @@ export async function GET(req: NextRequest) {
     const baseStem = nlp.stem(normalized);
 
     const prefixes = ["የ", "በ", "ለ", "ከ", "ስለ", "እነ", "የሚ", "የማይ"];
-    const suffixes = ["ች", "ዎች", "ኦች", "ው", "ኡ", "ዋ", "ኝ", "ነት", "አችን", "አቸው", "አችሁ", "ዎችን", "ዎቹን", "ውን", "ኡን", "ዋን", "አችንን", "አቸውን"];
+    const suffixes = [
+      "ች",
+      "ዎች",
+      "ኦች",
+      "ው",
+      "ኡ",
+      "ዋ",
+      "ኝ",
+      "ነት",
+      "አችን",
+      "አቸው",
+      "አችሁ",
+      "ዎችን",
+      "ዎቹን",
+      "ውን",
+      "ኡን",
+      "ዋን",
+      "አችንን",
+      "አቸውን",
+    ];
 
     const candidates = new Set<string>();
     const userWords = [expand, normalized, baseStem];
@@ -93,10 +112,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, documents }: { query: string; documents: Array<{ id: string; content: string }> } = await req.json();
+    const {
+      query,
+      documents,
+    }: { query: string; documents: Array<{ id: string; content: string }> } = await req.json();
 
     if (typeof query !== "string" || !Array.isArray(documents)) {
-      return NextResponse.json({ error: "Missing or invalid query or documents list" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing or invalid query or documents list" },
+        { status: 400 },
+      );
     }
 
     const queryStems = processQuery(query);
@@ -108,7 +133,7 @@ export async function POST(req: NextRequest) {
         id: doc.id,
         content: doc.content,
         score: similarityScore,
-        matchedStems: queryStems.filter(s => docStems.includes(s)),
+        matchedStems: queryStems.filter((s) => docStems.includes(s)),
       };
     });
 

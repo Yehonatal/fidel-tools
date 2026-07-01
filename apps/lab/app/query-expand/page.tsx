@@ -68,7 +68,6 @@ const expansions = amPack.dictionary
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -80,13 +79,14 @@ const expansions = amPack.dictionary
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          See the stemmer&apos;s behavior transparently. By typing a word, this tool tests suffix endings against the stemmer, proving which grammar inflections collapse back to the same root for a search hit.
+          See the stemmer&apos;s behavior transparently. By typing a word, this tool tests suffix
+          endings against the stemmer, proving which grammar inflections collapse back to the same
+          root for a search hit.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Input area */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card p-5 space-y-4">
@@ -101,7 +101,8 @@ const expansions = amPack.dictionary
                 className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-lg px-4 py-2.5 text-sm font-semibold text-zinc-800 dark:text-zinc-200 outline-none focus:outline-none"
               />
               <p className="text-[10px] font-medium text-zinc-400 leading-normal">
-                This triggers a search index dictionary audit to see all registered inflections that collapse down to the same grammatical stem root.
+                This triggers a search index dictionary audit to see all registered inflections that
+                collapse down to the same grammatical stem root.
               </p>
             </div>
 
@@ -124,16 +125,23 @@ const expansions = amPack.dictionary
               </div>
             ) : data ? (
               <div className="space-y-6 animate-in fade-in duration-200">
-                
                 {/* Stem summary */}
                 <div className="premium-card p-5 flex items-center justify-between gap-6">
                   <div className="space-y-1">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Resolved Stem Root</span>
-                    <span className="text-lg font-bold text-zinc-800 dark:text-zinc-100">{data.stem || "None"}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Resolved Stem Root
+                    </span>
+                    <span className="text-lg font-bold text-zinc-800 dark:text-zinc-100">
+                      {data.stem || "None"}
+                    </span>
                   </div>
                   <div className="space-y-1 text-right">
-                    <span className="text-[8px] font-mono font-bold text-zinc-405 uppercase tracking-wider block">Matched Variants count</span>
-                    <span className="text-lg font-mono font-extrabold text-blue-600 dark:text-sky-450">{data.expansions?.length || 0}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-405 uppercase tracking-wider block">
+                      Matched Variants count
+                    </span>
+                    <span className="text-lg font-mono font-extrabold text-blue-600 dark:text-sky-450">
+                      {data.expansions?.length || 0}
+                    </span>
                   </div>
                 </div>
 
@@ -149,19 +157,22 @@ const expansions = amPack.dictionary
                   {data.expansions?.length > 0 ? (
                     <div className="flex flex-wrap gap-2.5 max-h-[220px] overflow-y-auto pr-1">
                       {data.expansions.map((exp: string) => (
-                        <TokenBadge key={exp} token={exp} type={exp === word ? "highlight" : "normal"} />
+                        <TokenBadge
+                          key={exp}
+                          token={exp}
+                          type={exp === word ? "highlight" : "normal"}
+                        />
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-zinc-400 italic">No alternative inflected spelling variants discovered in dictionary index.</p>
+                    <p className="text-xs text-zinc-400 italic">
+                      No alternative inflected spelling variants discovered in dictionary index.
+                    </p>
                   )}
                 </div>
-
               </div>
             ) : null}
-
           </div>
-
         </div>
       </div>
     </div>

@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
       trace.removeStopwords = current;
     }
     if (stages.includes("stem")) {
-      const stems = current.split(/\s+/).filter(Boolean).map(w => nlp.stem(w));
+      const stems = current
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => nlp.stem(w));
       trace.stem = stems;
       current = stems.join(" ");
     }

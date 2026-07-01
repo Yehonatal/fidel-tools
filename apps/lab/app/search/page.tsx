@@ -83,7 +83,6 @@ const relevanceScore = score(docStems, queryStems)`;
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title Block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -95,13 +94,14 @@ const relevanceScore = score(docStems, queryStems)`;
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-555 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Standard search engines fail on spelling variants (e.g. `ሐኪሞች` vs `ሃኪሙ`) or plural inflections (e.g. `ልጅ` vs `ልጆች`). By running query and document text through normalizer and stemmer pipelines, queries match exact roots.
+          Standard search engines fail on spelling variants (e.g. `ሐኪሞች` vs `ሃኪሙ`) or plural
+          inflections (e.g. `ልጅ` vs `ልጆች`). By running query and document text through normalizer
+          and stemmer pipelines, queries match exact roots.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left column: Search input & Corpus management */}
           <div className="lg:col-span-1 space-y-6">
             <form onSubmit={handleSearchSubmit} className="space-y-3">
@@ -170,7 +170,9 @@ const relevanceScore = score(docStems, queryStems)`;
               </div>
               {queryStems.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] text-zinc-405 font-mono font-semibold">Query Stems:</span>
+                  <span className="text-[9px] text-zinc-405 font-mono font-semibold">
+                    Query Stems:
+                  </span>
                   <div className="flex gap-1.5">
                     {queryStems.map((st) => (
                       <TokenBadge key={st} token={st} type="stem" />
@@ -235,11 +237,13 @@ const relevanceScore = score(docStems, queryStems)`;
                               ))}
                             </div>
                           )}
-                          <span className={`text-xs font-mono font-extrabold px-2.5 py-0.5 rounded-md border ${
-                            isMatch
-                              ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-sky-400"
-                              : "bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-850 text-zinc-400"
-                          }`}>
+                          <span
+                            className={`text-xs font-mono font-extrabold px-2.5 py-0.5 rounded-md border ${
+                              isMatch
+                                ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-sky-400"
+                                : "bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-850 text-zinc-400"
+                            }`}
+                          >
                             Score: {Math.round(res.score * 100)}%
                           </span>
                         </div>
@@ -257,7 +261,6 @@ const relevanceScore = score(docStems, queryStems)`;
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

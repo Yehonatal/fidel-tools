@@ -5,7 +5,10 @@ export async function POST(req: NextRequest) {
   try {
     const { textA, textB } = await req.json();
     if (typeof textA !== "string" || typeof textB !== "string") {
-      return NextResponse.json({ error: "Missing or invalid text inputs (textA and textB)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing or invalid text inputs (textA and textB)" },
+        { status: 400 },
+      );
     }
 
     const stemsA = getStems(textA);
@@ -16,9 +19,9 @@ export async function POST(req: NextRequest) {
 
     const similarity = jaccardSimilarity(setA, setB);
 
-    const intersection = stemsA.filter(s => setB.has(s));
-    const uniqueA = stemsA.filter(s => !setB.has(s));
-    const uniqueB = stemsB.filter(s => !setA.has(s));
+    const intersection = stemsA.filter((s) => setB.has(s));
+    const uniqueA = stemsA.filter((s) => !setB.has(s));
+    const uniqueB = stemsB.filter((s) => !setA.has(s));
 
     return NextResponse.json({
       similarity,

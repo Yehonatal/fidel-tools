@@ -13,7 +13,7 @@ import {
   Key,
   Shield,
   RefreshCw,
-  Cpu
+  Cpu,
 } from "lucide-react";
 
 interface OnboardingWizardProps {
@@ -44,7 +44,7 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
     curl: `curl -X POST https://api.fidel.tools/v1/normalize \\
   -H "Authorization: Bearer ${displayKey}" \\
   -H "Content-Type: application/json" \\
-  -d '{"text": "ሐኪም ኀይሉ"}'`
+  -d '{"text": "ሐኪም ኀይሉ"}'`,
   };
 
   const handleCopy = (text: string, label: string) => {
@@ -65,15 +65,13 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
     { num: 1, label: "Project Details" },
     { num: 2, label: "Setup SDK" },
     { num: 3, label: "Environment Keys" },
-    { num: 4, label: "Verify Handshake" }
+    { num: 4, label: "Verify Handshake" },
   ];
 
   return (
     <div className="min-h-[500px] flex flex-col md:flex-row border border-slate-200/50 dark:border-zinc-900 bg-white dark:bg-[#070709] rounded-md overflow-hidden shadow-xs font-sans">
-      
       {/* ── Left Content Pane (Interactive Form Control) ──────────────── */}
       <div className="flex-1 p-8 md:p-10 flex flex-col justify-between space-y-8">
-        
         {/* Step Header */}
         <div className="space-y-2">
           <span className="text-[10px] font-mono font-bold text-blue-600 dark:text-sky-400 uppercase tracking-widest block">
@@ -86,16 +84,18 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
             {step === 4 && "Simulate Connection"}
           </h2>
           <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed max-w-md">
-            {step === 1 && "Name your application workspace to initialize isolated credentials keys."}
-            {step === 2 && "Add our parsing engine package to your codebase and initialize the client handler."}
-            {step === 3 && "Set your environment authorization key to authenticate API network requests."}
+            {step === 1 &&
+              "Name your application workspace to initialize isolated credentials keys."}
+            {step === 2 &&
+              "Add our parsing engine package to your codebase and initialize the client handler."}
+            {step === 3 &&
+              "Set your environment authorization key to authenticate API network requests."}
             {step === 4 && "Execute a network handshake test to verify API routing parameters."}
           </p>
         </div>
 
         {/* Step Body */}
         <div className="flex-1 py-4 flex flex-col justify-center">
-          
           {/* STEP 1: Name Project */}
           {step === 1 && (
             <div className="space-y-4 max-w-sm">
@@ -112,7 +112,8 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                 />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-zinc-500 leading-relaxed font-semibold">
-                This project configuration establishes local telemetry metrics and configures client headers.
+                This project configuration establishes local telemetry metrics and configures client
+                headers.
               </p>
             </div>
           )}
@@ -131,7 +132,11 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                     onClick={() => handleCopy("npm install @fidel-tools/core", "install")}
                     className="p-1 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                   >
-                    {copiedText === "install" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedText === "install" ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -146,7 +151,9 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                     <button
                       onClick={() => setCodeTab("sdk")}
                       className={`px-2 py-0.5 text-[9px] font-bold uppercase cursor-pointer ${
-                        codeTab === "sdk" ? "bg-slate-900 text-white dark:bg-zinc-800" : "text-slate-500 dark:text-zinc-500"
+                        codeTab === "sdk"
+                          ? "bg-slate-900 text-white dark:bg-zinc-800"
+                          : "text-slate-500 dark:text-zinc-500"
                       }`}
                     >
                       SDK
@@ -154,20 +161,26 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                     <button
                       onClick={() => setCodeTab("curl")}
                       className={`px-2 py-0.5 text-[9px] font-bold uppercase cursor-pointer ${
-                        codeTab === "curl" ? "bg-slate-900 text-white dark:bg-zinc-800" : "text-slate-500 dark:text-zinc-500"
+                        codeTab === "curl"
+                          ? "bg-slate-900 text-white dark:bg-zinc-800"
+                          : "text-slate-500 dark:text-zinc-500"
                       }`}
                     >
                       cURL
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="relative p-4 bg-slate-950 border border-zinc-900 rounded-md font-mono text-[10px] text-zinc-300 overflow-x-auto whitespace-pre max-h-[160px] leading-relaxed">
                   <button
                     onClick={() => handleCopy(codeSnippets[codeTab], "code")}
                     className="absolute top-2 right-2 p-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded border border-zinc-800 transition-colors cursor-pointer"
                   >
-                    {copiedText === "code" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedText === "code" ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                   <code>{codeSnippets[codeTab]}</code>
                 </div>
@@ -188,12 +201,20 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                     onClick={() => handleCopy(displayKey, "key")}
                     className="p-1 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                   >
-                    {copiedText === "key" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedText === "key" ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-zinc-500 leading-relaxed font-semibold">
-                Mount this credentials token inside your server environment variable list as <code className="font-mono text-slate-700 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded">BETTER_AUTH_API_KEY</code>.
+                Mount this credentials token inside your server environment variable list as{" "}
+                <code className="font-mono text-slate-700 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 rounded">
+                  BETTER_AUTH_API_KEY
+                </code>
+                .
               </p>
             </div>
           )}
@@ -206,8 +227,12 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                   <>
                     <Loader2 className="w-8 h-8 text-blue-600 dark:text-sky-400 animate-spin" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">Listening for endpoints telemetry requests...</p>
-                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">Attempting handshakes with api.fidel.tools</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                        Listening for endpoints telemetry requests...
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">
+                        Attempting handshakes with api.fidel.tools
+                      </p>
                     </div>
                   </>
                 ) : connectionVerified ? (
@@ -216,16 +241,24 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                       <CheckCircle2 className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">Handshake verified successfully!</p>
-                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold font-mono">fidel-api-prod: OK (200)</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                        Handshake verified successfully!
+                      </p>
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold font-mono">
+                        fidel-api-prod: OK (200)
+                      </p>
                     </div>
                   </>
                 ) : (
                   <>
                     <Cpu className="w-8 h-8 text-slate-400 dark:text-zinc-500" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">Waiting for API communication test</p>
-                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">Click the trigger below to run a test verification request.</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                        Waiting for API communication test
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">
+                        Click the trigger below to run a test verification request.
+                      </p>
                     </div>
                   </>
                 )}
@@ -242,7 +275,6 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
               )}
             </div>
           )}
-
         </div>
 
         {/* Step Actions */}
@@ -279,7 +311,6 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
             </button>
           )}
         </div>
-
       </div>
 
       {/* ── Right Vertical Navigation Stepper Panel ───────────────────── */}
@@ -289,7 +320,6 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
             Setup Progress
           </h3>
           <div className="relative pl-0.5 space-y-6">
-            
             {/* Stepper connector line */}
             <div className="absolute top-2 left-3 w-0.5 h-[calc(100%-16px)] bg-slate-200 dark:bg-zinc-900 z-0" />
 
@@ -303,8 +333,8 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                       passed
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                         : active
-                        ? "bg-blue-500/10 text-blue-600 dark:text-sky-400 border-blue-500/35 scale-105"
-                        : "bg-white dark:bg-zinc-950 text-slate-400 dark:text-zinc-500 border-slate-200/60 dark:border-zinc-900"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-sky-400 border-blue-500/35 scale-105"
+                          : "bg-white dark:bg-zinc-950 text-slate-400 dark:text-zinc-500 border-slate-200/60 dark:border-zinc-900"
                     }`}
                   >
                     {passed ? <Check className="w-3.5 h-3.5" /> : s.num}
@@ -314,8 +344,8 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
                       active
                         ? "font-bold text-slate-900 dark:text-white"
                         : passed
-                        ? "font-semibold text-slate-500 dark:text-zinc-400"
-                        : "font-semibold text-slate-400 dark:text-zinc-500"
+                          ? "font-semibold text-slate-500 dark:text-zinc-400"
+                          : "font-semibold text-slate-400 dark:text-zinc-500"
                     }`}
                   >
                     {s.label}
@@ -332,9 +362,7 @@ console.log(result.text); // Output: "ሃኪም ሃይሉ"`,
             Verified Sandbox
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

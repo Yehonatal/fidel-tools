@@ -25,7 +25,7 @@ export default async function SettingsPage() {
           Manage your developer profile, password, and workspace preferences.
         </p>
       </div>
-      
+
       <SettingsClient user={session.user} />
     </div>
   );

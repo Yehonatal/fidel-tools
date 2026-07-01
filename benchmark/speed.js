@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Pipeline, normalize as jsNormalize } from '../packages/core/dist/index.js';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Pipeline, normalize as jsNormalize } from "../packages/core/dist/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const amPackPath = path.resolve(__dirname, '../packages/lang-am/am.json');
-const amPack = JSON.parse(fs.readFileSync(amPackPath, 'utf8'));
+const amPackPath = path.resolve(__dirname, "../packages/lang-am/am.json");
+const amPack = JSON.parse(fs.readFileSync(amPackPath, "utf8"));
 
 const pipeline = new Pipeline(amPack);
 
@@ -17,7 +17,7 @@ const baseSentences = [
   "እባክህህህህ በጣምምምምም አመሰግናለሁህህህ።",
   "አዲስ አበባ ትልቅ ከተማ ናት።",
   "አንድ ሁለት ሦስት አራት አምስት",
-  "ይህ የመጀመሪያው ዓረፍተ ነገር ነው። ሁለተኛው ደግሞ ይከተላል፡ ሦስተኛውም አለ!"
+  "ይህ የመጀመሪያው ዓረፍተ ነገር ነው። ሁለተኛው ደግሞ ይከተላል፡ ሦስተኛውም አለ!",
 ];
 
 // Payload generation
@@ -88,8 +88,12 @@ function runSuite(label, payload, iterations) {
   const speedup = jsTotalTime / wasmTotalTime;
 
   console.log(`\n--- Speed Benchmark: ${label} (${iterations} iterations) ---`);
-  console.log(`  JS:   Throughput: ${jsThroughput.toFixed(0)} ops/sec | p50: ${jsP50.toFixed(2)} μs | p95: ${jsP95.toFixed(2)} μs | p99: ${jsP99.toFixed(2)} μs`);
-  console.log(`  WASM: Throughput: ${wasmThroughput.toFixed(0)} ops/sec | p50: ${wasmP50.toFixed(2)} μs | p95: ${wasmP95.toFixed(2)} μs | p99: ${wasmP99.toFixed(2)} μs`);
+  console.log(
+    `  JS:   Throughput: ${jsThroughput.toFixed(0)} ops/sec | p50: ${jsP50.toFixed(2)} μs | p95: ${jsP95.toFixed(2)} μs | p99: ${jsP99.toFixed(2)} μs`,
+  );
+  console.log(
+    `  WASM: Throughput: ${wasmThroughput.toFixed(0)} ops/sec | p50: ${wasmP50.toFixed(2)} μs | p95: ${wasmP95.toFixed(2)} μs | p99: ${wasmP99.toFixed(2)} μs`,
+  );
   console.log(`  Speedup Factor: ${speedup.toFixed(2)}x`);
 
   return {
@@ -97,18 +101,25 @@ function runSuite(label, payload, iterations) {
     iterations,
     js: { throughput: jsThroughput, p50: jsP50, p95: jsP95, p99: jsP99 },
     wasm: { throughput: wasmThroughput, p50: wasmP50, p95: wasmP95, p99: wasmP99 },
-    speedup
+    speedup,
   };
 }
 
-console.log('Running speed benchmarks...');
-const shortResults = runSuite('Short Payload (~15 chars)', shortPayload, 10000);
-const mediumResults = runSuite('Medium Payload (~200 chars)', mediumPayload, 5000);
-const largeResults = runSuite('Large Payload (~2000 chars)', largePayload, 1000);
+console.log("Running speed benchmarks...");
+const shortResults = runSuite("Short Payload (~15 chars)", shortPayload, 10000);
+const mediumResults = runSuite("Medium Payload (~200 chars)", mediumPayload, 5000);
+const largeResults = runSuite("Large Payload (~2000 chars)", largePayload, 1000);
 
-const resultsFile = path.resolve(__dirname, 'speed_results.json');
-fs.writeFileSync(resultsFile, JSON.stringify({
-  short: shortResults,
-  medium: mediumResults,
-  large: largeResults
-}, null, 2));
+const resultsFile = path.resolve(__dirname, "speed_results.json");
+fs.writeFileSync(
+  resultsFile,
+  JSON.stringify(
+    {
+      short: shortResults,
+      medium: mediumResults,
+      large: largeResults,
+    },
+    null,
+    2,
+  ),
+);

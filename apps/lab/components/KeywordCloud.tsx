@@ -25,7 +25,7 @@ export default function KeywordCloud({ keywords, onKeywordClick }: KeywordCloudP
         {keywords.map(([word, freq]) => {
           const weightRatio = maxFreq > 1 ? (freq - 1) / (maxFreq - 1) : 0.5;
           const fontSize = 11 + weightRatio * 8;
-          
+
           let colorClass = "text-zinc-650 dark:text-zinc-400";
           if (weightRatio > 0.7) {
             colorClass = "text-blue-600 dark:text-sky-450 font-extrabold";

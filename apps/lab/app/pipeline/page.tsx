@@ -16,7 +16,7 @@ const PRESETS = [
 
 export default function PipelinePage() {
   const [text, setText] = useState(
-    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት"
+    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት",
   );
   const [stages, setStages] = useState<string[]>([
     "normalize",
@@ -83,7 +83,6 @@ const sera = nlp.feligTransliterate(cleaned, 'am');`;
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -95,8 +94,9 @@ const sera = nlp.feligTransliterate(cleaned, 'am');`;
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Trace how Amharic text parses through each layer of the NLP compilation system sequentially: 
-          `normalize` &rarr; `lexAnalyze` &rarr; `removeStopwords` &rarr; `stem` &rarr; `transliterate`.
+          Trace how Amharic text parses through each layer of the NLP compilation system
+          sequentially: `normalize` &rarr; `lexAnalyze` &rarr; `removeStopwords` &rarr; `stem`
+          &rarr; `transliterate`.
         </p>
       </div>
 
@@ -121,7 +121,6 @@ const sera = nlp.feligTransliterate(cleaned, 'am');`;
 
         {/* Main interface grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left column: input text & code */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -181,10 +180,8 @@ const sera = nlp.feligTransliterate(cleaned, 'am');`;
               <CodeSnippet title="Pipeline Execution Code" code={codeSnippet} />
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
   );
 }

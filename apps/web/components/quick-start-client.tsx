@@ -60,7 +60,7 @@ print(response.json())`,
             Quick Integration
           </span>
         </div>
-        
+
         {/* Language Tabs */}
         <div className="flex border border-slate-800 rounded overflow-hidden bg-slate-950">
           {(["curl", "js", "python"] as const).map((lang) => (
@@ -68,9 +68,7 @@ print(response.json())`,
               key={lang}
               onClick={() => setActiveTab(lang)}
               className={`px-3 py-1 cursor-pointer transition-colors text-[10px] uppercase font-bold tracking-wider ${
-                activeTab === lang
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-500 hover:text-zinc-300"
+                activeTab === lang ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
               {lang === "js" ? "JS" : lang}
@@ -86,11 +84,13 @@ print(response.json())`,
           className="absolute top-3 right-3 p-1.5 rounded border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors cursor-pointer"
           title="Copy Code"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? (
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+          ) : (
+            <Copy className="w-3.5 h-3.5" />
+          )}
         </button>
-        <code className="block mt-2">
-          {codeSnippets[activeTab]}
-        </code>
+        <code className="block mt-2">{codeSnippets[activeTab]}</code>
       </div>
 
       {/* Footer bar */}

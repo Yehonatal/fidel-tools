@@ -26,7 +26,10 @@ for (const input of cases) {
     const cleaned = nlp.removeStopwords(lexed);
     console.log("removeStopwords: ", cleaned);
 
-    const stems = cleaned.split(/\s+/).filter(Boolean).map(w => nlp.stem(w));
+    const stems = cleaned
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((w) => nlp.stem(w));
     console.log("stems:           ", stems);
 
     const transliterated = nlp.feligTransliterate(cleaned, "am");

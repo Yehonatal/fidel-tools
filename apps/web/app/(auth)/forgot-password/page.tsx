@@ -43,9 +43,7 @@ export default function ForgotPasswordPage() {
 
         {/* Brand */}
         <Link href="/" className="inline-flex items-center gap-2 relative z-10">
-          <span className="font-loga text-4xl font-light text-white select-none">
-            ፊደል
-          </span>
+          <span className="font-loga text-4xl font-light text-white select-none">ፊደል</span>
           <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase mt-2 font-mono">
             Console
           </span>
@@ -60,7 +58,8 @@ export default function ForgotPasswordPage() {
             Credential Recovery
           </h2>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Generate validation links to reset account permissions and verify system-access configurations.
+            Generate validation links to reset account permissions and verify system-access
+            configurations.
           </p>
         </div>
 
@@ -74,7 +73,6 @@ export default function ForgotPasswordPage() {
       {/* ── Right Column (Authentication Form) ──────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
         <div className="w-full max-w-sm animate-fade-in space-y-6">
-          
           {/* Logo representation on mobile */}
           <div className="text-center md:hidden mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">

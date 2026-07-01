@@ -8,10 +8,7 @@ export async function POST(req: NextRequest) {
     const { text } = await req.json();
 
     if (!text || typeof text !== "string") {
-      return NextResponse.json(
-        { error: 'Body must include { text: string }' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Body must include { text: string }" }, { status: 400 });
     }
 
     const result = removeStopwords(text, amPack);

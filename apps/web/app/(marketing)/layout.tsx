@@ -1,11 +1,7 @@
 import MarketingHeader from "@/components/marketing-header";
 import MarketingFooter from "@/components/marketing-footer";
 
-export default function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#030303] text-zinc-900 dark:text-white flex flex-col font-sans relative overflow-x-hidden transition-colors duration-300">
       {/* Sleek Grid Overlay */}
@@ -15,9 +11,7 @@ export default function MarketingLayout({
       </div>
 
       <MarketingHeader />
-      <div className="flex-grow flex flex-col relative z-10">
-        {children}
-      </div>
+      <div className="flex-grow flex flex-col relative z-10">{children}</div>
       <MarketingFooter />
     </div>
   );

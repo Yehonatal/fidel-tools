@@ -12,7 +12,11 @@ export default function MarketingFooter() {
           <span>&bull;</span>
           <span>MIT License</span>
           <span>&bull;</span>
-          <a href="https://github.com/Yehonatal/fidel-tools" target="_blank" className="hover:text-slate-800 dark:hover:text-white transition-colors">
+          <a
+            href="https://github.com/Yehonatal/fidel-tools"
+            target="_blank"
+            className="hover:text-slate-800 dark:hover:text-white transition-colors"
+          >
             GitHub
           </a>
         </div>

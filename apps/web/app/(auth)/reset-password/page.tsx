@@ -62,9 +62,7 @@ export default function ResetPasswordPage({
 
         {/* Brand */}
         <Link href="/" className="inline-flex items-center gap-2 relative z-10">
-          <span className="font-loga text-4xl font-light text-white select-none">
-            ፊደል
-          </span>
+          <span className="font-loga text-4xl font-light text-white select-none">ፊደል</span>
           <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase mt-2 font-mono">
             Console
           </span>
@@ -79,7 +77,8 @@ export default function ResetPasswordPage({
             Establish New Password
           </h2>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Define a secure cryptographic sequence to restore access permissions for the Fidel environment.
+            Define a secure cryptographic sequence to restore access permissions for the Fidel
+            environment.
           </p>
         </div>
 
@@ -93,7 +92,6 @@ export default function ResetPasswordPage({
       {/* ── Right Column (Authentication Form) ──────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
         <div className="w-full max-w-sm animate-fade-in space-y-6">
-          
           {/* Logo representation on mobile */}
           <div className="text-center md:hidden mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">
@@ -116,7 +114,8 @@ export default function ResetPasswordPage({
                   Invalid Reset Token
                 </h2>
                 <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500">
-                  The password recovery token is missing, expired, or invalid. Please request a new link.
+                  The password recovery token is missing, expired, or invalid. Please request a new
+                  link.
                 </p>
               </div>
               <div className="pt-2">

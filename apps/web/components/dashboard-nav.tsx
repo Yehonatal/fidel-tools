@@ -18,7 +18,7 @@ import {
   BookOpen,
   Layers,
   Sparkles,
-  Terminal
+  Terminal,
 } from "lucide-react";
 
 interface NavItem {
@@ -221,7 +221,13 @@ export default function DashboardNav({ user }: DashboardNavProps) {
                       <span className="absolute left-0 top-[20%] w-0.5 h-[60%] rounded bg-blue-500" />
                     )}
 
-                    <span className={isActive ? "text-blue-600 dark:text-blue-400" : "text-zinc-400 dark:text-zinc-500"}>
+                    <span
+                      className={
+                        isActive
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-zinc-400 dark:text-zinc-500"
+                      }
+                    >
                       {item.icon}
                     </span>
                     {!isCollapsed && (
@@ -285,7 +291,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
               {user.name?.charAt(0)?.toUpperCase() || "?"}
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-zinc-50 dark:border-[#070709]" />
             </div>
-            
+
             <button
               onClick={handleSignOut}
               title="Sign out"

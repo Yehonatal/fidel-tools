@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ArrowRight, 
-  Layers, 
-  Keyboard, 
-  Type, 
-  Check, 
+import {
+  ArrowRight,
+  Layers,
+  Keyboard,
+  Type,
+  Check,
   Copy,
   Github,
   Cpu,
@@ -27,7 +27,7 @@ import {
   Activity,
   ArrowRightLeft,
   Settings,
-  Database
+  Database,
 } from "lucide-react";
 
 type TabType = "NORMALIZER" | "STEMMER" | "TRANSLITERATOR" | "CODE";
@@ -83,9 +83,9 @@ export default function LabLandingPage() {
       const res = await fetch("/api/pipeline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          text, 
-          stages: ["normalize", "stem", "transliterate"] 
+        body: JSON.stringify({
+          text,
+          stages: ["normalize", "stem", "transliterate"],
         }),
       });
       const data = await res.json();
@@ -110,12 +110,12 @@ export default function LabLandingPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: wizardNormInput }),
-        }).then(r => r.json()),
+        }).then((r) => r.json()),
         fetch("/api/normalize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: wizardNormInput2 }),
-        }).then(r => r.json())
+        }).then((r) => r.json()),
       ]);
       setWizardNormOutput(res1.result || "");
       setWizardNormOutput2(res2.result || "");
@@ -171,13 +171,13 @@ export default function LabLandingPage() {
     if (!fidelSearchEnabled) {
       // Literal Search simulation
       const queryClean = simulationSearchQuery.trim();
-      const hits = simulationCorpus.map(doc => {
+      const hits = simulationCorpus.map((doc) => {
         const hasTerm = doc.content.includes(queryClean);
         return {
           id: doc.id,
           content: doc.content,
           score: hasTerm ? 1.0 : 0.0,
-          matchedStems: hasTerm ? [queryClean] : []
+          matchedStems: hasTerm ? [queryClean] : [],
         };
       });
       setSimulationResults(hits);
@@ -252,23 +252,32 @@ const normalized = nlp.normalize("${inputVal}");
 const stems = nlp.stem(normalized);`;
 
   const onboardingSteps = [
-    { title: "The Ge'ez Script Problem", desc: "Understanding the unique linguistic bottlenecks of Amharic computing." },
-    { title: "Stage 1: Lexical Normalization", desc: "Merging spelling duplicates into canonical keys." },
+    {
+      title: "The Ge'ez Script Problem",
+      desc: "Understanding the unique linguistic bottlenecks of Amharic computing.",
+    },
+    {
+      title: "Stage 1: Lexical Normalization",
+      desc: "Merging spelling duplicates into canonical keys.",
+    },
     { title: "Stage 2: Light Stemming", desc: "Stripping suffixes to expose core root meanings." },
-    { title: "Stage 3: Transliteration", desc: "Bidirectional mapping for frictionless text inputs." },
-    { title: "Stage 4: Search Validation", desc: "Seeing the exact precision boost in a live index search." },
-    { title: "Launch & SDK Install", desc: "Adding the library components to your environment." }
+    {
+      title: "Stage 3: Transliteration",
+      desc: "Bidirectional mapping for frictionless text inputs.",
+    },
+    {
+      title: "Stage 4: Search Validation",
+      desc: "Seeing the exact precision boost in a live index search.",
+    },
+    { title: "Launch & SDK Install", desc: "Adding the library components to your environment." },
   ];
 
   return (
     <div className="space-y-20 py-8 md:py-16 px-4 max-w-7xl mx-auto font-sans relative">
-      
       {/* ── 1. TWO-COLUMN HERO SECTION ──────────────────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
         {/* Left Side: Headline & Copy */}
         <div className="lg:col-span-5 space-y-6 text-left">
-          
           {/* Tag Pill */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/15 dark:border-blue-500/20 text-[10px] font-mono font-bold text-blue-600 dark:text-sky-400 uppercase tracking-wider">
             <Cpu className="w-3.5 h-3.5" />
@@ -277,12 +286,16 @@ const stems = nlp.stem(normalized);`;
 
           {/* Large Title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.12]">
-            The interactive testground for <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">Amharic NLP</span>
+            The interactive testground for{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+              Amharic NLP
+            </span>
           </h1>
 
           {/* Description */}
           <p className="text-sm md:text-base text-zinc-655 dark:text-zinc-400 font-medium leading-relaxed max-w-lg">
-            Trace, benchmark, and visualize language processing pipelines in real-time. Test spell correction homophones, Light Stemming, and transliteration stages interactively.
+            Trace, benchmark, and visualize language processing pipelines in real-time. Test spell
+            correction homophones, Light Stemming, and transliteration stages interactively.
           </p>
 
           {/* CTA Buttons */}
@@ -295,7 +308,7 @@ const stems = nlp.stem(normalized);`;
               <span>Launch Lab Console</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            
+
             {onboardingDone && (
               <button
                 onClick={() => {
@@ -309,13 +322,11 @@ const stems = nlp.stem(normalized);`;
               </button>
             )}
           </div>
-
         </div>
 
         {/* Right Side: Code Console Terminal Widget (Always Dark Theme) */}
         <div className="lg:col-span-7">
           <div className="w-full rounded-xl border border-zinc-900 bg-[#070709] overflow-hidden flex flex-col font-mono text-zinc-300 shadow-2xl">
-            
             {/* Terminal Header Tabs */}
             <div className="bg-[#0b0b0e] px-4 py-2 border-b border-zinc-900/60 flex items-center justify-between">
               <div className="flex items-center gap-1">
@@ -324,7 +335,7 @@ const stems = nlp.stem(normalized);`;
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`px-3 py-1.5 rounded text-[10px] font-bold tracking-wider transition-colors cursor-pointer ${
-                      activeTab === tab 
+                      activeTab === tab
                         ? "bg-zinc-900 text-white border border-zinc-800"
                         : "text-zinc-500 hover:text-zinc-350"
                     }`}
@@ -340,38 +351,49 @@ const stems = nlp.stem(normalized);`;
                 className="text-zinc-500 hover:text-white transition-colors cursor-pointer p-1 rounded"
                 title="Copy code snippet"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
               </button>
             </div>
 
             {/* Terminal Panel Content */}
             <div className="p-6 space-y-5 min-h-[260px] flex flex-col justify-between">
-              
               {/* Output Content */}
               <div className="space-y-4">
                 {activeTab === "NORMALIZER" && (
                   <div className="space-y-3">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Normalizer Stage Output</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                      Normalizer Stage Output
+                    </span>
                     <div className="p-3 bg-[#0d0d11] border border-zinc-900 rounded-lg">
                       <p className="text-xs text-sky-450 font-bold leading-normal select-all">
                         {loading ? "..." : normalizedVal || "-"}
                       </p>
                     </div>
                     <p className="text-[10px] text-zinc-500 leading-normal">
-                      Harmonizes variable letter shapes to uniform canonical roots (e.g. ሀ, ሐ, ኀ, ሃ) to prevent index duplicate keys.
+                      Harmonizes variable letter shapes to uniform canonical roots (e.g. ሀ, ሐ, ኀ, ሃ)
+                      to prevent index duplicate keys.
                     </p>
                   </div>
                 )}
 
                 {activeTab === "STEMMER" && (
                   <div className="space-y-3">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Stems Stage Output</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                      Stems Stage Output
+                    </span>
                     <div className="flex flex-wrap gap-2 p-3 bg-[#0d0d11] border border-zinc-900 rounded-lg min-h-[48px]">
                       {loading ? (
                         <span className="text-xs text-zinc-500">...</span>
                       ) : stems.length > 0 ? (
                         stems.map((stem, idx) => (
-                          <span key={idx} className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-sky-400 border border-blue-900/10">
+                          <span
+                            key={idx}
+                            className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-sky-400 border border-blue-900/10"
+                          >
                             {stem}
                           </span>
                         ))
@@ -387,7 +409,9 @@ const stems = nlp.stem(normalized);`;
 
                 {activeTab === "TRANSLITERATOR" && (
                   <div className="space-y-3">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Transliteration mapping</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                      Transliteration mapping
+                    </span>
                     <div className="p-3 bg-[#0d0d11] border border-zinc-900 rounded-lg">
                       <p className="text-xs text-emerald-450 font-bold leading-normal select-all">
                         {loading ? "..." : sera || "-"}
@@ -401,7 +425,9 @@ const stems = nlp.stem(normalized);`;
 
                 {activeTab === "CODE" && (
                   <div className="space-y-3">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Workspace Setup Code</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                      Workspace Setup Code
+                    </span>
                     <pre className="p-3 bg-[#0d0d11] border border-zinc-900 rounded-lg text-[10px] text-zinc-300 overflow-x-auto whitespace-pre-wrap leading-relaxed select-all">
                       {codeSnippet}
                     </pre>
@@ -420,19 +446,18 @@ const stems = nlp.stem(normalized);`;
                     className="flex-grow bg-transparent border-0 outline-none focus:outline-none text-xs font-semibold text-zinc-100 placeholder-zinc-700"
                     placeholder="Enter Amharic text to trace compilation output..."
                   />
-                  {loading && <div className="w-3.5 h-3.5 border border-zinc-600 border-t-transparent rounded-full animate-spin shrink-0"></div>}
+                  {loading && (
+                    <div className="w-3.5 h-3.5 border border-zinc-600 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                  )}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-
       </section>
 
       {/* ── 2. PLATFORM FEATURES ────────────────────────────────────── */}
       <section className="space-y-8">
-        
         <div className="text-left space-y-2 max-w-lg">
           <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white font-sans tracking-tight">
             Lab Playground Modules
@@ -444,8 +469,10 @@ const stems = nlp.stem(normalized);`;
 
         {/* 3-column features card grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <Link href="/input" className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors">
+          <Link
+            href="/input"
+            className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors"
+          >
             <div>
               <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-600 block mb-4">
                 01
@@ -454,12 +481,16 @@ const stems = nlp.stem(normalized);`;
                 Lexical Normalizer
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                Type sentences to view side-by-side homophone character normalization and spelling corrections in real-time.
+                Type sentences to view side-by-side homophone character normalization and spelling
+                corrections in real-time.
               </p>
             </div>
           </Link>
 
-          <Link href="/pipeline" className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors">
+          <Link
+            href="/pipeline"
+            className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors"
+          >
             <div>
               <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-600 block mb-4">
                 02
@@ -468,12 +499,16 @@ const stems = nlp.stem(normalized);`;
                 Pipeline Stage Visualizer
               </h3>
               <p className="text-xs text-zinc-660 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                Trace step-by-step transformation traces from raw strings through stopwords removal, stemming, and SERA.
+                Trace step-by-step transformation traces from raw strings through stopwords removal,
+                stemming, and SERA.
               </p>
             </div>
           </Link>
 
-          <Link href="/search" className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors">
+          <Link
+            href="/search"
+            className="premium-card p-6 flex flex-col justify-between min-h-[180px] bg-white dark:bg-zinc-950/20 hover:border-blue-500 transition-colors"
+          >
             <div>
               <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-600 block mb-4">
                 03
@@ -482,19 +517,17 @@ const stems = nlp.stem(normalized);`;
                 Full-Text Search Engine
               </h3>
               <p className="text-xs text-zinc-660 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                Evaluate keyword overlap scores, inverted index parameters, and document tf-idf values interactively.
+                Evaluate keyword overlap scores, inverted index parameters, and document tf-idf
+                values interactively.
               </p>
             </div>
           </Link>
-
         </div>
-
       </section>
 
       {/* ── 3. ENGULFIING ONBOARDING INTERACTIVE WIZARD FULL-VIEWPORT ── */}
       {onboardingOpen && (
         <div className="fixed inset-0 w-screen h-screen z-[99999] bg-[#fafafa] dark:bg-[#030303] flex flex-col md:flex-row overflow-hidden animate-in fade-in duration-300">
-          
           {/* Left Panel: Step List & Info Header (Dark Industrial Side) */}
           <div className="md:w-80 bg-zinc-950 text-zinc-105 p-6 md:p-8 flex flex-col justify-between shrink-0 border-b md:border-b-0 md:border-r border-zinc-900">
             <div className="space-y-8">
@@ -522,19 +555,23 @@ const stems = nlp.stem(normalized);`;
                   const isActive = onboardingStep === idx;
                   return (
                     <div key={idx} className="flex gap-3 text-left items-start">
-                      <div className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold font-mono transition-colors ${
-                        isPassed 
-                          ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                          : isActive
-                            ? "bg-blue-600 text-white"
-                            : "bg-zinc-900 text-zinc-650 border border-zinc-800"
-                      }`}>
+                      <div
+                        className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold font-mono transition-colors ${
+                          isPassed
+                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                            : isActive
+                              ? "bg-blue-600 text-white"
+                              : "bg-zinc-900 text-zinc-650 border border-zinc-800"
+                        }`}
+                      >
                         {isPassed ? <Check className="w-3 h-3" /> : idx + 1}
                       </div>
                       <div>
-                        <p className={`text-xs font-bold font-sans transition-colors ${
-                          isActive ? "text-white" : "text-zinc-500"
-                        }`}>
+                        <p
+                          className={`text-xs font-bold font-sans transition-colors ${
+                            isActive ? "text-white" : "text-zinc-500"
+                          }`}
+                        >
                           {step.title}
                         </p>
                         {isActive && (
@@ -557,15 +594,12 @@ const stems = nlp.stem(normalized);`;
               >
                 Skip Onboarding
               </button>
-              <span className="text-[9px] font-mono text-zinc-600">
-                v0.1.6
-              </span>
+              <span className="text-[9px] font-mono text-zinc-600">v0.1.6</span>
             </div>
           </div>
 
           {/* Right Panel: Content Area & Sandboxes (Theme Responsive Pane) */}
           <div className="flex-1 bg-white dark:bg-[#030303] p-6 md:p-12 flex flex-col justify-between overflow-y-auto">
-            
             {/* Header / Dismiss Action */}
             <div className="flex justify-between items-start gap-4 border-b border-zinc-100 dark:border-zinc-900 pb-5">
               <div>
@@ -576,7 +610,7 @@ const stems = nlp.stem(normalized);`;
                   {onboardingSteps[onboardingStep].title}
                 </h2>
               </div>
-              <button 
+              <button
                 onClick={handleCompleteOnboarding}
                 className="p-1.5 border border-zinc-200 dark:border-zinc-900 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
               >
@@ -586,40 +620,55 @@ const stems = nlp.stem(normalized);`;
 
             {/* Stage Body */}
             <div className="flex-1 py-8 md:py-10 max-w-3xl">
-              
               {/* STEP 0: Introduction to Ge'ez computing problem */}
               {onboardingStep === 0 && (
                 <div className="space-y-6">
                   <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    Amharic language computation is fundamentally broken on traditional Western database structures. Traditional databases index text literally. Ge'ez syntax, however, creates massive information loss due to duplicate spelling shapes:
+                    Amharic language computation is fundamentally broken on traditional Western
+                    database structures. Traditional databases index text literally. Ge'ez syntax,
+                    however, creates massive information loss due to duplicate spelling shapes:
                   </p>
 
                   {/* Flow Diagram Block */}
                   <div className="p-5 border border-zinc-200 dark:border-zinc-900 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 space-y-4 animate-slide-up shadow-xs">
-                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">NLP Compilation Failure Model</span>
-                    
+                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">
+                      NLP Compilation Failure Model
+                    </span>
+
                     <div className="flex flex-col gap-3">
                       {/* Diagram Row 1 */}
                       <div className="flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border border-red-500/10 bg-red-500/[0.01] hover:scale-[1.01] transition-transform duration-200">
-                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 uppercase shrink-0">WITHOUT NLP</span>
+                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 uppercase shrink-0">
+                          WITHOUT NLP
+                        </span>
                         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                           <span>Query `ሐኪም`</span>
                           <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
-                          <span className="p-1 bg-zinc-200 dark:bg-zinc-900 rounded border text-[10px]">Database Search Index</span>
+                          <span className="p-1 bg-zinc-200 dark:bg-zinc-900 rounded border text-[10px]">
+                            Database Search Index
+                          </span>
                           <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
-                          <span className="text-red-500 font-bold">X (Zero hits for doc containing `ሀኪም`)</span>
+                          <span className="text-red-500 font-bold">
+                            X (Zero hits for doc containing `ሀኪም`)
+                          </span>
                         </div>
                       </div>
 
                       {/* Diagram Row 2 */}
                       <div className="flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border border-emerald-500/10 bg-emerald-500/[0.01] hover:scale-[1.01] transition-transform duration-200 animate-glow-pulse">
-                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 uppercase shrink-0">WITH FIDEL TOOLS</span>
+                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 uppercase shrink-0">
+                          WITH FIDEL TOOLS
+                        </span>
                         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                           <span>Query `ሐኪም`</span>
                           <ArrowRight className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="p-1 bg-blue-500/10 text-blue-500 rounded border border-blue-500/20 text-[10px] font-bold">Normalizer</span>
+                          <span className="p-1 bg-blue-500/10 text-blue-500 rounded border border-blue-500/20 text-[10px] font-bold">
+                            Normalizer
+                          </span>
                           <ArrowRight className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="text-emerald-500 font-bold">✔ Match! (Returns `ሀኪም`)</span>
+                          <span className="text-emerald-500 font-bold">
+                            ✔ Match! (Returns `ሀኪም`)
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -632,7 +681,9 @@ const stems = nlp.stem(normalized);`;
                         <h4 className="text-sm font-bold font-sans">Homophone Duplicates</h4>
                       </div>
                       <p className="text-xs text-zinc-550 dark:text-zinc-400 leading-relaxed font-sans">
-                        Identical sounding words use distinct spelling shapes. Searching for `ሐኪም` (doctor) misses entries stored as `ሀኪም` or `ሃኪም`. Index queries miss up to 40% of relevant records.
+                        Identical sounding words use distinct spelling shapes. Searching for `ሐኪም`
+                        (doctor) misses entries stored as `ሀኪም` or `ሃኪም`. Index queries miss up to
+                        40% of relevant records.
                       </p>
                     </div>
 
@@ -642,7 +693,8 @@ const stems = nlp.stem(normalized);`;
                         <h4 className="text-sm font-bold font-sans">Inflectional Bloat</h4>
                       </div>
                       <p className="text-xs text-zinc-550 dark:text-zinc-400 leading-relaxed font-sans">
-                        Suffixes mutate the word form. `ልጅ` (child) expands into `ልጆች`, `ልጅነት`, `ልጆቻችን`. Standard indexes treat these as entirely distinct entities.
+                        Suffixes mutate the word form. `ልጅ` (child) expands into `ልጆች`, `ልጅነት`,
+                        `ልጆቻችን`. Standard indexes treat these as entirely distinct entities.
                       </p>
                     </div>
                   </div>
@@ -653,18 +705,25 @@ const stems = nlp.stem(normalized);`;
               {onboardingStep === 1 && (
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    The **Lexical Normalizer** solves spelling divergence. It maps character shapes representing identical phonemes to unified canonical keys. Watch how we normalize the variations below into a single index query:
+                    The **Lexical Normalizer** solves spelling divergence. It maps character shapes
+                    representing identical phonemes to unified canonical keys. Watch how we
+                    normalize the variations below into a single index query:
                   </p>
 
                   {/* Normalizer Diagram */}
                   <div className="p-5 border border-zinc-200 dark:border-zinc-900 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 space-y-4 animate-slide-up shadow-xs">
-                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">Lexical Merging Pipeline</span>
-                    
+                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">
+                      Lexical Merging Pipeline
+                    </span>
+
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                       {/* Character boxes */}
                       <div className="flex gap-2 animate-float">
                         {["ሀ", "ሐ", "ኀ", "ሃ"].map((char) => (
-                          <div key={char} className="w-10 h-10 rounded-lg border border-zinc-350 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center font-bold text-sm text-zinc-800 dark:text-zinc-200 shadow-sm hover:scale-110 active:scale-95 transition-transform cursor-pointer">
+                          <div
+                            key={char}
+                            className="w-10 h-10 rounded-lg border border-zinc-350 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center font-bold text-sm text-zinc-800 dark:text-zinc-200 shadow-sm hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                          >
                             {char}
                           </div>
                         ))}
@@ -693,7 +752,9 @@ const stems = nlp.stem(normalized);`;
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                     <div className="space-y-2.5">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Variant Spelling A</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Variant Spelling A
+                      </span>
                       <input
                         type="text"
                         value={wizardNormInput}
@@ -706,7 +767,9 @@ const stems = nlp.stem(normalized);`;
                     </div>
 
                     <div className="space-y-2.5">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Variant Spelling B</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Variant Spelling B
+                      </span>
                       <input
                         type="text"
                         value={wizardNormInput2}
@@ -734,13 +797,16 @@ const stems = nlp.stem(normalized);`;
               {onboardingStep === 2 && (
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    The **Light Stemmer** exposes root lemmas. Suffixes and prefixes are parsed and stripped. Select a word below to test the extraction engine:
+                    The **Light Stemmer** exposes root lemmas. Suffixes and prefixes are parsed and
+                    stripped. Select a word below to test the extraction engine:
                   </p>
 
                   {/* Stemmer Diagram */}
                   <div className="p-5 border border-zinc-200 dark:border-zinc-900 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 space-y-4 animate-slide-up shadow-xs">
-                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">Suffix Stripping Flow</span>
-                    
+                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">
+                      Suffix Stripping Flow
+                    </span>
+
                     <div className="flex flex-wrap items-center justify-center gap-3 animate-float">
                       <div className="px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-xs font-bold text-emerald-500 hover:scale-105 transition-transform duration-200">
                         ልጅ (Root)
@@ -753,9 +819,9 @@ const stems = nlp.stem(normalized);`;
                       <div className="px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-xs font-bold text-red-400 line-through hover:scale-105 transition-transform duration-200">
                         ን (Suffix)
                       </div>
-                      
+
                       <ArrowRight className="w-5 h-5 text-zinc-400" />
-                      
+
                       <div className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-md animate-glow-pulse">
                         ልጅ (Final Stem)
                       </div>
@@ -765,9 +831,9 @@ const stems = nlp.stem(normalized);`;
                   <div className="flex flex-wrap gap-2 py-1">
                     {["ልጆቻቸውን", "ቤታችን", "ትምህርትቤቶች", "መምህራን"].map((word) => (
                       <button
-                         key={word}
-                         onClick={() => handleWizardStem(word)}
-                         className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-350 border border-zinc-200 dark:border-zinc-900 hover:border-blue-500 hover:scale-[1.05] active:scale-95 transition-all cursor-pointer"
+                        key={word}
+                        onClick={() => handleWizardStem(word)}
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-350 border border-zinc-200 dark:border-zinc-900 hover:border-blue-500 hover:scale-[1.05] active:scale-95 transition-all cursor-pointer"
                       >
                         {word}
                       </button>
@@ -776,7 +842,9 @@ const stems = nlp.stem(normalized);`;
 
                   <div className="flex gap-4 items-center bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-250 dark:border-zinc-900 rounded-xl p-5">
                     <div className="flex-1 space-y-2">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Grammatical Variant</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Grammatical Variant
+                      </span>
                       <input
                         type="text"
                         value={wizardStemInput}
@@ -788,7 +856,9 @@ const stems = nlp.stem(normalized);`;
                       <ArrowRight className="w-5 h-5" />
                     </div>
                     <div className="flex-1 space-y-2">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Lemma Base Root</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Lemma Base Root
+                      </span>
                       <div className="bg-[#09090b] border border-zinc-900 rounded-lg p-3.5 text-sm font-mono font-extrabold text-center text-emerald-450 min-h-[46px] flex items-center justify-center">
                         {stemLoading ? "..." : wizardStemOutput || "-"}
                       </div>
@@ -810,18 +880,25 @@ const stems = nlp.stem(normalized);`;
               {onboardingStep === 3 && (
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    The **Phonetic Transliterator** bridges Latin keyboards with Ge'ez Unicode. It parses phonetic sound mapping inputs standardly. Try typing or selecting Latin text below:
+                    The **Phonetic Transliterator** bridges Latin keyboards with Ge'ez Unicode. It
+                    parses phonetic sound mapping inputs standardly. Try typing or selecting Latin
+                    text below:
                   </p>
 
                   {/* Transliteration Keyboard Diagram */}
                   <div className="p-5 border border-zinc-200 dark:border-zinc-900 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 space-y-4 animate-slide-up shadow-xs">
-                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">SERA Keyboard Translation Model</span>
-                    
+                    <span className="text-[9px] font-bold font-mono tracking-widest text-zinc-405 dark:text-zinc-555 block uppercase">
+                      SERA Keyboard Translation Model
+                    </span>
+
                     <div className="flex flex-col items-center gap-3">
                       {/* Keyboard Keys Layout */}
                       <div className="flex gap-1.5 animate-float">
                         {["S", "E", "L", "A", "M"].map((k) => (
-                          <div key={k} className="px-3.5 py-2 rounded border border-zinc-350 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-zinc-800 dark:text-zinc-200 shadow-sm hover:-translate-y-1 hover:border-blue-500 transition-all cursor-pointer">
+                          <div
+                            key={k}
+                            className="px-3.5 py-2 rounded border border-zinc-350 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-zinc-800 dark:text-zinc-200 shadow-sm hover:-translate-y-1 hover:border-blue-500 transition-all cursor-pointer"
+                          >
                             {k}
                           </div>
                         ))}
@@ -860,7 +937,9 @@ const stems = nlp.stem(normalized);`;
 
                   <div className="flex gap-4 items-center bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-250 dark:border-zinc-900 rounded-xl p-5">
                     <div className="flex-1 space-y-2">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Latin characters</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Latin characters
+                      </span>
                       <input
                         type="text"
                         value={wizardTransInput}
@@ -872,7 +951,9 @@ const stems = nlp.stem(normalized);`;
                       <ArrowRight className="w-5 h-5" />
                     </div>
                     <div className="flex-1 space-y-2">
-                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">Ge'ez output</span>
+                      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 font-mono block">
+                        Ge'ez output
+                      </span>
                       <div className="bg-[#09090b] border border-zinc-900 rounded-lg p-3.5 text-sm font-mono font-extrabold text-center text-sky-400 min-h-[46px] flex items-center justify-center">
                         {transLoading ? "..." : wizardTransOutput || "-"}
                       </div>
@@ -894,15 +975,18 @@ const stems = nlp.stem(normalized);`;
               {onboardingStep === 4 && (
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-655 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    Let's search for **`ሐኪም`** in a small index corpus. The corpus contains spelling variants like `ሐኪሞች` and `ሃኪሙ`. Toggle the switch to see the exact contrast:
+                    Let's search for **`ሐኪም`** in a small index corpus. The corpus contains spelling
+                    variants like `ሐኪሞች` and `ሃኪሙ`. Toggle the switch to see the exact contrast:
                   </p>
 
                   <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900">
                     <div className="flex items-center gap-3">
                       <Search className="w-5 h-5 text-zinc-400" />
-                      <span className="text-sm font-bold text-zinc-850 dark:text-zinc-200 font-mono">Query: "{simulationSearchQuery}"</span>
+                      <span className="text-sm font-bold text-zinc-850 dark:text-zinc-200 font-mono">
+                        Query: "{simulationSearchQuery}"
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-zinc-400 dark:text-zinc-500">
                         Fidel Tools Engine
@@ -923,20 +1007,29 @@ const stems = nlp.stem(normalized);`;
                   </div>
 
                   <div className="space-y-2.5 animate-slide-up">
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-555 font-mono block">Corpus Matches</span>
+                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-555 font-mono block">
+                      Corpus Matches
+                    </span>
                     <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
                       {simulationResults.map((res) => {
                         const hasHit = res.score > 0;
                         return (
-                          <div key={res.id} className={`p-3.5 rounded-lg border text-sm flex justify-between items-center transition-all hover:scale-[1.01] ${
-                            hasHit 
-                              ? "bg-blue-500/[0.02] border-blue-500/20 text-zinc-800 dark:text-zinc-250" 
-                              : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-250 dark:border-zinc-900/40 text-zinc-400 opacity-50"
-                          }`}>
+                          <div
+                            key={res.id}
+                            className={`p-3.5 rounded-lg border text-sm flex justify-between items-center transition-all hover:scale-[1.01] ${
+                              hasHit
+                                ? "bg-blue-500/[0.02] border-blue-500/20 text-zinc-800 dark:text-zinc-250"
+                                : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-250 dark:border-zinc-900/40 text-zinc-400 opacity-50"
+                            }`}
+                          >
                             <span className="font-semibold line-clamp-1">{res.content}</span>
-                            <span className={`text-[10px] font-bold font-mono px-2.5 py-0.5 rounded ${
-                              hasHit ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400"
-                            }`}>
+                            <span
+                              className={`text-[10px] font-bold font-mono px-2.5 py-0.5 rounded ${
+                                hasHit
+                                  ? "bg-emerald-500/10 text-emerald-500"
+                                  : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400"
+                              }`}
+                            >
                               {hasHit ? `Match (${Math.round(res.score * 100)}%)` : "No Match"}
                             </span>
                           </div>
@@ -949,12 +1042,18 @@ const stems = nlp.stem(normalized);`;
                     {fidelSearchEnabled ? (
                       <span className="text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                        <span>✔ Success! Fidel Tools normalizes the spelling to a common root, and stems inflections, retrieving 100% of matches!</span>
+                        <span>
+                          ✔ Success! Fidel Tools normalizes the spelling to a common root, and stems
+                          inflections, retrieving 100% of matches!
+                        </span>
                       </span>
                     ) : (
                       <span className="text-red-500 font-bold flex items-center gap-1.5">
                         <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-                        <span>✘ Search Miss! Without preprocessing, literal search yields 0 matches because orthographic structures do not match the query exactly.</span>
+                        <span>
+                          ✘ Search Miss! Without preprocessing, literal search yields 0 matches
+                          because orthographic structures do not match the query exactly.
+                        </span>
                       </span>
                     )}
                   </div>
@@ -965,7 +1064,8 @@ const stems = nlp.stem(normalized);`;
               {onboardingStep === 5 && (
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-655 dark:text-zinc-400 font-medium leading-relaxed font-sans">
-                    Fidel Tools is available as an npm package for modern Node.js, Bun, and browser-based build environments. Run the following command in your terminal:
+                    Fidel Tools is available as an npm package for modern Node.js, Bun, and
+                    browser-based build environments. Run the following command in your terminal:
                   </p>
 
                   <div className="relative flex items-center bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-xl p-4">
@@ -977,7 +1077,11 @@ const stems = nlp.stem(normalized);`;
                       className="absolute right-4 p-1.5 rounded-md text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                       title="Copy install command"
                     >
-                      {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                      {copied ? (
+                        <Check className="w-4 h-4 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
 
@@ -986,13 +1090,13 @@ const stems = nlp.stem(normalized);`;
                     <div className="space-y-1 font-sans">
                       <p className="font-bold">Discovery Tour Completed!</p>
                       <p className="text-xs text-zinc-500 leading-normal">
-                        You have successfully verified all modules of the pipeline. You can now launch the dashboard environment to build your custom indexes.
+                        You have successfully verified all modules of the pipeline. You can now
+                        launch the dashboard environment to build your custom indexes.
                       </p>
                     </div>
                   </div>
                 </div>
               )}
-
             </div>
 
             {/* Stage Footer Navigation */}
@@ -1024,12 +1128,9 @@ const stems = nlp.stem(normalized);`;
                 </button>
               )}
             </div>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

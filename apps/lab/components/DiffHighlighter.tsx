@@ -42,9 +42,13 @@ export default function DiffHighlighter({ original, modified }: DiffHighlighterP
               key={index}
               className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/[0.04] dark:bg-amber-400/[0.02] border border-amber-500/10 dark:border-amber-400/10 text-xs font-mono"
             >
-              <span className="text-red-500 line-through decoration-red-500/50">{diff.o || "Ø"}</span>
+              <span className="text-red-500 line-through decoration-red-500/50">
+                {diff.o || "Ø"}
+              </span>
               <ArrowRight className="w-3 h-3 text-zinc-400" />
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{diff.m || "Ø"}</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                {diff.m || "Ø"}
+              </span>
             </span>
           );
         })}

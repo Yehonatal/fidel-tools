@@ -120,16 +120,14 @@ export default function SettingsClient({ user }: SettingsClientProps) {
             />
           </div>
           {profileMsg && (
-            <p className={`text-xs font-bold flex items-center gap-1 ${profileMsg.includes("Failed") ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+            <p
+              className={`text-xs font-bold flex items-center gap-1 ${profileMsg.includes("Failed") ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}
+            >
               {profileMsg.includes("Failed") ? null : <Check className="w-3.5 h-3.5" />}
               {profileMsg}
             </p>
           )}
-          <button
-            type="submit"
-            disabled={profileSaving}
-            className={btnClass}
-          >
+          <button type="submit" disabled={profileSaving} className={btnClass}>
             {profileSaving ? "Saving…" : "Save changes"}
           </button>
         </form>
@@ -187,11 +185,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
               {pwdMsg}
             </p>
           )}
-          <button
-            type="submit"
-            disabled={pwdSaving}
-            className={btnClass}
-          >
+          <button type="submit" disabled={pwdSaving} className={btnClass}>
             {pwdSaving ? "Changing…" : "Change password"}
           </button>
         </form>
@@ -204,8 +198,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
           Danger Zone
         </h2>
         <p className="text-xs font-medium text-slate-500 dark:text-zinc-500 mb-4">
-          Permanently delete your account and all associated data. This action
-          cannot be undone.
+          Permanently delete your account and all associated data. This action cannot be undone.
         </p>
 
         {showDelete ? (

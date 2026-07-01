@@ -34,7 +34,7 @@ export default function GeezCharMap() {
     { base: "ፀ", name: "Ts'ä", row: ["ፀ", "ፁ", "ፂ", "ፃ", "ፄ", "ፅ", "ፇ"] },
     { base: "ፈ", name: "Fä", row: ["ፈ", "ፉ", "ፊ", "ፋ", "ፌ", "ፍ", "ፎ"] },
     { base: "ፐ", name: "Pä", row: ["ፐ", "ፑ", "ፒ", "ፓ", "ፔ", "ፕ", "ፖ"] },
-  ].filter((c, idx, arr) => arr.findIndex(item => item.base === c.base) === idx); // Deduplicate rows
+  ].filter((c, idx, arr) => arr.findIndex((item) => item.base === c.base) === idx); // Deduplicate rows
 
   const vowels = ["1st (ä)", "2nd (u)", "3rd (i)", "4th (a)", "5th (e)", "6th (ə)", "7th (o)"];
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
@@ -70,10 +70,12 @@ export default function GeezCharMap() {
             Click any character to view its phonetic SERA transliteration.
           </p>
         </div>
-        
+
         {selectedChar && (
           <div className="flex items-center gap-3.5 bg-blue-500/5 dark:bg-blue-500/10 px-4 py-2 rounded-lg border border-blue-500/20 font-mono text-sm">
-            <span className="font-extrabold text-zinc-900 dark:text-white text-lg">{selectedChar}</span>
+            <span className="font-extrabold text-zinc-900 dark:text-white text-lg">
+              {selectedChar}
+            </span>
             <span className="text-blue-500 font-bold">&rarr;</span>
             <span className="font-black text-blue-600 dark:text-sky-400">{seraValue}</span>
           </div>
@@ -84,17 +86,30 @@ export default function GeezCharMap() {
         <table className="w-full text-center font-mono text-xs border-collapse min-w-[550px]">
           <thead>
             <tr className="border-b border-zinc-200 dark:border-zinc-900">
-              <th className="px-3 py-2 text-zinc-400 dark:text-zinc-500 text-left font-bold text-[9px] uppercase tracking-wider">Root</th>
+              <th className="px-3 py-2 text-zinc-400 dark:text-zinc-500 text-left font-bold text-[9px] uppercase tracking-wider">
+                Root
+              </th>
               {vowels.map((v) => (
-                <th key={v} className="px-2 py-2 text-zinc-400 dark:text-zinc-500 font-bold text-[9px] uppercase tracking-wider">{v}</th>
+                <th
+                  key={v}
+                  className="px-2 py-2 text-zinc-400 dark:text-zinc-500 font-bold text-[9px] uppercase tracking-wider"
+                >
+                  {v}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-150 dark:divide-zinc-900/60">
             {consonants.map((c) => (
-              <tr key={c.base} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/20 transition-colors">
+              <tr
+                key={c.base}
+                className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/20 transition-colors"
+              >
                 <td className="px-3 py-1.5 font-bold text-left text-zinc-900 dark:text-white border-r border-zinc-150 dark:border-zinc-900/40 pr-4">
-                  {c.base} <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-normal">({c.name})</span>
+                  {c.base}{" "}
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-normal">
+                    ({c.name})
+                  </span>
                 </td>
                 {c.row.map((char, index) => (
                   <td key={index} className="px-1 py-1.5">

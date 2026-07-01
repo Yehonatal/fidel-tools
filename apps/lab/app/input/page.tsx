@@ -66,7 +66,6 @@ const handleInputChange = async (val: string) => {
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -78,13 +77,14 @@ const handleInputChange = async (val: string) => {
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          This module acts as a live &quot;spellcheck compiler&quot; that collapses spelling inconsistencies as the user types. This ensures uniform database indexing across spelling homophones.
+          This module acts as a live &quot;spellcheck compiler&quot; that collapses spelling
+          inconsistencies as the user types. This ensures uniform database indexing across spelling
+          homophones.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Input Text Box */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -132,7 +132,6 @@ const handleInputChange = async (val: string) => {
 
           {/* Output Panel */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Normalized Output Box */}
             <div className="premium-card p-5 space-y-3">
               <div className="flex items-center gap-2">
@@ -142,20 +141,19 @@ const handleInputChange = async (val: string) => {
                 </h4>
               </div>
               <p className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-150 dark:border-zinc-900 min-h-[60px] break-all leading-relaxed select-all">
-                {normalizedText || <span className="text-zinc-450 font-semibold italic">Waiting for input...</span>}
+                {normalizedText || (
+                  <span className="text-zinc-450 font-semibold italic">Waiting for input...</span>
+                )}
               </p>
             </div>
 
             {/* Diffs visualization */}
-            {normalizedText && (
-              <DiffHighlighter original={rawText} modified={normalizedText} />
-            )}
+            {normalizedText && <DiffHighlighter original={rawText} modified={normalizedText} />}
 
             <div className="block lg:hidden">
               <CodeSnippet title="Input Component Integration Code" code={codeSnippet} />
             </div>
           </div>
-
         </div>
       </div>
     </div>

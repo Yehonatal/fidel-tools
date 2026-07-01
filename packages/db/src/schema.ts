@@ -66,10 +66,7 @@ export const verifications = pgTable("verifications", {
 
 // ── API Keys ──────────────────────────────────────────────────────────────────
 
-export const apiKeyStatusEnum = pgEnum("api_key_status", [
-  "active",
-  "revoked",
-]);
+export const apiKeyStatusEnum = pgEnum("api_key_status", ["active", "revoked"]);
 
 export const apiKeys = pgTable(
   "api_keys",
@@ -86,10 +83,7 @@ export const apiKeys = pgTable(
     expiresAt: timestamp("expires_at"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [
-    index("api_keys_user_id_idx").on(t.userId),
-    index("api_keys_key_hash_idx").on(t.keyHash),
-  ]
+  (t) => [index("api_keys_user_id_idx").on(t.userId), index("api_keys_key_hash_idx").on(t.keyHash)],
 );
 
 // ── Usage Tracking ────────────────────────────────────────────────────────────
@@ -114,7 +108,7 @@ export const usageLogs = pgTable(
   (t) => [
     index("usage_logs_user_id_idx").on(t.userId),
     index("usage_logs_created_at_idx").on(t.createdAt),
-  ]
+  ],
 );
 
 // Monthly aggregates (updated by a cron or triggers)

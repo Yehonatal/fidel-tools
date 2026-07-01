@@ -109,7 +109,6 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/") {
     return (
       <div className="min-h-screen flex flex-col w-full relative">
-        
         {/* Landing Top Header */}
         <header className="w-full border-b border-zinc-200 dark:border-zinc-900 bg-white/70 dark:bg-black/70 backdrop-blur-md sticky top-0 z-40 transition-colors">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -135,10 +134,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Children marketing components */}
-        <main className="flex-grow w-full">
-          {children}
-        </main>
-        
+        <main className="flex-grow w-full">{children}</main>
       </div>
     );
   }
@@ -146,7 +142,6 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
   // 2. Dashboard Playground Console layout (Docked full-height sidebar, scroll-locked viewport)
   return (
     <div className="min-h-screen md:h-screen flex flex-col md:flex-row w-full relative md:overflow-hidden bg-[#fafafa] dark:bg-[#030303]">
-      
       {/* Mobile Header (Hidden on Desktop) */}
       <div className="md:hidden w-full h-16 px-4 border-b border-zinc-200 dark:border-zinc-900 bg-white/80 dark:bg-black/80 backdrop-blur-md flex items-center justify-between sticky top-0 z-40 shrink-0">
         <Link href="/" className="flex items-center gap-2.5">
@@ -157,7 +152,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
             Labs
           </span>
         </Link>
-        
+
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <button
@@ -176,9 +171,11 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         {/* Workspace header */}
-        <div className={`border-b border-zinc-200 dark:border-zinc-900 flex items-center shrink-0 h-14 overflow-hidden ${
-          isCollapsed ? "justify-center px-2" : "justify-start px-4"
-        }`}>
+        <div
+          className={`border-b border-zinc-200 dark:border-zinc-900 flex items-center shrink-0 h-14 overflow-hidden ${
+            isCollapsed ? "justify-center px-2" : "justify-start px-4"
+          }`}
+        >
           <Link href="/" className="flex items-center gap-2.5 select-none">
             <span className="font-loga text-2xl font-light text-zinc-900 dark:text-white shrink-0">
               {isCollapsed ? "ፊ" : "ፊደል"}
@@ -212,13 +209,17 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
                   <span className="absolute left-0 top-[20%] w-0.5 h-[60%] rounded bg-blue-500" />
                 )}
 
-                <span className={`shrink-0 transition-colors ${active ? "text-blue-600 dark:text-blue-400" : "text-zinc-400 dark:text-zinc-500"}`}>
+                <span
+                  className={`shrink-0 transition-colors ${active ? "text-blue-600 dark:text-blue-400" : "text-zinc-400 dark:text-zinc-500"}`}
+                >
                   {item.icon}
                 </span>
-                
-                <span className={`flex-grow text-left leading-none transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                  isCollapsed ? "w-0 opacity-0 max-w-0" : "w-auto opacity-100 max-w-[200px]"
-                }`}>
+
+                <span
+                  className={`flex-grow text-left leading-none transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                    isCollapsed ? "w-0 opacity-0 max-w-0" : "w-auto opacity-100 max-w-[200px]"
+                  }`}
+                >
                   {item.name}
                 </span>
               </Link>
@@ -248,7 +249,9 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
 
         {/* Desktop Sidebar Pinned Theme Switcher */}
         <div className="border-t border-zinc-200 dark:border-zinc-900 p-3 bg-zinc-100/10 dark:bg-zinc-950/20 shrink-0">
-          <div className={`flex items-center justify-between ${isCollapsed ? "justify-center" : "px-1"}`}>
+          <div
+            className={`flex items-center justify-between ${isCollapsed ? "justify-center" : "px-1"}`}
+          >
             {!isCollapsed && (
               <span className="text-[9px] font-bold font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-widest whitespace-nowrap">
                 Theme Toggle
@@ -276,7 +279,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </div>
-          
+
           <nav className="flex flex-col gap-2">
             <Link
               href="/"
@@ -292,10 +295,12 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
               </span>
               <div>
                 <p className="text-xs font-bold leading-none">Lab Landing Overview</p>
-                <p className="text-[10px] text-zinc-500 mt-1 leading-tight font-semibold">NLP features presentation and quick start</p>
+                <p className="text-[10px] text-zinc-500 mt-1 leading-tight font-semibold">
+                  NLP features presentation and quick start
+                </p>
               </div>
             </Link>
-            
+
             {navigation.map((item) => {
               const active = pathname === item.href;
               return (
@@ -314,7 +319,9 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
                   </span>
                   <div>
                     <p className="text-xs font-bold leading-none">{item.name}</p>
-                    <p className="text-[10px] text-zinc-500 mt-1 leading-tight font-semibold">{item.desc}</p>
+                    <p className="text-[10px] text-zinc-500 mt-1 leading-tight font-semibold">
+                      {item.desc}
+                    </p>
                   </div>
                 </Link>
               );
@@ -325,11 +332,8 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content viewport panel */}
       <main className="flex-grow min-w-0 overflow-y-auto h-full">
-        <div className="w-full h-full">
-          {children}
-        </div>
+        <div className="w-full h-full">{children}</div>
       </main>
-
     </div>
   );
 }

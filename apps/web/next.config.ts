@@ -20,11 +20,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   // Transpile workspace packages
-  transpilePackages: [
-    "@fidel-tools/db",
-    "@fidel-tools/core",
-    "@fidel-tools/lang-am",
-  ],
+  transpilePackages: ["@fidel-tools/db", "@fidel-tools/core", "@fidel-tools/lang-am"],
 
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

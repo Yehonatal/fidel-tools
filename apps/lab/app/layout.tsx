@@ -6,7 +6,8 @@ import PageLoader from "@/components/PageLoader";
 
 export const metadata: Metadata = {
   title: "Fidel Lab — Interactive NLP Console",
-  description: "Interactive playground, transliteration sandbox, and tokenization tools for Amharic language processing.",
+  description:
+    "Interactive playground, transliteration sandbox, and tokenization tools for Amharic language processing.",
 };
 
 export default function RootLayout({
@@ -18,16 +19,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function() {
             try {
               const saved = localStorage.getItem("fidel-theme");
@@ -45,11 +44,16 @@ export default function RootLayout({
               }
             } catch (e) {}
           })();
-        `}} />
+        `,
+          }}
+        />
       </head>
-      <body suppressHydrationWarning className="min-h-screen antialiased relative text-zinc-900 dark:text-zinc-300 transition-colors duration-300">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen antialiased relative text-zinc-900 dark:text-zinc-300 transition-colors duration-300"
+      >
         <PageLoader />
-        
+
         {/* Background elements mirroring apps/web */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="bg-grid absolute inset-0 text-slate-900/[0.025] dark:text-white/[0.012] transition-colors duration-300"></div>
@@ -62,7 +66,6 @@ export default function RootLayout({
             <LabShell>{children}</LabShell>
           </AOSProvider>
         </div>
-
       </body>
     </html>
   );

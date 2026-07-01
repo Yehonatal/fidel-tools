@@ -12,17 +12,17 @@ const app = new OpenAPIHono();
 
 // Initialize DB schema & default developer API keys
 initDb().catch((err) => {
-    console.error("Database initialization failed on startup:", err);
+  console.error("Database initialization failed on startup:", err);
 });
 
 // Global Middlewares
 app.use(
-    "*",
-    cors({
-        origin: "*",
-        allowMethods: ["GET", "POST", "OPTIONS"],
-        allowHeaders: ["Content-Type", "x-api-key", "Authorization"],
-    }),
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "x-api-key", "Authorization"],
+  }),
 );
 app.use("*", logger());
 app.use("*", prettyJSON());
@@ -34,30 +34,29 @@ app.route("/api/v1/nlp", nlpRouter);
 
 // Base health check & status endpoint (Industry Standard API Root)
 app.get("/", (c) => {
-    return c.json({
-        name: "fidel-tools-api",
-        description:
-            "Production-ready OpenAPI-compliant API for Amharic NLP pre-processing",
-        version: "0.1.6",
-        status: "operational",
-        documentation: "/docs",
-        endpoints: {
-            health: { path: "/", method: "GET", status: "active" },
-            docs: { path: "/docs", method: "GET", status: "active" },
-            openapi: { path: "/openapi.json", method: "GET", status: "active" },
-        },
-    });
+  return c.json({
+    name: "fidel-tools-api",
+    description: "Production-ready OpenAPI-compliant API for Amharic NLP pre-processing",
+    version: "0.1.6",
+    status: "operational",
+    documentation: "/docs",
+    endpoints: {
+      health: { path: "/", method: "GET", status: "active" },
+      docs: { path: "/docs", method: "GET", status: "active" },
+      openapi: { path: "/openapi.json", method: "GET", status: "active" },
+    },
+  });
 });
 
 // OpenAPI Spec Generation
 app.doc("/openapi.json", {
-    openapi: "3.0.0",
-    info: {
-        title: "ፊደል Tools API",
-        version: "0.1.6",
-        description:
-            "ፊደል (Fidel) Tools is a developer-first suite of high-performance natural language processing APIs built specifically for Ethiopic languages. This reference provides interactive documentation for our production-grade NLP preprocessing endpoints (normalization, tokenization, stopword removal, morphological stemming, transliteration).",
-    },
+  openapi: "3.0.0",
+  info: {
+    title: "ፊደል Tools API",
+    version: "0.1.6",
+    description:
+      "ፊደል (Fidel) Tools is a developer-first suite of high-performance natural language processing APIs built specifically for Ethiopic languages. This reference provides interactive documentation for our production-grade NLP preprocessing endpoints (normalization, tokenization, stopword removal, morphological stemming, transliteration).",
+  },
 });
 
 // Custom CSS styling for Scalar to align with Fidel Tools landing page design system
@@ -74,31 +73,28 @@ const customCss = `
 
 // Scalar Documentation
 app.get("/docs", (c, next) => {
-    const themeParam = c.req.query("theme") || "dark";
-    const forceDarkModeState = themeParam === "light" ? "light" : "dark";
-    return apiReference({
-        spec: { url: "/openapi.json" },
-        pageTitle: "ፊደል Tools API Reference",
-        customCss,
-        forceDarkModeState,
-    })(c, next);
+  const themeParam = c.req.query("theme") || "dark";
+  const forceDarkModeState = themeParam === "light" ? "light" : "dark";
+  return apiReference({
+    spec: { url: "/openapi.json" },
+    pageTitle: "ፊደል Tools API Reference",
+    customCss,
+    forceDarkModeState,
+  })(c, next);
 });
 
 // Unhandled error recovery handler
 app.onError((err, c) => {
-    console.error("Unhandled API Exception:", err);
-    return c.json(
-        { error: "Internal Server Error", message: err.message },
-        500,
-    );
+  console.error("Unhandled API Exception:", err);
+  return c.json({ error: "Internal Server Error", message: err.message }, 500);
 });
 
 // Start serve instance
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 console.log(`Server listening on port ${port}`);
 serve({
-    fetch: app.fetch,
-    port,
+  fetch: app.fetch,
+  port,
 });
 
 export default app;

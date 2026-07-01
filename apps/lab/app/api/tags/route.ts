@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     const lexed = nlp.lexAnalyze(normalized);
     const cleaned = nlp.removeStopwords(lexed);
     const tokens = cleaned.split(/\s+/).filter(Boolean);
-    const stems = tokens.map(w => nlp.stem(w));
+    const stems = tokens.map((w) => nlp.stem(w));
 
     const freq: Record<string, number> = {};
-    stems.forEach(s => {
+    stems.forEach((s) => {
       if (s.length > 1) {
         freq[s] = (freq[s] || 0) + 1;
       }
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       .sort(([, a], [, b]) => b - a)
       .slice(0, limit)
       .map(([stem, count]) => {
-        const rawWords = text.split(/\s+/).filter(w => {
+        const rawWords = text.split(/\s+/).filter((w) => {
           try {
             return nlp.stem(nlp.normalize(w)) === stem;
           } catch {

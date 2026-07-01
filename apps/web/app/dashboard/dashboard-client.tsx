@@ -4,15 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import OnboardingWizard from "@/components/onboarding-wizard";
 import QuickStartClient from "@/components/quick-start-client";
-import {
-  Key,
-  Cpu,
-  ChevronRight,
-  Code2,
-  Layers,
-  Activity,
-  Award
-} from "lucide-react";
+import { Key, Cpu, ChevronRight, Code2, Layers, Activity, Award } from "lucide-react";
 
 interface ApiKey {
   id: string;
@@ -35,12 +27,7 @@ interface DashboardClientProps {
   displayKey: string;
 }
 
-export default function DashboardClient({
-  user,
-  keys,
-  stats,
-  displayKey
-}: DashboardClientProps) {
+export default function DashboardClient({ user, keys, stats, displayKey }: DashboardClientProps) {
   const [showOnboarding, setShowOnboarding] = useState(true);
 
   useEffect(() => {
@@ -59,7 +46,6 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-6">
-      
       {/* Tab Selectors to switch between Onboarding Guide and Live Telemetry Console */}
       <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-zinc-900 pb-4 mb-4">
         <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-950 p-0.5 rounded-md border border-slate-200/50 dark:border-zinc-900">
@@ -100,7 +86,6 @@ export default function DashboardClient({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
           {/* Main stats + quickstart */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Stats Connected Grid Card */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/20 rounded-md overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-zinc-800">
               {stats.map((stat, i) => (
@@ -178,7 +163,9 @@ export default function DashboardClient({
                 </div>
               ) : (
                 <div className="h-24 flex flex-col items-center justify-center border border-dashed border-slate-200 dark:border-zinc-800 rounded">
-                  <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-500">No API keys created yet.</span>
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-500">
+                    No API keys created yet.
+                  </span>
                   <Link
                     href="/dashboard/api-keys"
                     className="text-[10px] font-bold text-blue-600 dark:text-sky-400 hover:underline mt-1"
@@ -199,8 +186,10 @@ export default function DashboardClient({
                 Explore query parameters for transliteration, normalization, and stemming.
               </p>
               <div className="bg-slate-950 dark:bg-black p-3 rounded border border-slate-200/30 dark:border-zinc-800 font-mono text-[10px] text-zinc-400 mb-4 leading-relaxed">
-                <span className="text-emerald-400 font-bold">POST</span> /api/v1/normalize<br/>
-                <span className="text-blue-400 font-bold">POST</span> /api/v1/stem<br/>
+                <span className="text-emerald-400 font-bold">POST</span> /api/v1/normalize
+                <br />
+                <span className="text-blue-400 font-bold">POST</span> /api/v1/stem
+                <br />
                 <span className="text-amber-400 font-bold">POST</span> /api/v1/transliterate
               </div>
               <a

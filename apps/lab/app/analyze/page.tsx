@@ -8,7 +8,7 @@ import { BarChart2, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function AnalyzePage() {
   const [text, setText] = useState(
-    "የአዲስ አበባ ከተማ አስተዳደር ትምህርት ቢሮ በትምህርት ቤቶች ውስጥ የሚታዩትን የትምህርት ጥራት ችግሮች ለመፍታት አዲስ መመሪያ አወጣ። መመሪያው መምህራን በተገቢው መንገድ እንዲያስተምሩ እና ተማሪዎችም በትጋት እንዲያጠኑ ያዛል። ት/ቤት መሄድ ግዴታ ነው።"
+    "የአዲስ አበባ ከተማ አስተዳደር ትምህርት ቢሮ በትምህርት ቤቶች ውስጥ የሚታዩትን የትምህርት ጥራት ችግሮች ለመፍታት አዲስ መመሪያ አወጣ። መመሪያው መምህራን በተገቢው መንገድ እንዲያስተምሩ እና ተማሪዎችም በትጋት እንዲያጠኑ ያዛል። ት/ቤት መሄድ ግዴታ ነው።",
   );
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
@@ -49,9 +49,7 @@ export default function AnalyzePage() {
     : [];
 
   const stopwordRatio = data?.wordCount
-    ? Math.round(
-        ((data.wordCount.raw - data.wordCount.afterProcessing) / data.wordCount.raw) * 100
-      )
+    ? Math.round(((data.wordCount.raw - data.wordCount.afterProcessing) / data.wordCount.raw) * 100)
     : 0;
 
   const codeSnippet = `// Document Analysis Pipeline
@@ -65,7 +63,6 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -77,13 +74,14 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Audit the grammatical and semantic density of a text. This system isolates keywords by stripping stopwords, collapses words into their morphological stems, and provides real-time vocabulary charts.
+          Audit the grammatical and semantic density of a text. This system isolates keywords by
+          stripping stopwords, collapses words into their morphological stems, and provides
+          real-time vocabulary charts.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Document Editor */}
           <div className="lg:col-span-1 space-y-6">
             <div className="premium-card flex flex-col overflow-hidden">
@@ -120,7 +118,6 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
 
           {/* Results grid */}
           <div className="lg:col-span-2 space-y-6">
-            
             {error && (
               <div className="p-4 border border-red-500/20 bg-red-500/5 rounded-md flex gap-3 text-red-500 text-xs font-mono">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -135,20 +132,31 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
               </div>
             ) : data ? (
               <div className="space-y-6">
-                
                 {/* Density statistics */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Raw Word Count</span>
-                    <span className="text-xl font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">{data.wordCount.raw}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Raw Word Count
+                    </span>
+                    <span className="text-xl font-mono font-extrabold text-zinc-900 dark:text-white mt-1 block">
+                      {data.wordCount.raw}
+                    </span>
                   </div>
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Cleaned Tokens</span>
-                    <span className="text-xl font-mono font-extrabold text-blue-600 dark:text-sky-400 mt-1 block">{data.wordCount.afterProcessing}</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Cleaned Tokens
+                    </span>
+                    <span className="text-xl font-mono font-extrabold text-blue-600 dark:text-sky-400 mt-1 block">
+                      {data.wordCount.afterProcessing}
+                    </span>
                   </div>
                   <div className="premium-card p-4">
-                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">Stopword Ratio</span>
-                    <span className="text-xl font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1 block">{stopwordRatio}%</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
+                      Stopword Ratio
+                    </span>
+                    <span className="text-xl font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1 block">
+                      {stopwordRatio}%
+                    </span>
                   </div>
                 </div>
 
@@ -161,7 +169,13 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
                     <div className="w-full h-48">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData}>
-                          <XAxis dataKey="name" stroke="#888888" fontSize={9} tickLine={false} axisLine={false} />
+                          <XAxis
+                            dataKey="name"
+                            stroke="#888888"
+                            fontSize={9}
+                            tickLine={false}
+                            axisLine={false}
+                          />
                           <YAxis stroke="#888888" fontSize={9} tickLine={false} axisLine={false} />
                           <Tooltip
                             contentStyle={{
@@ -172,7 +186,12 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
                               color: "#ffffff",
                             }}
                           />
-                          <Bar dataKey="frequency" fill="#2563eb" radius={[2, 2, 0, 0]} maxBarSize={30} />
+                          <Bar
+                            dataKey="frequency"
+                            fill="#2563eb"
+                            radius={[2, 2, 0, 0]}
+                            maxBarSize={30}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -191,12 +210,9 @@ const transliterated = nlp.feligTransliterate(cleaned, 'am');`;
                     {data.transliterated}
                   </p>
                 </div>
-
               </div>
             ) : null}
-
           </div>
-
         </div>
       </div>
     </div>

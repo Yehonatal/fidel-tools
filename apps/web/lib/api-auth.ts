@@ -6,33 +6,26 @@ import { eq } from "drizzle-orm";
 
 export async function withApiAuth(
   req: NextRequest,
-  handler: (userId: string, keyId: string) => Promise<NextResponse>
+  handler: (userId: string, keyId: string) => Promise<NextResponse>,
 ): Promise<NextResponse> {
   const start = Date.now();
   const raw =
-    req.headers.get("x-api-key") ??
-    req.headers.get("authorization")?.replace("Bearer ", "");
+    req.headers.get("x-api-key") ?? req.headers.get("authorization")?.replace("Bearer ", "");
 
   if (!raw) {
     return NextResponse.json(
       { error: "Missing API key. Provide X-API-Key header." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
   const { valid, userId, keyId } = await validateApiKey(raw);
   if (!valid || !userId || !keyId) {
-    return NextResponse.json(
-      { error: "Invalid or revoked API key." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid or revoked API key." }, { status: 401 });
   }
 
   // Fetch user tier for rate limit selection
-  const [user] = await db
-    .select({ tier: users.tier })
-    .from(users)
-    .where(eq(users.id, userId));
+  const [user] = await db.select({ tier: users.tier }).from(users).where(eq(users.id, userId));
   const limiter = user?.tier === "pro" ? apiRateLimitPro : apiRateLimit;
 
   const { success, limit, remaining, reset } = await limiter.limit(userId);
@@ -47,7 +40,7 @@ export async function withApiAuth(
           "X-RateLimit-Reset": String(reset),
           "Retry-After": String(Math.ceil((reset - Date.now()) / 1000)),
         },
-      }
+      },
     );
   }
 
@@ -56,10 +49,7 @@ export async function withApiAuth(
     response = await handler(userId, keyId);
   } catch (err) {
     console.error(err);
-    response = NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    response = NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   // Log usage (fire-and-forget)

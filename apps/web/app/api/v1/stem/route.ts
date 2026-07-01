@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: "Missing 'word' string or 'words' array in request body" },
-      { status: 400 }
+      { status: 400 },
     );
   });
 }

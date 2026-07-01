@@ -74,7 +74,6 @@ const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
 
   return (
     <div className="animate-in fade-in duration-300">
-      
       {/* Title block */}
       <div className="sticky top-0 z-20 px-6 md:px-8 pt-6 md:pt-8 pb-5 bg-[#fafafa]/95 dark:bg-[#030303]/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-200 space-y-2 mb-6 md:mb-8">
         <div className="flex items-center gap-2.5">
@@ -86,19 +85,21 @@ const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
           </h2>
         </div>
         <p className="text-xs font-medium text-zinc-550 dark:text-zinc-400 max-w-3xl leading-relaxed font-sans">
-          Convert Ge&apos;ez Unicode characters into their phonetic ASCII equivalents (SERA) and vice versa. This enables integration with legacy ASCII-only databases or SMS gateways.
+          Convert Ge&apos;ez Unicode characters into their phonetic ASCII equivalents (SERA) and
+          vice versa. This enables integration with legacy ASCII-only databases or SMS gateways.
         </p>
       </div>
 
       <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Converter Panes */}
           <div className="lg:col-span-2 space-y-6">
-            
             <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-900 pb-3">
               <span className="text-[10px] font-mono font-bold text-zinc-405 dark:text-zinc-555 uppercase tracking-widest">
-                Direction: {direction === "to-sera" ? "Ge'ez Unicode ➔ SERA ASCII" : "SERA ASCII ➔ Ge'ez Unicode"}
+                Direction:{" "}
+                {direction === "to-sera"
+                  ? "Ge'ez Unicode ➔ SERA ASCII"
+                  : "SERA ASCII ➔ Ge'ez Unicode"}
               </span>
               <button
                 onClick={toggleDirection}
@@ -117,7 +118,6 @@ const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               {/* Input Pane */}
               <div className="premium-card flex flex-col min-h-[180px] overflow-hidden">
                 <div className="bg-zinc-50 dark:bg-zinc-950 px-4 py-2 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between shrink-0">
@@ -144,23 +144,24 @@ const geez = nlp.feligTransliterate("selam", "en") // -> "ሰላም"`;
                 </div>
                 <div className="p-4 flex-grow flex flex-col">
                   <div className="w-full flex-grow bg-transparent text-sm md:text-base font-mono font-extrabold text-blue-600 dark:text-sky-405 leading-relaxed break-all select-all overflow-y-auto max-h-[140px]">
-                    {loading ? "Translating..." : result || <span className="text-zinc-400 font-semibold italic">Waiting...</span>}
+                    {loading
+                      ? "Translating..."
+                      : result || (
+                          <span className="text-zinc-400 font-semibold italic">Waiting...</span>
+                        )}
                   </div>
                 </div>
               </div>
-
             </div>
 
             {/* Interactive grid */}
             <GeezCharMap />
-
           </div>
 
           {/* Code representation */}
           <div className="lg:col-span-1">
             <CodeSnippet title="SDK Transliteration Code" code={codeSnippet} />
           </div>
-
         </div>
       </div>
     </div>

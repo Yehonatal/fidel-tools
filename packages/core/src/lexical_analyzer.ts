@@ -8,20 +8,20 @@ import type { LanguagePack } from "./types.js";
  * @returns : Lexically analyzed Amharic text
  */
 export function lexAnalyze(corpus: string, pack: LanguagePack): string {
-    // Expand exceptions (abbreviations)
-    if (pack.tokenization && pack.tokenization.exceptions) {
-        for (const key in pack.tokenization.exceptions) {
-            const expansion = pack.tokenization.exceptions[key].join(" ");
-            corpus = corpus.replaceAll(key, expansion);
-        }
+  // Expand exceptions (abbreviations)
+  if (pack.tokenization && pack.tokenization.exceptions) {
+    for (const key in pack.tokenization.exceptions) {
+      const expansion = pack.tokenization.exceptions[key].join(" ");
+      corpus = corpus.replaceAll(key, expansion);
     }
+  }
 
-    corpus = corpus
-        .replace(/[.\?"',/#!$%^&*;:፤።{}=\-_`~()]/g, " ")
-        .replace(/[.፩፪፫፬፭፮፯፰፱፲፳፴፵፶፷፸፹፺፻0123456789]/g, " ")
-        .replace(/\s{2,}/g, " ");
+  corpus = corpus
+    .replace(/[.\?"',/#!$%^&*;:፤።{}=\-_`~()]/g, " ")
+    .replace(/[.፩፪፫፬፭፮፯፰፱፲፳፴፵፶፷፸፹፺፻0123456789]/g, " ")
+    .replace(/\s{2,}/g, " ");
 
-    return corpus;
+  return corpus;
 }
 
 export default lexAnalyze;

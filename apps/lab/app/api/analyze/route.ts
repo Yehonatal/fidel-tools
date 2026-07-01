@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     const lexed = nlp.lexAnalyze(normalized);
     const cleaned = nlp.removeStopwords(lexed);
     const tokens = cleaned.split(/\s+/).filter(Boolean);
-    const stems = tokens.map(w => nlp.stem(w));
+    const stems = tokens.map((w) => nlp.stem(w));
 
     const freq: Record<string, number> = {};
-    stems.forEach(s => {
+    stems.forEach((s) => {
       freq[s] = (freq[s] || 0) + 1;
     });
     const topKeywords = Object.entries(freq)

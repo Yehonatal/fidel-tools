@@ -38,7 +38,7 @@ const tablesToDrop = [
   "usage_aggregates",
   "usage_logs",
   "users",
-  "verifications"
+  "verifications",
 ];
 
 console.log("Cleaning up existing tables...");
@@ -53,7 +53,7 @@ for (const table of tablesToDrop) {
 
 try {
   await sql(`DROP TYPE IF EXISTS "api_key_status" CASCADE;`);
-  console.log("Dropped type \"api_key_status\" (if existed)");
+  console.log('Dropped type "api_key_status" (if existed)');
 } catch (err) {
   console.warn("Could not drop type:", err.message);
 }
@@ -69,7 +69,7 @@ const sqlContent = fs.readFileSync(sqlFilePath, "utf-8");
 // Split by statement-breakpoint
 const statements = sqlContent
   .split("--> statement-breakpoint")
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 console.log(`\nExecuting ${statements.length} migration statement(s) directly...`);

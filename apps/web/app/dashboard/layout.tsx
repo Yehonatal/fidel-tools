@@ -1,11 +1,7 @@
 import { getRequiredSession } from "@/lib/session";
 import DashboardNav from "@/components/dashboard-nav";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getRequiredSession();
 
   return (

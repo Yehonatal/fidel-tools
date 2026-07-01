@@ -10,7 +10,7 @@ import {
   AlertTriangle,
   Cpu,
   ArrowUpRight,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 export default async function UsagePage() {
@@ -36,23 +36,13 @@ export default async function UsagePage() {
     const [result] = await db
       .select({ count: count() })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.userId, session.user.id),
-          gte(usageLogs.createdAt, startOfMonth)
-        )
-      );
+      .where(and(eq(usageLogs.userId, session.user.id), gte(usageLogs.createdAt, startOfMonth)));
     monthlyRequests = result?.count ?? 0;
 
     const [tokensResult] = await db
       .select({ totalTokens: sum(usageLogs.tokensProcessed) })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.userId, session.user.id),
-          gte(usageLogs.createdAt, startOfMonth)
-        )
-      );
+      .where(and(eq(usageLogs.userId, session.user.id), gte(usageLogs.createdAt, startOfMonth)));
     monthlyTokens = Number(tokensResult?.totalTokens ?? 0);
 
     recentLogs = await db
@@ -100,7 +90,7 @@ export default async function UsagePage() {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const quota = (session.user as Record<string, unknown>).monthlyQuota as number ?? 10000;
+  const quota = ((session.user as Record<string, unknown>).monthlyQuota as number) ?? 10000;
   const usagePercent = Math.min((monthlyRequests / quota) * 100, 100);
 
   return (
@@ -141,7 +131,6 @@ export default async function UsagePage() {
 
       {/* ── Stats Grid (4 Cards) ─────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Card 1: Monthly Requests */}
         <div className="bg-white/50 dark:bg-zinc-950/20 rounded-md border border-slate-200/50 dark:border-zinc-900 p-4 space-y-2.5">
           <div className="flex items-center justify-between">
@@ -213,15 +202,12 @@ export default async function UsagePage() {
             </p>
           </div>
         </div>
-
       </div>
 
       {/* ── Main Layout Split ────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        
         {/* Left Column (2/3 width) - Quota Bar & Logs Table */}
         <div className="lg:col-span-2 space-y-6">
-          
           {/* Usage Bar Card */}
           <div className="bg-white/50 dark:bg-zinc-950/20 rounded-md p-5 border border-slate-200/50 dark:border-zinc-900 space-y-3.5">
             <div className="flex items-center justify-between">
@@ -233,26 +219,24 @@ export default async function UsagePage() {
                 {monthlyRequests.toLocaleString()} / {quota.toLocaleString()} queries
               </span>
             </div>
-            
+
             <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-zinc-900 overflow-hidden border border-slate-200/10 dark:border-zinc-800 relative">
               <div
                 className="h-full rounded-full transition-all duration-700 ease-out"
                 style={{
                   width: `${usagePercent}%`,
                   background:
-                    usagePercent > 90
-                      ? "#ef4444"
-                      : usagePercent > 70
-                      ? "#f59e0b"
-                      : "#3b82f6",
+                    usagePercent > 90 ? "#ef4444" : usagePercent > 70 ? "#f59e0b" : "#3b82f6",
                 }}
               />
             </div>
 
             <div className="flex items-center justify-between text-[10px] font-bold font-mono text-slate-400 dark:text-zinc-500 uppercase tracking-wider pt-1">
-              <span>{usagePercent < 100
-                ? `${(100 - usagePercent).toFixed(1)}% limit remaining`
-                : "Quota depleted. System auto-throttling active."}</span>
+              <span>
+                {usagePercent < 100
+                  ? `${(100 - usagePercent).toFixed(1)}% limit remaining`
+                  : "Quota depleted. System auto-throttling active."}
+              </span>
               {usagePercent >= 80 && (
                 <span className="text-amber-500 flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5" /> High Usage Warning
@@ -322,14 +306,16 @@ export default async function UsagePage() {
                                 log.statusCode < 300
                                   ? "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
                                   : log.statusCode < 500
-                                  ? "bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/10"
-                                  : "bg-red-500/5 text-red-600 dark:text-red-400 border-red-500/10"
+                                    ? "bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/10"
+                                    : "bg-red-500/5 text-red-600 dark:text-red-400 border-red-500/10"
                               }`}
                             >
                               {log.statusCode}
                             </span>
                           </td>
-                          <td className={`px-6 py-3 text-xs font-mono font-semibold ${isError ? "text-slate-400" : "text-slate-700 dark:text-zinc-400"}`}>
+                          <td
+                            className={`px-6 py-3 text-xs font-mono font-semibold ${isError ? "text-slate-400" : "text-slate-700 dark:text-zinc-400"}`}
+                          >
                             {log.latencyMs ? `${log.latencyMs}ms` : "—"}
                           </td>
                           <td className="px-6 py-3 text-xs font-mono text-slate-500 dark:text-zinc-500">
@@ -350,17 +336,16 @@ export default async function UsagePage() {
                   <Globe className="w-5 h-5 text-slate-400 dark:text-zinc-500" />
                 </div>
                 <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed max-w-xs mx-auto">
-                  No query logs detected. Initiate requests using your generated API credentials to fill this log ledger.
+                  No query logs detected. Initiate requests using your generated API credentials to
+                  fill this log ledger.
                 </p>
               </div>
             )}
           </div>
-
         </div>
 
         {/* Right Column (1/3 width) - Endpoint Breakdown & Performance info */}
         <div className="space-y-6">
-          
           {/* Endpoint Distribution Breakdown */}
           <div className="bg-white/50 dark:bg-zinc-950/20 rounded-md border border-slate-200/50 dark:border-zinc-900 p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200/30 dark:border-zinc-900/50 pb-2">
@@ -398,7 +383,8 @@ export default async function UsagePage() {
               </div>
             ) : (
               <p className="text-xs font-semibold text-slate-500 dark:text-zinc-500 leading-relaxed">
-                Distribution breakdown will display here once the API processing pipeline begins receiving requests.
+                Distribution breakdown will display here once the API processing pipeline begins
+                receiving requests.
               </p>
             )}
           </div>
@@ -416,22 +402,27 @@ export default async function UsagePage() {
               <li className="flex items-start gap-2 text-xs text-slate-500 dark:text-zinc-500 font-semibold leading-relaxed">
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 mt-1.5" />
                 <p>
-                  <span className="text-slate-800 dark:text-zinc-300 font-bold">Geographic proximity</span>: API servers are hosted in AWS us-east-1. Locate calling clients nearby to minimize round-trip connection overhead.
+                  <span className="text-slate-800 dark:text-zinc-300 font-bold">
+                    Geographic proximity
+                  </span>
+                  : API servers are hosted in AWS us-east-1. Locate calling clients nearby to
+                  minimize round-trip connection overhead.
                 </p>
               </li>
               <li className="flex items-start gap-2 text-xs text-slate-500 dark:text-zinc-500 font-semibold leading-relaxed">
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 mt-1.5" />
                 <p>
-                  <span className="text-slate-800 dark:text-zinc-300 font-bold">Pipeline optimization</span>: Use the batch <code className="font-mono text-[10px]">/pipeline</code> endpoint rather than sequential single-tool calls to achieve up to 3x lower latency.
+                  <span className="text-slate-800 dark:text-zinc-300 font-bold">
+                    Pipeline optimization
+                  </span>
+                  : Use the batch <code className="font-mono text-[10px]">/pipeline</code> endpoint
+                  rather than sequential single-tool calls to achieve up to 3x lower latency.
                 </p>
               </li>
             </ul>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

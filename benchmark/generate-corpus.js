@@ -1,11 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const corpusDir = path.resolve(__dirname, 'corpus');
+const corpusDir = path.resolve(__dirname, "corpus");
 if (!fs.existsSync(corpusDir)) {
   fs.mkdirSync(corpusDir, { recursive: true });
 }
@@ -28,32 +28,47 @@ const normalizationBases = [
   { text: "አዲስ አበባ ትልቅ ከተማ ናት።", category: "clean" },
   { text: "አንድ ሁለት ሶስት አራት አምስት", category: "clean" },
   { text: "ኢትዮጵያ ታሪካዊና ውብ ሃገር ናት።", category: "clean" },
-  { text: "ቋንቋችንን ማሳደግና መንከባከብ አለብን።", category: "clean" }
+  { text: "ቋንቋችንን ማሳደግና መንከባከብ አለብን።", category: "clean" },
 ];
 
 const homophonesPerturb = {
-  'ሃ': ['ሀ', 'ሐ', 'ኀ'],
-  'ሰ': ['ሠ'],
-  'አ': ['ዐ'],
-  'ፀ': ['ጸ']
+  ሃ: ["ሀ", "ሐ", "ኀ"],
+  ሰ: ["ሠ"],
+  አ: ["ዐ"],
+  ፀ: ["ጸ"],
 };
 
 const labializationPerturb = {
-  'ሉዋ': 'ሏ', 'ሙዋ': 'ሟ', 'ሩዋ': 'ሯ', 'ሱዋ': 'ሷ', 'ሹዋ': 'ሿ',
-  'ቁዋ': 'ቋ', 'ቡዋ': 'ቧ', 'ቱዋ': 'ቷ', 'ቹዋ': 'ቿ', 'ኑዋ': 'ኗ',
-  'ዟ': 'ዟ', 'ዧ': 'ዧ', 'ዱዋ': 'ዷ', 'ጁዋ': 'ጇ', 'ጡዋ': 'ጧ',
-  'ጩዋ': 'ጯ', 'ጹዋ': 'ጿ', 'ፉዋ': 'ፏ', 'ሁዋ': 'ኋ'
+  ሉዋ: "ሏ",
+  ሙዋ: "ሟ",
+  ሩዋ: "ሯ",
+  ሱዋ: "ሷ",
+  ሹዋ: "ሿ",
+  ቁዋ: "ቋ",
+  ቡዋ: "ቧ",
+  ቱዋ: "ቷ",
+  ቹዋ: "ቿ",
+  ኑዋ: "ኗ",
+  ዟ: "ዟ",
+  ዧ: "ዧ",
+  ዱዋ: "ዷ",
+  ጁዋ: "ጇ",
+  ጡዋ: "ጧ",
+  ጩዋ: "ጯ",
+  ጹዋ: "ጿ",
+  ፉዋ: "ፏ",
+  ሁዋ: "ኋ",
 };
 
 function generateNormalizationCorpus() {
-  console.log('Generating independent normalization corpus...');
+  console.log("Generating independent normalization corpus...");
   const corpus = [];
-  
+
   for (let i = 0; i < 2000; i++) {
     const base = normalizationBases[i % normalizationBases.length];
     let text = base.text;
     let actualCategory = base.category;
-    
+
     // Perturb homophones if the base category is homophones, or randomly in general
     if (base.category === "homophones" || Math.random() < 0.5) {
       for (const [norm, raws] of Object.entries(homophonesPerturb)) {
@@ -63,7 +78,7 @@ function generateNormalizationCorpus() {
         }
       }
     }
-    
+
     // Perturb labialization
     if (base.category === "labialization" || Math.random() < 0.5) {
       for (const [norm, raw] of Object.entries(labializationPerturb)) {
@@ -72,7 +87,7 @@ function generateNormalizationCorpus() {
         }
       }
     }
-    
+
     // Add artificial gemination to introduce gemination noise
     if (Math.random() < 0.3) {
       actualCategory = "gemination";
@@ -87,18 +102,18 @@ function generateNormalizationCorpus() {
       }
       text = geminatedText;
     }
-    
+
     corpus.push({
       input: text,
       expected: base.text,
-      category: actualCategory
+      category: actualCategory,
     });
   }
-  
-  const filePath = path.join(corpusDir, 'normalization.jsonl');
+
+  const filePath = path.join(corpusDir, "normalization.jsonl");
   const writeStream = fs.createWriteStream(filePath);
-  corpus.forEach(item => {
-    writeStream.write(JSON.stringify(item) + '\n');
+  corpus.forEach((item) => {
+    writeStream.write(JSON.stringify(item) + "\n");
   });
   writeStream.end();
   console.log(`Saved ${corpus.length} entries to ${filePath}`);
@@ -123,14 +138,14 @@ const stemmingBases = [
   { word: "ጎረቤት", category: "regular" },
   { word: "ቅጠል", category: "regular" },
   { word: "ወጥ", category: "regular" },
-  
+
   // Irregular/Protected
   { word: "ኢትዮጵያ", category: "irregular" },
   { word: "አፍሪካ", category: "irregular" },
   { word: "አዲስ አበባ", category: "irregular" },
   { word: "ንከባከበ", category: "irregular" },
   { word: "ዳቦ", category: "irregular" },
-  
+
   // Ambiguous (where prefix/suffix removal results in incorrect stem)
   { word: "በላ", category: "ambiguous" },
   { word: "ደብዳቤ", category: "ambiguous" },
@@ -139,40 +154,40 @@ const stemmingBases = [
   { word: "አደረገ", category: "ambiguous" },
   { word: "በለጠ", category: "ambiguous" },
   { word: "ለመለመ", category: "ambiguous" },
-  { word: "ሰደበ", category: "ambiguous" }
+  { word: "ሰደበ", category: "ambiguous" },
 ];
 
 const prefixes = ["የ", "በ", "ከ", "ለ", "ስለ", "የሚ", "የማ", ""];
 const suffixes = ["ዎች", "ኝ", "ችን", "ቸው", "ቸውን", "ታል", ""];
 
 function generateStemmingCorpus() {
-  console.log('Generating independent stemming corpus...');
+  console.log("Generating independent stemming corpus...");
   const corpus = [];
-  
+
   for (let i = 0; i < 2000; i++) {
     const base = stemmingBases[i % stemmingBases.length];
     let prefix = "";
     let suffix = "";
-    
+
     // Only apply affixes for regular or ambiguous words randomly
     if (base.category !== "irregular" || Math.random() < 0.3) {
       prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
       suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
     }
-    
+
     const inflected = prefix + base.word + suffix;
-    
+
     corpus.push({
       input: inflected,
       expected: base.word,
-      category: base.category
+      category: base.category,
     });
   }
-  
-  const filePath = path.join(corpusDir, 'stemming.jsonl');
+
+  const filePath = path.join(corpusDir, "stemming.jsonl");
   const writeStream = fs.createWriteStream(filePath);
-  corpus.forEach(item => {
-    writeStream.write(JSON.stringify(item) + '\n');
+  corpus.forEach((item) => {
+    writeStream.write(JSON.stringify(item) + "\n");
   });
   writeStream.end();
   console.log(`Saved ${corpus.length} entries to ${filePath}`);
@@ -189,29 +204,29 @@ const tokenizationBases = [
   { text: "ዶክተር አበበ ዛሬ ይመጣል", category: "standard" },
   { text: "ጠቅላይ ሚኒስትሩ አዲስ ውሳኔ አስተላለፉ", category: "standard" },
   { text: "ከተማዋ በጣም ቆንጆ እና ትልቅ ናት", category: "standard" },
-  
+
   // Word Separator (hulet neteb ፡)
   { text: "ልጁ፡በልቷል፡ሟች፡ቤተሰብም፡አለ", category: "word_separator" },
   { text: "አዲስ፡አበባ፡ትልቅ፡ከተማ፡ናት", category: "word_separator" },
-  
+
   // Abbreviations (should not split sentences inside them)
   { text: "ት/ቤት ዛሬ ተዘግቷል", category: "abbreviation" },
   { text: "ወ/ሮ ማርቱ በኢትዮጵያ ይኖራሉ", category: "abbreviation" },
-  { text: "ጠ/ሚ አዲስ ውሳኔ አስተላለፉ", category: "abbreviation" }
+  { text: "ጠ/ሚ አዲስ ውሳኔ አስተላለፉ", category: "abbreviation" },
 ];
 
-const boundaries = ['።', '?', '!', '.'];
+const boundaries = ["።", "?", "!", "."];
 
 function generateTokenizationCorpus() {
-  console.log('Generating independent tokenization corpus...');
+  console.log("Generating independent tokenization corpus...");
   const corpus = [];
-  
+
   for (let i = 0; i < 2000; i++) {
     const numSentences = 1 + Math.floor(Math.random() * 3); // 1 to 3 sentences
     const selectedBases = [];
     const expected = [];
     let dominantCategory = "standard";
-    
+
     for (let j = 0; j < numSentences; j++) {
       const base = tokenizationBases[(i * 3 + j) % tokenizationBases.length];
       selectedBases.push(base.text);
@@ -220,7 +235,7 @@ function generateTokenizationCorpus() {
         dominantCategory = base.category;
       }
     }
-    
+
     // Join sentences with random boundaries
     let text = "";
     for (let k = 0; k < selectedBases.length; k++) {
@@ -228,18 +243,18 @@ function generateTokenizationCorpus() {
       text += selectedBases[k] + bound + " ";
     }
     text = text.trim();
-    
+
     corpus.push({
       input: text,
       expected: expected,
-      category: dominantCategory
+      category: dominantCategory,
     });
   }
-  
-  const filePath = path.join(corpusDir, 'tokenization.jsonl');
+
+  const filePath = path.join(corpusDir, "tokenization.jsonl");
   const writeStream = fs.createWriteStream(filePath);
-  corpus.forEach(item => {
-    writeStream.write(JSON.stringify(item) + '\n');
+  corpus.forEach((item) => {
+    writeStream.write(JSON.stringify(item) + "\n");
   });
   writeStream.end();
   console.log(`Saved ${corpus.length} entries to ${filePath}`);
@@ -248,4 +263,4 @@ function generateTokenizationCorpus() {
 generateNormalizationCorpus();
 generateStemmingCorpus();
 generateTokenizationCorpus();
-console.log('All non-circular test corpora generated successfully!');
+console.log("All non-circular test corpora generated successfully!");

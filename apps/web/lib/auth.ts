@@ -3,11 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db, schema } from "@fidel-tools/db";
 import { dash } from "@better-auth/infra";
-import {
-  sendVerificationEmail,
-  sendPasswordResetEmail,
-  sendWelcomeEmail,
-} from "@/lib/email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -83,10 +79,7 @@ export const auth = betterAuth({
     max: 20, // max 20 auth requests per window
   },
 
-  plugins: [
-    ...(process.env.NODE_ENV === "production" ? [dash()] : []),
-    nextCookies(),
-  ],
+  plugins: [...(process.env.NODE_ENV === "production" ? [dash()] : []), nextCookies()],
 });
 
 export type Session = typeof auth.$Infer.Session;

@@ -1,14 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Pipeline } from './dist/pipeline.js';
-import { normalize as jsNormalize } from './dist/normalizer.js';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Pipeline } from "./dist/pipeline.js";
+import { normalize as jsNormalize } from "./dist/normalizer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const amPackPath = path.resolve(__dirname, '../lang-am/am.json');
-const amPack = JSON.parse(fs.readFileSync(amPackPath, 'utf8'));
+const amPackPath = path.resolve(__dirname, "../lang-am/am.json");
+const amPack = JSON.parse(fs.readFileSync(amPackPath, "utf8"));
 
 // Initialize pipeline
 const pipeline = new Pipeline(amPack);
@@ -19,13 +19,13 @@ const baseSentences = [
   "እባክህህህህ በጣምምምምም አመሰግናለሁህህህ።",
   "አዲስ አበባ ትልቅ ከተማ ናት።",
   "አንድ ሁለት ሦስት አራት አምስት",
-  "ይህ የመጀመሪያው ዓረፍተ ነገር ነው። ሁለተኛው ደግሞ ይከተላል፡ ሦስተኛውም አለ!"
+  "ይህ የመጀመሪያው ዓረፍተ ነገር ነው። ሁለተኛው ደግሞ ይከተላል፡ ሦስተኛውም አለ!",
 ];
 
 // Generate different test corpora sizes
 function runBenchmark(label, corpus) {
   const size = corpus.length;
-  
+
   // Warm up
   for (let i = 0; i < Math.min(size, 200); i++) {
     jsNormalize(corpus[i], amPack);
@@ -53,8 +53,12 @@ function runBenchmark(label, corpus) {
   const speedup = jsDuration / wasmDuration;
 
   console.log(`\n--- ${label} (${size} items) ---`);
-  console.log(`  JS Time  : ${jsDuration.toFixed(2)} ms (${((jsDuration / size) * 1000).toFixed(2)} μs/op, ${jsOpsPerSec.toFixed(0)} ops/s)`);
-  console.log(`  WASM Time: ${wasmDuration.toFixed(2)} ms (${((wasmDuration / size) * 1000).toFixed(2)} μs/op, ${wasmOpsPerSec.toFixed(0)} ops/s)`);
+  console.log(
+    `  JS Time  : ${jsDuration.toFixed(2)} ms (${((jsDuration / size) * 1000).toFixed(2)} μs/op, ${jsOpsPerSec.toFixed(0)} ops/s)`,
+  );
+  console.log(
+    `  WASM Time: ${wasmDuration.toFixed(2)} ms (${((wasmDuration / size) * 1000).toFixed(2)} μs/op, ${wasmOpsPerSec.toFixed(0)} ops/s)`,
+  );
   console.log(`  Speedup  : ${speedup.toFixed(2)}x`);
 }
 

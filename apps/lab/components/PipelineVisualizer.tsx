@@ -63,7 +63,8 @@ export default function PipelineVisualizer({ inputText, trace }: PipelineVisuali
             </h4>
           </div>
           <p className="text-[10px] font-semibold text-zinc-450 leading-tight">
-            Collapses phoneme homophones (e.g. ሀ/ሐ/ኀ) and cleans letters to uniform spelling representations.
+            Collapses phoneme homophones (e.g. ሀ/ሐ/ኀ) and cleans letters to uniform spelling
+            representations.
           </p>
           <div className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-zinc-50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-900/60 max-h-[140px] overflow-y-auto">
             {trace.normalize ? (
@@ -92,7 +93,8 @@ export default function PipelineVisualizer({ inputText, trace }: PipelineVisuali
             </h4>
           </div>
           <p className="text-[10px] font-semibold text-zinc-450 leading-tight">
-            Identifies token boundaries, expands common abbreviations (e.g. ት/ቤት &rarr; ትምህርት ቤት), and strips non-word punctuation.
+            Identifies token boundaries, expands common abbreviations (e.g. ት/ቤት &rarr; ትምህርት ቤት),
+            and strips non-word punctuation.
           </p>
           <div className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-zinc-50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-900/60 max-h-[140px] overflow-y-auto">
             {trace.lexAnalyze ? (
@@ -121,7 +123,8 @@ export default function PipelineVisualizer({ inputText, trace }: PipelineVisuali
             </h4>
           </div>
           <p className="text-[10px] font-semibold text-zinc-450 leading-tight">
-            Filters out high-frequency prepositions, conjunctions, and copulas, keeping semantic keywords.
+            Filters out high-frequency prepositions, conjunctions, and copulas, keeping semantic
+            keywords.
           </p>
           <div className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-zinc-50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-900/60 max-h-[140px] overflow-y-auto">
             {trace.removeStopwords ? (
@@ -154,9 +157,7 @@ export default function PipelineVisualizer({ inputText, trace }: PipelineVisuali
           </p>
           <div className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-zinc-50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-900/60 max-h-[140px] overflow-y-auto">
             {trace.stem && trace.stem.length > 0 ? (
-              trace.stem.map((s, idx) => (
-                <TokenBadge key={idx} token={s} type="stem" />
-              ))
+              trace.stem.map((s, idx) => <TokenBadge key={idx} token={s} type="stem" />)
             ) : (
               <span className="text-xs text-zinc-400 italic">Processing...</span>
             )}

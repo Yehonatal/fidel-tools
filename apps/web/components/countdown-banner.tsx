@@ -56,7 +56,9 @@ export function CountdownBanner() {
             </span>
           </div>
           <div className="text-slate-800 dark:text-zinc-200 font-semibold tracking-wide">
-            Full Release in <span className="text-blue-600 dark:text-sky-400 font-bold">23 days</span> (23d 00h 00m 00s)
+            Full Release in{" "}
+            <span className="text-blue-600 dark:text-sky-400 font-bold">23 days</span> (23d 00h 00m
+            00s)
           </div>
         </div>
       </div>
@@ -77,14 +79,15 @@ export function CountdownBanner() {
             Currently Under Development
           </span>
         </div>
-        
+
         <div className="text-slate-800 dark:text-zinc-200 font-semibold tracking-wide flex items-center gap-1.5 flex-wrap justify-center">
           <span>Full Release in</span>
           <span className="text-blue-600 dark:text-sky-400 font-bold px-1 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-200/50 dark:border-zinc-800/50 text-[11px]">
-            {timeLeft.days} {timeLeft.days === 1 ? 'day' : 'days'}
+            {timeLeft.days} {timeLeft.days === 1 ? "day" : "days"}
           </span>
           <span className="text-slate-400 dark:text-zinc-550 font-bold text-[10px]">
-            ({formatNum(timeLeft.days)}d : {formatNum(timeLeft.hours)}h : {formatNum(timeLeft.minutes)}m : {formatNum(timeLeft.seconds)}s)
+            ({formatNum(timeLeft.days)}d : {formatNum(timeLeft.hours)}h :{" "}
+            {formatNum(timeLeft.minutes)}m : {formatNum(timeLeft.seconds)}s)
           </span>
         </div>
       </div>

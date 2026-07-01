@@ -21,12 +21,7 @@ function getTransporter() {
 
 // ─── Base send helper ─────────────────────────────────────────────────────────
 
-async function sendMail(options: {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-}) {
+async function sendMail(options: { to: string; subject: string; html: string; text?: string }) {
   const t = getTransporter();
   await t.sendMail({
     from: process.env.SMTP_FROM!,
@@ -92,11 +87,7 @@ export async function sendPasswordResetEmail(to: string, url: string) {
   });
 }
 
-export async function sendApiKeyCreatedEmail(
-  to: string,
-  keyName: string,
-  keyPrefix: string
-) {
+export async function sendApiKeyCreatedEmail(to: string, keyName: string, keyPrefix: string) {
   await sendMail({
     to,
     subject: `New API key created — ${keyName}`,

@@ -17,7 +17,7 @@ import {
   AlertCircle,
   Code2,
   RefreshCw,
-  FolderOpen
+  FolderOpen,
 } from "lucide-react";
 
 // Initialize local pipeline with imported Amharic pack
@@ -32,11 +32,41 @@ interface FileItem {
 }
 
 const ideFiles: FileItem[] = [
-  { id: "pipeline", name: "pipeline.ts", type: "ts", icon: <Layers className="w-3.5 h-3.5 text-blue-400" />, description: "Complete composition pipeline analyzer." },
-  { id: "transliterator", name: "transliterator.ts", type: "ts", icon: <Terminal className="w-3.5 h-3.5 text-purple-400" />, description: "Bi-directional SERA / Ethiopic transliterators." },
-  { id: "stemmer", name: "stemmer.ts", type: "ts", icon: <Activity className="w-3.5 h-3.5 text-emerald-400" />, description: "Amharic grammar stemmer / root extractor." },
-  { id: "stopwords", name: "stopwords.ts", type: "ts", icon: <Sparkles className="w-3.5 h-3.5 text-amber-400" />, description: "Grammatical & structural stopwords filter." },
-  { id: "normalizer", name: "normalizer.ts", type: "ts", icon: <Code2 className="w-3.5 h-3.5 text-sky-400" />, description: "Lexical abbreviation and dialect normalizer." },
+  {
+    id: "pipeline",
+    name: "pipeline.ts",
+    type: "ts",
+    icon: <Layers className="w-3.5 h-3.5 text-blue-400" />,
+    description: "Complete composition pipeline analyzer.",
+  },
+  {
+    id: "transliterator",
+    name: "transliterator.ts",
+    type: "ts",
+    icon: <Terminal className="w-3.5 h-3.5 text-purple-400" />,
+    description: "Bi-directional SERA / Ethiopic transliterators.",
+  },
+  {
+    id: "stemmer",
+    name: "stemmer.ts",
+    type: "ts",
+    icon: <Activity className="w-3.5 h-3.5 text-emerald-400" />,
+    description: "Amharic grammar stemmer / root extractor.",
+  },
+  {
+    id: "stopwords",
+    name: "stopwords.ts",
+    type: "ts",
+    icon: <Sparkles className="w-3.5 h-3.5 text-amber-400" />,
+    description: "Grammatical & structural stopwords filter.",
+  },
+  {
+    id: "normalizer",
+    name: "normalizer.ts",
+    type: "ts",
+    icon: <Code2 className="w-3.5 h-3.5 text-sky-400" />,
+    description: "Lexical abbreviation and dialect normalizer.",
+  },
 ];
 
 type ConsoleTab = "terminal" | "json" | "snippet";
@@ -44,7 +74,7 @@ type ConsoleTab = "terminal" | "json" | "snippet";
 export default function PlaygroundClient() {
   const [activeFile, setActiveFile] = useState<string>("pipeline");
   const [inputText, setInputText] = useState(
-    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት"
+    "የገንዘብ ሚኒስቴር ምክር ቤተ ከሃያ ዓመታት በፊት ያወጣውን የ ተጨማሪ እሴት ታክስ ቫት አዋጅን የሚተካ ረቂቅ ተዘጋጀ። ት/ቤት እና መስሪያ ቤት",
   );
   const [transLang, setTransLang] = useState<"am" | "en">("am");
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("terminal");
@@ -55,13 +85,17 @@ export default function PlaygroundClient() {
   // Trigger running status
   const runCode = () => {
     setIsRunning(true);
-    setRunLogs((prev) => [...prev, `[compiler] Compiling ${activeFile}...`, `[runtime] Initializing Fidel NLP runtime...`]);
+    setRunLogs((prev) => [
+      ...prev,
+      `[compiler] Compiling ${activeFile}...`,
+      `[runtime] Initializing Fidel NLP runtime...`,
+    ]);
     setTimeout(() => {
       setIsRunning(false);
       setRunLogs((prev) => [
         ...prev,
         `[runtime] Processed ${inputText.split(/\s+/).filter(Boolean).length} tokens.`,
-        `[success] Compiled and finished in 0.${Math.floor(Math.random() * 8) + 1}ms.`
+        `[success] Compiled and finished in 0.${Math.floor(Math.random() * 8) + 1}ms.`,
       ]);
     }, 450);
   };
@@ -69,7 +103,7 @@ export default function PlaygroundClient() {
   useEffect(() => {
     setRunLogs([
       `[sys] Fidel NLP Engine version 0.1.6 initialized.`,
-      `[sys] Ready. Select a file from the explorer to run.`
+      `[sys] Ready. Select a file from the explorer to run.`,
     ]);
   }, [activeFile]);
 
@@ -139,13 +173,16 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
         pipelineSteps: {
           step1_normalized: lexedText,
           step2_stopwords_removed: cleanedText,
-          step3_stems: cleanedText.split(/\s+/).filter(Boolean).map(w => nlp.stem(w))
+          step3_stems: cleanedText
+            .split(/\s+/)
+            .filter(Boolean)
+            .map((w) => nlp.stem(w)),
         },
         languagePack: "amharic-v0.1.6",
-        env: "sandbox-local"
+        env: "sandbox-local",
       },
       null,
-      2
+      2,
     );
   };
 
@@ -312,23 +349,43 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                   {activeFile === "pipeline" && (
                     <div className="space-y-3">
                       <div className="p-2.5 rounded border border-slate-200/50 dark:border-zinc-900/60 bg-slate-50 dark:bg-zinc-950/20">
-                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">1. Lexical Normalizer</span>
-                        <p className="text-xs text-slate-800 dark:text-zinc-200 font-mono leading-relaxed truncate">{lexedText}</p>
+                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                          1. Lexical Normalizer
+                        </span>
+                        <p className="text-xs text-slate-800 dark:text-zinc-200 font-mono leading-relaxed truncate">
+                          {lexedText}
+                        </p>
                       </div>
-                      <div className="flex justify-center text-slate-300 dark:text-zinc-800"><ChevronRight className="w-3.5 h-3.5 rotate-90" /></div>
+                      <div className="flex justify-center text-slate-300 dark:text-zinc-800">
+                        <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                      </div>
                       <div className="p-2.5 rounded border border-slate-200/50 dark:border-zinc-900/60 bg-slate-50 dark:bg-zinc-950/20">
-                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">2. Stopword Filter</span>
-                        <p className="text-xs text-slate-800 dark:text-zinc-200 font-mono leading-relaxed truncate">{cleanedText}</p>
+                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                          2. Stopword Filter
+                        </span>
+                        <p className="text-xs text-slate-800 dark:text-zinc-200 font-mono leading-relaxed truncate">
+                          {cleanedText}
+                        </p>
                       </div>
-                      <div className="flex justify-center text-slate-300 dark:text-zinc-800"><ChevronRight className="w-3.5 h-3.5 rotate-90" /></div>
+                      <div className="flex justify-center text-slate-300 dark:text-zinc-800">
+                        <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                      </div>
                       <div className="p-2.5 rounded border border-blue-500/10 dark:border-sky-400/10 bg-blue-500/[0.02] dark:bg-sky-400/[0.01]">
-                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">3. Morphological Roots</span>
+                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
+                          3. Morphological Roots
+                        </span>
                         <div className="flex flex-wrap gap-1 mt-1 max-h-[70px] overflow-y-auto">
-                          {cleanedText.split(/\s+/).filter(Boolean).map((w, i) => (
-                            <span key={i} className="bg-slate-900 dark:bg-zinc-800 text-white font-mono text-[9px] px-1.5 py-0.5 rounded border border-transparent font-bold">
-                              {nlp.stem(w)}
-                            </span>
-                          ))}
+                          {cleanedText
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .map((w, i) => (
+                              <span
+                                key={i}
+                                className="bg-slate-900 dark:bg-zinc-800 text-white font-mono text-[9px] px-1.5 py-0.5 rounded border border-transparent font-bold"
+                              >
+                                {nlp.stem(w)}
+                              </span>
+                            ))}
                         </div>
                       </div>
                     </div>
@@ -337,12 +394,16 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                   {activeFile === "transliterator" && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Transliteration Mode:</span>
+                        <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                          Transliteration Mode:
+                        </span>
                         <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded border border-slate-200/50 dark:border-zinc-800">
                           <button
                             onClick={() => setTransLang("am")}
                             className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${
-                              transLang === "am" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white" : "text-slate-500"
+                              transLang === "am"
+                                ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white"
+                                : "text-slate-500"
                             }`}
                           >
                             AM &rarr; ASCII
@@ -350,7 +411,9 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                           <button
                             onClick={() => setTransLang("en")}
                             className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${
-                              transLang === "en" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white" : "text-slate-500"
+                              transLang === "en"
+                                ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white"
+                                : "text-slate-500"
                             }`}
                           >
                             ASCII &rarr; AM
@@ -365,16 +428,22 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
 
                   {activeFile === "stemmer" && (
                     <div className="space-y-2">
-                      <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Stem mapping results:</span>
+                      <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">
+                        Stem mapping results:
+                      </span>
                       <div className="grid grid-cols-1 gap-1.5 max-h-[220px] overflow-y-auto pr-1">
                         {tokensList.map((token, idx) => (
                           <div
                             key={idx}
                             className="p-1.5 rounded border border-slate-200/40 dark:border-zinc-900/60 bg-slate-50/50 dark:bg-zinc-950/20 flex items-center justify-between font-mono text-xs"
                           >
-                            <span className="text-slate-800 dark:text-zinc-300 font-semibold truncate max-w-[110px]">{token}</span>
+                            <span className="text-slate-800 dark:text-zinc-300 font-semibold truncate max-w-[110px]">
+                              {token}
+                            </span>
                             <span className="text-slate-400 dark:text-zinc-600">&rarr;</span>
-                            <span className="text-blue-600 dark:text-sky-400 font-bold truncate max-w-[110px]">{nlp.stem(token)}</span>
+                            <span className="text-blue-600 dark:text-sky-400 font-bold truncate max-w-[110px]">
+                              {nlp.stem(token)}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -383,7 +452,9 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
 
                   {activeFile === "stopwords" && (
                     <div className="space-y-2">
-                      <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Stopword identification:</span>
+                      <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">
+                        Stopword identification:
+                      </span>
                       <div className="flex flex-wrap gap-1.5 max-h-[200px] overflow-y-auto pr-1">
                         {tokensList.map((token, idx) => {
                           const isStop = nlp.stopwords.includes(token);
@@ -407,11 +478,15 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                   {activeFile === "normalizer" && (
                     <div className="space-y-3">
                       <div className="p-3 rounded border border-slate-200/50 dark:border-zinc-900 bg-slate-50 dark:bg-zinc-950/20 font-mono text-xs leading-relaxed">
-                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Normalized Output</span>
+                        <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
+                          Normalized Output
+                        </span>
                         <p className="text-slate-800 dark:text-zinc-200">{lexedText}</p>
                       </div>
                       <div className="space-y-1.5">
-                        <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Example expansions:</span>
+                        <span className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                          Example expansions:
+                        </span>
                         <div className="grid grid-cols-1 gap-1">
                           {[
                             { orig: "ት/ቤት", expanded: "ትምህርት ቤት" },
@@ -424,7 +499,9 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                             >
                               <span className="text-zinc-800 dark:text-zinc-200">{abbr.orig}</span>
                               <span className="text-zinc-400 dark:text-zinc-600">&rarr;</span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{abbr.expanded}</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                                {abbr.expanded}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -444,7 +521,11 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                     className="absolute top-2 right-2 p-1 bg-zinc-900 hover:bg-zinc-800 rounded border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
                     title="Copy JSON output"
                   >
-                    {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copied ? (
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
                   </button>
                 </div>
               )}
@@ -459,7 +540,11 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
                     className="absolute top-2 right-2 p-1 bg-zinc-900 hover:bg-zinc-800 rounded border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
                     title="Copy SDK snippet"
                   >
-                    {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copied ? (
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
                   </button>
                 </div>
               )}
@@ -467,14 +552,23 @@ const normalized = nlp.lexAnalyze("ት/ቤት እና መስሪያ ቤት");
 
             {/* Run Console logs window */}
             <div className="border-t border-slate-200 dark:border-zinc-900 pt-3 mt-4">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest font-mono mb-2">Compiler Diagnostics</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest font-mono mb-2">
+                Compiler Diagnostics
+              </span>
               <div className="p-2.5 rounded bg-[#09090b] text-[10px] font-mono leading-relaxed space-y-1 min-h-[70px] max-h-[90px] overflow-y-auto">
                 {runLogs.map((log, idx) => (
-                  <div key={idx} className={
-                    log.includes("[success]") ? "text-emerald-400" :
-                    log.includes("[error]") ? "text-red-400" :
-                    log.includes("[compiler]") ? "text-zinc-500" : "text-zinc-400"
-                  }>
+                  <div
+                    key={idx}
+                    className={
+                      log.includes("[success]")
+                        ? "text-emerald-400"
+                        : log.includes("[error]")
+                          ? "text-red-400"
+                          : log.includes("[compiler]")
+                            ? "text-zinc-500"
+                            : "text-zinc-400"
+                    }
+                  >
                     {log}
                   </div>
                 ))}

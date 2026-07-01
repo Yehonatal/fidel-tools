@@ -9,9 +9,8 @@ export default async function DashboardPage() {
   const keys = await listApiKeys(session.user.id);
   const activeKeys = keys.filter((k) => k.status === "active");
 
-  const displayKey = activeKeys.length > 0
-    ? `${activeKeys[0].keyPrefix}••••••••••••••••••••••••••••••••`
-    : "";
+  const displayKey =
+    activeKeys.length > 0 ? `${activeKeys[0].keyPrefix}••••••••••••••••••••••••••••••••` : "";
 
   // Get current month usage
   const now = new Date();
@@ -22,12 +21,7 @@ export default async function DashboardPage() {
     const [result] = await db
       .select({ count: count() })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.userId, session.user.id),
-          gte(usageLogs.createdAt, startOfMonth)
-        )
-      );
+      .where(and(eq(usageLogs.userId, session.user.id), gte(usageLogs.createdAt, startOfMonth)));
     monthlyRequests = result?.count ?? 0;
   } catch {
     // Usage table may not exist yet
@@ -48,7 +42,9 @@ export default async function DashboardPage() {
     },
     {
       label: "Monthly Quota",
-      value: ((session.user as Record<string, unknown>).monthlyQuota as number ?? 10000).toLocaleString(),
+      value: (
+        ((session.user as Record<string, unknown>).monthlyQuota as number) ?? 10000
+      ).toLocaleString(),
     },
   ];
 
@@ -75,12 +71,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <DashboardClient
-        user={session.user}
-        keys={keys}
-        stats={stats}
-        displayKey={displayKey}
-      />
+      <DashboardClient user={session.user} keys={keys} stats={stats} displayKey={displayKey} />
     </div>
   );
 }

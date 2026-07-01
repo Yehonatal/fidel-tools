@@ -1,10 +1,8 @@
-import transliterate from "../dist/transliterator.js"
-import fs from "fs"
-import { resolve } from "path"
+import transliterate from "../dist/transliterator.js";
+import fs from "fs";
+import { resolve } from "path";
 
-const amPack = JSON.parse(
-  fs.readFileSync(resolve(__dirname, "../../lang-am/am.json"), "utf8")
-)
+const amPack = JSON.parse(fs.readFileSync(resolve(__dirname, "../../lang-am/am.json"), "utf8"));
 
 const amh_testWords_input = [
   "ወንበር",
@@ -60,7 +58,7 @@ const amh_testWords_input = [
   "ትምህርት",
   "በኢትዮጵያ",
   "የኢትዮጵያ",
-]
+];
 const en_testWords = [
   "wenber",
   "wenberE",
@@ -115,7 +113,7 @@ const en_testWords = [
   "tmhrt",
   "beityoPya",
   "yeityoPya",
-]
+];
 
 const en_expected_output = [
   "ወንብኧር",
@@ -171,26 +169,26 @@ const en_expected_output = [
   "ትምህርት",
   "በኢትዮጵይአ",
   "የኢትዮጵይአ",
-]
+];
 
 test("Amharic to ASCII transliterator", () => {
   for (let index = 0; index < amh_testWords_input.length; index++) {
-    const amh_input = amh_testWords_input[index]
-    const amh_output = en_expected_output[index]
-    const english = en_testWords[index]
+    const amh_input = amh_testWords_input[index];
+    const amh_output = en_expected_output[index];
+    const english = en_testWords[index];
 
-    expect(transliterate.felig_transliterate(amh_input, "am", amPack)).toBe(english)
+    expect(transliterate.felig_transliterate(amh_input, "am", amPack)).toBe(english);
 
-    expect(transliterate.felig_transliterate(english, "en", amPack)).toBe(amh_output)
+    expect(transliterate.felig_transliterate(english, "en", amPack)).toBe(amh_output);
   }
-})
+});
 
 test("Preserves whitespace and punctuation during transliteration", () => {
-  const amh_input = "ወንበር ልጅ ቤቶች።"
-  const expected_en = "wenber lj bEtoc።"
-  expect(transliterate.felig_transliterate(amh_input, "am", amPack)).toBe(expected_en)
+  const amh_input = "ወንበር ልጅ ቤቶች።";
+  const expected_en = "wenber lj bEtoc።";
+  expect(transliterate.felig_transliterate(amh_input, "am", amPack)).toBe(expected_en);
 
-  const en_input = "wenber lj bEtoc።"
-  const expected_amh = "ወንብኧር ልጅ ቤቶች።"
-  expect(transliterate.felig_transliterate(en_input, "en", amPack)).toBe(expected_amh)
-})
+  const en_input = "wenber lj bEtoc።";
+  const expected_amh = "ወንብኧር ልጅ ቤቶች።";
+  expect(transliterate.felig_transliterate(en_input, "en", amPack)).toBe(expected_amh);
+});
