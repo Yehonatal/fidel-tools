@@ -35,13 +35,24 @@ app.route("/api/v1/nlp", nlpRouter);
 app.get("/", (c) => {
   return c.json({
     name: "fidel-tools-api",
-    description: "Production-ready API for Amharic NLP pre-processing",
-    version: "0.1.6",
+    description: "ፊደል (Fidel) Tools is a developer-first suite of high-performance natural language processing APIs built specifically for Ethiopic languages.",
+    version: "0.1.9",
     status: "operational",
     documentation: "/docs",
     endpoints: {
       health: { path: "/", method: "GET", status: "active" },
       docs: { path: "/docs", method: "GET", status: "active" },
+      languages: { path: "/api/v1/nlp/languages", method: "GET", status: "active" },
+      pipeline: { path: "/api/v1/nlp/pipeline", method: "POST", status: "active" },
+      normalize: { path: "/api/v1/nlp/normalize", method: "POST", status: "active" },
+      tokenize: { path: "/api/v1/nlp/tokenize", method: "POST", status: "active" },
+      stopwords: { path: "/api/v1/nlp/remove-stopwords", method: "POST", status: "active" },
+      stem: { path: "/api/v1/nlp/stem", method: "POST", status: "active" },
+      transliterate: { path: "/api/v1/nlp/transliterate", method: "POST", status: "active" },
+      lexicalAnalyze: { path: "/api/v1/nlp/lexical-analyze", method: "POST", status: "active" },
+      indexDocuments: { path: "/api/v1/nlp/index-documents", method: "POST", status: "active" },
+      indexQuery: { path: "/api/v1/nlp/index-query", method: "POST", status: "active" },
+      weighTerms: { path: "/api/v1/nlp/weigh-terms", method: "POST", status: "active" },
     },
   });
 });

@@ -2,7 +2,7 @@
   "info": {
     "title": "ፊደል (Fidel) Tools API Reference",
     "description": "ፊደል (Fidel) Tools is a developer-first suite of high-performance natural language processing APIs built specifically for Ethiopic languages. This reference provides interactive documentation for our production-grade NLP preprocessing endpoints.",
-    "baseUrl": "https://api.fidel.tools"
+    "baseUrl": "http://localhost:3001"
   },
   "endpoints": [
     {

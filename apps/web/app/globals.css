@@ -6,7 +6,6 @@
 @font-face {
     font-family: "Loga";
     src: url("/Loga_Light_4c025211ef.ttf") format("truetype");
-    font-weight: 300;
     font-style: normal;
 }
 
@@ -48,7 +47,7 @@
 
   /* ── Typography ────────────────────────────────────────── */
   --font-loga: "Loga", "Outfit", sans-serif;
-  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", "Loga", "Outfit", sans-serif;
   --font-sans: var(--font-jakarta);
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 
