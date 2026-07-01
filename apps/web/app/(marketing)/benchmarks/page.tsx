@@ -786,28 +786,30 @@ const CorpusDetail = () => (
 
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-[9px] leading-relaxed">
       <div className="p-3.5 bg-slate-50 dark:bg-zinc-950/60 rounded-xl border border-slate-200/60 dark:border-zinc-900/60 flex flex-col justify-between shadow-inner">
-        <span className="font-bold text-zinc-400 uppercase">Normalization</span>
+        <span className="font-bold text-zinc-400 uppercase">Normalization (Homophones)</span>
         <div className="my-1 space-y-0.5">
-          <div className="text-blue-500 font-bold text-xl tracking-tight">{accuracyData.normalization.wasmAcc.toFixed(2)}%</div>
-          <div className="text-[9px] text-zinc-400 font-mono font-semibold">Goal Target: 98.00%</div>
+          <div className="text-blue-500 font-bold text-xl tracking-tight">
+            {(accuracyData.normalization.categories.homophones.jsMatches / accuracyData.normalization.categories.homophones.total * 100).toFixed(2)}%
+          </div>
+          <div className="text-[9px] text-zinc-450 dark:text-zinc-400 font-mono font-semibold">Goal Target: 98.00%</div>
         </div>
-        <span className="text-[8px] text-zinc-500 font-sans font-semibold">Char & labialized match</span>
+        <span className="text-[8px] text-zinc-550 dark:text-zinc-500 font-sans font-semibold">Homophone recall (Exact Match: {accuracyData.normalization.wasmAcc.toFixed(2)}%)</span>
       </div>
       <div className="p-3.5 bg-slate-50 dark:bg-zinc-950/60 rounded-xl border border-slate-200/60 dark:border-zinc-900/60 flex flex-col justify-between shadow-inner">
-        <span className="font-bold text-zinc-400 uppercase">Stemming</span>
+        <span className="font-bold text-zinc-400 uppercase">Stemming (Correct Root)</span>
         <div className="my-1 space-y-0.5">
           <div className="text-amber-500 font-bold text-xl tracking-tight">{accuracyData.stemming.acc.toFixed(2)}%</div>
-          <div className="text-[9px] text-zinc-400 font-mono font-semibold">Goal Target: 82.00%</div>
+          <div className="text-[9px] text-zinc-450 dark:text-zinc-400 font-mono font-semibold">Goal Target: 82.00%</div>
         </div>
-        <span className="text-[8px] text-zinc-500 font-sans font-semibold">Light affix-removal match</span>
+        <span className="text-[8px] text-zinc-555 dark:text-zinc-500 font-sans font-semibold">Light affix-removal match</span>
       </div>
       <div className="p-3.5 bg-slate-50 dark:bg-zinc-950/60 rounded-xl border border-slate-200/60 dark:border-zinc-900/60 flex flex-col justify-between shadow-inner">
-        <span className="font-bold text-zinc-400 uppercase">Tokenization</span>
+        <span className="font-bold text-zinc-400 uppercase">Tokenization (Boundaries)</span>
         <div className="my-1 space-y-0.5">
-          <div className="text-sky-500 font-bold text-xl tracking-tight">{(accuracyData.tokenization.f1 / 100).toFixed(2)} F1</div>
-          <div className="text-[9px] text-zinc-400 font-mono font-semibold">Goal Target: 0.95 F1</div>
+          <div className="text-sky-500 font-bold text-xl tracking-tight">{accuracyData.tokenization.f1.toFixed(2)}%</div>
+          <div className="text-[9px] text-zinc-455 dark:text-zinc-400 font-mono font-semibold">Goal Target: 95.00%</div>
         </div>
-        <span className="text-[8px] text-zinc-500 font-sans font-semibold">Sentence split boundary F1</span>
+        <span className="text-[8px] text-zinc-555 dark:text-zinc-500 font-sans font-semibold">Sentence split boundary F1</span>
       </div>
     </div>
 

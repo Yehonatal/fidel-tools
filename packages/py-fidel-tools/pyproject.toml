@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fidel-tools"
-version = "0.1.0"
+version = "0.1.8"
 description = "Python port of Fidel Tools - Amharic language preprocessing toolkit"
 readme = "README.md"
 requires-python = ">=3.8"

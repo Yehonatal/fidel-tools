@@ -36,9 +36,9 @@ Fidel Tools is managed as a monorepo workspace. Check the individual package dir
 
 | Package | Description | Version | Changelog |
 | :--- | :--- | :--- | :--- |
-| [`@fidel-tools/core`](./packages/core) | Core processing pipeline and NLP engine | `0.1.6` | [Changelog](./packages/core/CHANGELOG.md) |
-| [`@fidel-tools/lang-am`](./packages/lang-am) | Amharic language pack & schema configurations | `0.1.6` | [Changelog](./packages/lang-am/CHANGELOG.md) |
-| [`@fidel-tools/validate-pack`](./packages/validate-pack) | CLI tool to validate & fix language packs | `0.1.6` | [Changelog](./packages/validate-pack/CHANGELOG.md) |
+| [`@fidel-tools/core`](./packages/core) | Core processing pipeline and NLP engine | `0.1.8` | [Changelog](./packages/core/CHANGELOG.md) |
+| [`@fidel-tools/lang-am`](./packages/lang-am) | Amharic language pack & schema configurations | `0.1.8` | [Changelog](./packages/lang-am/CHANGELOG.md) |
+| [`@fidel-tools/validate-pack`](./packages/validate-pack) | CLI tool to validate & fix language packs | `0.1.8` | [Changelog](./packages/validate-pack/CHANGELOG.md) |
 
 ---
 
@@ -70,6 +70,24 @@ console.log(cleaned) // "ያወጣውን የ እሴት"
 const stem = nlp.stem("ልጆቻቸውን")
 console.log(stem) // "ልጅ"
 ```
+
+---
+
+## Performance & Benchmarks
+
+Fidel Tools prioritizes execution speed and scalability. We measure throughput and latencies across three different target environments: pure JavaScript, compiled WebAssembly (Rust), and native Python bindings (via PyO3).
+
+### Processing Throughput (ops/sec)
+
+Benchmarks evaluated on standard medium-length paragraphs (~200 characters):
+
+| Environment | Language / Tech | Throughput | Average Latency | Speedup |
+| :--- | :--- | :--- | :--- | :--- |
+| **Python Package** | Python + PyO3 Native | ~117,000 ops/s | ~8.50 μs | **1.70x** (Fastest) |
+| **WASM Engine** | Node.js + WebAssembly | ~93,000 ops/s | ~10.75 μs | **1.35x** |
+| **JS Fallback** | Pure JavaScript | ~69,000 ops/s | ~14.50 μs | Baseline (1.00x) |
+
+*For complete performance percentiles (p50, p95, p99), category breakdowns, and linguistic accuracy benchmarks, please refer to the detailed [BENCHMARKS.md](BENCHMARKS.md) report.*
 
 ---
 
