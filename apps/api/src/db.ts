@@ -84,6 +84,18 @@ export async function initDb() {
       );
     `);
 
+    // Create refresh_tokens table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        token_hash TEXT UNIQUE NOT NULL,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        api_key_id UUID REFERENCES api_keys(id) ON DELETE CASCADE,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+
     // Create daily_puzzles table
     await client.query(`
       CREATE TABLE IF NOT EXISTS daily_puzzles (

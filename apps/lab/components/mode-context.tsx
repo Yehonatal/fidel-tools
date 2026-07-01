@@ -166,12 +166,16 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
     setErrorMsg("");
 
     try {
-      // Test key verification against languages API
-      const res = await fetch("/api/languages", {
+      // Exchange credentials for cookies and access token via our Next.js Route Handler
+      const res = await fetch("/api/auth/token", {
+        method: "POST",
         headers: {
-          "x-passkey": inputPasskey,
-          "x-passphrase": inputPassphrase,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          passkey: inputPasskey,
+          passphrase: inputPassphrase,
+        }),
       });
 
       if (res.ok) {
@@ -241,14 +245,14 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
           <form onSubmit={handleUnlockSubmit} className="space-y-5">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold font-mono tracking-wider text-zinc-400 uppercase flex items-center gap-1">
-                <Key className="w-3.5 h-3.5 text-zinc-500" /> Security Passkey
+                <Key className="w-3.5 h-3.5 text-zinc-500" /> Security Passkey / API Key
               </label>
               <div className="relative">
                 <input
                   type={showPasskey ? "text" : "password"}
                   value={inputPasskey}
                   onChange={(e) => setInputPasskey(e.target.value)}
-                  placeholder="fidel_passkey_..."
+                  placeholder="fidel_dev_key_... or ft_..."
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-2.5 pl-3 pr-10 text-xs font-mono text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                 />
                 <button
@@ -298,6 +302,17 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
               {isVerifying ? "Verifying Token..." : "Authenticate Session"}
             </button>
           </form>
+
+          <div className="text-center mt-3">
+            <a
+              href="/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-mono text-zinc-500 hover:text-blue-400 transition-colors underline decoration-dotted"
+            >
+              Get API Key from Fidel Tools Console
+            </a>
+          </div>
 
           {/* Console footer logs */}
           <div className="mt-8 border-t border-zinc-850 pt-4 flex flex-col gap-1 text-[8px] font-mono text-zinc-600">

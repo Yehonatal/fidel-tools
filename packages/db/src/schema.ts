@@ -86,6 +86,22 @@ export const apiKeys = pgTable(
   (t) => [index("api_keys_user_id_idx").on(t.userId), index("api_keys_key_hash_idx").on(t.keyHash)],
 );
 
+// ── Refresh Tokens ────────────────────────────────────────────────────────────
+
+export const refreshTokens = pgTable(
+  "refresh_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    apiKeyId: uuid("api_key_id").references(() => apiKeys.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  }
+);
+
 // ── Usage Tracking ────────────────────────────────────────────────────────────
 
 export const usageLogs = pgTable(

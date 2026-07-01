@@ -6,6 +6,7 @@ import { serve } from "@hono/node-server";
 import notifyRouter from "./routes/notify.js";
 import nlpRouter from "./routes/nlp.js";
 import puzzleRouter from "./routes/puzzle.js";
+import authRouter from "./routes/auth.js";
 import { initDb } from "./db.js";
 import { globalIpLimiter } from "./middleware/rateLimiter.js";
 
@@ -34,6 +35,7 @@ app.route("/api/v1/notify", notifyRouter);
 app.route("/notify", notifyRouter); // Direct mount fallback for frontend subscriber form
 app.route("/api/v1/nlp/puzzle", puzzleRouter);
 app.route("/api/v1/nlp", nlpRouter);
+app.route("/api/v1/auth", authRouter);
 
 // Base health check & status endpoint (Industry Standard API Root)
 app.get("/", (c) => {
