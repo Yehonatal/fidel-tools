@@ -173,173 +173,232 @@ export default function TokenizePage() {
           `
         }} />
 
-        {/* Header HUD */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
-          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
-            <span>✂️ LEVEL 4: BOUNDARY SLICER ✂️</span>
+        {/* Header Block */}
+        <div className="w-full max-w-6xl pb-5 border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200 space-y-2 mb-8 text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                <Activity className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
+                    SCISSOR SNIPPER
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider font-mono">
+                    Level 4
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-650 dark:text-zinc-400 font-sans mt-0.5">
+                  Click in between characters to physically snip the paper tape into word tokens!
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
-            SCISSOR SNIPPER
-          </h2>
-          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
-            Click in between characters to physically snip the paper tape into word tokens!
-          </p>
         </div>
 
-        {!isPlaying ? (
-          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
-            <div className="text-5xl">✂️</div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
-                Begin Boundary Slicing?
-              </h3>
-              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                You have a continuous run-on paper tape of characters. Click between glyphs to insert cuts. Your final cuts are scored by F1 semantic boundary precision!
-              </p>
-            </div>
-            <button
-              onClick={startGame}
-              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
-            >
-              Start Snipping
-            </button>
-          </div>
-        ) : (
-          <div className="max-w-4xl w-full flex flex-col items-center gap-8">
-            {/* HUD */}
-            <div className="w-full cartoon-border rounded-lg bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-3.5 flex justify-between items-center text-xs font-black">
-              <span className="text-zinc-500 dark:text-zinc-400 uppercase">
-                LEVEL {round + 1} / {GAME_SENTENCES.length}
-              </span>
-              <span className="text-zinc-500 dark:text-zinc-400">
-                ACTIVE CUTS: {userCuts.length}
-              </span>
-            </div>
-
-            {/* Clickable Character Paper Tape */}
-            <div className="paper-tape p-8 rounded-2xl w-full flex flex-wrap gap-y-6 gap-x-2 items-center justify-center relative overflow-hidden select-none">
-              {charArray.map((char, idx) => {
-                const hasCutAfter = userCuts.includes(idx + 1);
-
-                return (
-                  <React.Fragment key={idx}>
-                    {/* Wobbly Letter Block */}
-                    <span className="w-12 h-12 border-[3px] border-black bg-white dark:bg-[#222] dark:border-amber-500 font-sans text-2xl font-black flex items-center justify-center rounded-xl shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b]">
-                      {char}
-                    </span>
-                    
-                    {/* Splitting Gutter with Scissor Hover */}
-                    {idx < charArray.length - 1 && (
-                      <div className="relative flex items-center">
-                        <button
-                          disabled={hasSubmitted}
-                          onClick={() => toggleBoundary(idx + 1)}
-                          className="scissor-cut-btn w-6 h-12 -mx-2 flex items-center justify-center relative cursor-pointer group disabled:cursor-not-allowed z-10"
-                        >
-                          <div className={`w-[4px] h-9 rounded-full transition-all ${
-                            hasCutAfter
-                              ? "bg-red-500 border-l border-r border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] w-[6px]"
-                              : "bg-transparent group-hover:bg-zinc-400/60"
-                          }`} />
-                          
-                          {/* Hover Scissor Icon */}
-                          {!hasCutAfter && !hasSubmitted && (
-                            <span className="scissor-icon absolute opacity-0 group-hover:opacity-100 text-sm -top-3 transition-transform pointer-events-none select-none">
-                              ✂️
-                            </span>
-                          )}
-
-                          {/* Placed Cut Scissor */}
-                          {hasCutAfter && (
-                            <span className="absolute -top-3.5 text-sm select-none animate-bounce">
-                              ✂️
-                            </span>
-                          )}
-                        </button>
-
-                        {/* Physical split gap when cut is present */}
-                        {hasCutAfter && (
-                          <div className="w-3 border-r-2 border-dashed border-red-500" />
-                        )}
-
-                        {/* Snip splash effect text */}
-                        {snipEffect === idx + 1 && (
-                          <span className="snip-bubble absolute -top-8 px-2 py-0.5 border border-black bg-yellow-200 text-[8px] font-black uppercase rounded shadow z-30 pointer-events-none">
-                            SNIP!
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* Live Segmented Preview Display */}
-            <div className="w-full cartoon-border rounded-xl p-6 bg-white dark:bg-[#1c1a19] dark:border-amber-500 space-y-3">
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-550 block">LIVE RECONSTRUCTED TOKENS</span>
-              <div className="flex flex-wrap gap-3 items-center justify-center min-h-[46px]">
-                {segmentedPreview.length > 0 ? (
-                  segmentedPreview.map((word, i) => (
-                    <span
-                      key={i}
-                      className="px-4 py-2 border-[3px] border-black bg-cyan-155 text-black text-xs font-black rounded-xl shadow-[3px_3px_0px_0px_#000] dark:bg-cyan-900/40 dark:text-amber-250 dark:border-amber-500 animate-in zoom-in-50 duration-200"
-                    >
-                      {word}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-zinc-450 text-xs font-black uppercase tracking-widest">TAPE UNRESOLVED</span>
-                )}
-              </div>
-            </div>
-
-            {/* Submission dashboard */}
-            <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
-              <div>
-                {!hasSubmitted ? (
-                  <button
-                    onClick={handleSubmitCuts}
-                    className="px-6 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer font-mono dark:border-amber-500"
-                  >
-                    Submit Cuts
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-4">
-                    <div className="cartoon-border px-4 py-3 bg-white dark:bg-[#1c1a19] dark:border-amber-500 flex flex-col justify-center">
-                      <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest block font-black">ACCURACY SCORE</span>
-                      <span className="text-xl font-black text-black dark:text-amber-400">{score}% F1 BOUNDARY</span>
-                    </div>
-
-                    <button
-                      onClick={handleNextRound}
-                      className="px-5 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] flex items-center gap-1.5 cursor-pointer font-mono dark:border-amber-500"
-                    >
-                      <span>{round < GAME_SENTENCES.length - 1 ? "Next Level" : "Finish Arcade"}</span>
-                      <ArrowRight className="w-4 h-4 animate-pulse" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {hasSubmitted && (
-                <div className="cartoon-border p-4 bg-cyan-100 dark:bg-cyan-950/20 text-xs font-bold rounded-lg border-2 border-black max-w-sm dark:border-amber-500">
-                  <p className="uppercase text-[9px] font-black text-cyan-600 dark:text-amber-500 mb-1">
-                    GROUND TRUTH WORD SEGMENTS
+        {/* 12-Column Layout */}
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Interactive Game Area (Col span 8) */}
+          <div className="lg:col-span-8 w-full bg-white/40 dark:bg-zinc-900/10 p-4 md:p-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-800 flex flex-col items-center justify-center min-h-[480px]">
+            {!isPlaying ? (
+              <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+                <div className="text-5xl">✂️</div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                    Begin Boundary Slicing?
+                  </h3>
+                  <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
+                    You have a continuous run-on paper tape of characters. Click between glyphs to insert cuts. Your final cuts are scored by F1 semantic boundary precision!
                   </p>
-                  <div className="flex flex-wrap gap-2 justify-center mt-2">
-                    {currentSentence.tokens.map((t, idx) => (
-                      <span key={idx} className="px-2.5 py-1 border-2 border-black bg-white text-black text-xs font-black rounded-lg dark:bg-zinc-900 dark:text-white dark:border-amber-500 shadow-[1px_1px_0px_0px_#000]">
-                        {t}
-                      </span>
-                    ))}
+                </div>
+                <button
+                  onClick={startGame}
+                  className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
+                >
+                  Start Snipping
+                </button>
+              </div>
+            ) : (
+              <div className="w-full flex flex-col items-center gap-8">
+                {/* HUD */}
+                <div className="w-full cartoon-border rounded-lg bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-3.5 flex justify-between items-center text-xs font-black">
+                  <span className="text-zinc-550 dark:text-zinc-400 uppercase">
+                    LEVEL {round + 1} / {GAME_SENTENCES.length}
+                  </span>
+                  <span className="text-zinc-555 dark:text-zinc-400">
+                    ACTIVE CUTS: {userCuts.length}
+                  </span>
+                </div>
+
+                {/* Clickable Character Paper Tape */}
+                <div className="paper-tape p-8 rounded-2xl w-full flex flex-wrap gap-y-6 gap-x-2 items-center justify-center relative overflow-hidden select-none">
+                  {charArray.map((char, idx) => {
+                    const hasCutAfter = userCuts.includes(idx + 1);
+
+                    return (
+                      <React.Fragment key={idx}>
+                        {/* Wobbly Letter Block */}
+                        <span className="w-12 h-12 border-[3px] border-black bg-white dark:bg-[#222] dark:border-amber-500 font-sans text-2xl font-black flex items-center justify-center rounded-xl shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b]">
+                          {char}
+                        </span>
+                        
+                        {/* Splitting Gutter with Scissor Hover */}
+                        {idx < charArray.length - 1 && (
+                          <div className="relative flex items-center">
+                            <button
+                              disabled={hasSubmitted}
+                              onClick={() => toggleBoundary(idx + 1)}
+                              className="scissor-cut-btn w-6 h-12 -mx-2 flex items-center justify-center relative cursor-pointer group disabled:cursor-not-allowed z-10"
+                            >
+                              <div className={`w-[4px] h-9 rounded-full transition-all ${
+                                hasCutAfter
+                                  ? "bg-red-500 border-l border-r border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] w-[6px]"
+                                  : "bg-transparent group-hover:bg-zinc-400/60"
+                              }`} />
+                              
+                              {/* Hover Scissor Icon */}
+                              {!hasCutAfter && !hasSubmitted && (
+                                <span className="scissor-icon absolute opacity-0 group-hover:opacity-100 text-sm -top-3 transition-transform pointer-events-none select-none">
+                                  ✂️
+                                </span>
+                              )}
+
+                              {/* Placed Cut Scissor */}
+                              {hasCutAfter && (
+                                <span className="absolute -top-3.5 text-sm select-none animate-bounce">
+                                  ✂️
+                                </span>
+                              )}
+                            </button>
+
+                            {/* Physical split gap when cut is present */}
+                            {hasCutAfter && (
+                              <div className="w-3 border-r-2 border-dashed border-red-500" />
+                            )}
+
+                            {/* Snip splash effect text */}
+                            {snipEffect === idx + 1 && (
+                              <span className="snip-bubble absolute -top-8 px-2 py-0.5 border border-black bg-yellow-200 text-[8px] font-black uppercase rounded shadow z-30 pointer-events-none text-black">
+                                SNIP!
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+
+                {/* Live Segmented Preview Display */}
+                <div className="w-full cartoon-border rounded-xl p-6 bg-white dark:bg-[#1c1a19] dark:border-amber-500 space-y-3">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-zinc-550 block">LIVE RECONSTRUCTED TOKENS</span>
+                  <div className="flex flex-wrap gap-3 items-center justify-center min-h-[46px]">
+                    {segmentedPreview.length > 0 ? (
+                      segmentedPreview.map((word, i) => (
+                        <span
+                          key={i}
+                          className="px-4 py-2 border-[3px] border-black bg-cyan-155 text-black text-xs font-black rounded-xl shadow-[3px_3px_0px_0px_#000] dark:bg-cyan-900/40 dark:text-amber-250 dark:border-amber-500 animate-in zoom-in-50 duration-200 animate-in fade-in"
+                        >
+                          {word}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-zinc-450 text-xs font-black uppercase tracking-widest">TAPE UNRESOLVED</span>
+                    )}
                   </div>
                 </div>
-              )}
+
+                {/* Submission dashboard */}
+                <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+                  <div>
+                    {!hasSubmitted ? (
+                      <button
+                        onClick={handleSubmitCuts}
+                        className="px-6 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer font-mono dark:border-amber-500"
+                      >
+                        Submit Cuts
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-4 animate-in fade-in duration-300">
+                        <div className="cartoon-border px-4 py-3 bg-white dark:bg-[#1c1a19] dark:border-amber-500 flex flex-col justify-center">
+                          <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest block">ACCURACY SCORE</span>
+                          <span className="text-xl font-black text-black dark:text-amber-400">{score}% F1 BOUNDARY</span>
+                        </div>
+
+                        <button
+                          onClick={handleNextRound}
+                          className="px-5 py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 active:shadow-[0px_0px_0px_0px_#000] flex items-center gap-1.5 cursor-pointer font-mono dark:border-amber-500"
+                        >
+                          <span>{round < GAME_SENTENCES.length - 1 ? "Next Level" : "Finish Arcade"}</span>
+                          <ArrowRight className="w-4 h-4 animate-pulse" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {hasSubmitted && (
+                    <div className="cartoon-border p-4 bg-cyan-100 dark:bg-cyan-950/20 text-xs font-bold rounded-lg border-2 border-black max-w-sm dark:border-amber-500 text-black dark:text-amber-100 animate-in fade-in duration-300">
+                      <p className="uppercase text-[9px] font-black text-cyan-600 dark:text-amber-500 mb-1">
+                        GROUND TRUTH WORD SEGMENTS
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center mt-2">
+                        {currentSentence.tokens.map((t, idx) => (
+                          <span key={idx} className="px-2.5 py-1 border-2 border-black bg-white text-black text-xs font-black rounded-lg dark:bg-zinc-900 dark:text-white dark:border-amber-500 shadow-[1px_1px_0px_0px_#000]">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Study Guide & Performance HUD (Col span 4) */}
+          <div className="lg:col-span-4 space-y-6 w-full font-mono">
+            {/* Real-time stats card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <h3 className="text-xs font-black uppercase text-zinc-500 dark:text-amber-500 tracking-wider">
+                🎮 SESSION PERFORMANCE
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-black dark:text-white leading-none">{score}%</p>
+                  <p className="text-[9px] font-black text-zinc-550 dark:text-zinc-500 uppercase mt-1 leading-none">ACCURACY</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-amber-500 leading-none">⚙️ {round + 1}</p>
+                  <p className="text-[9px] font-black text-zinc-550 dark:text-zinc-500 uppercase mt-1 leading-none">LEVEL</p>
+                </div>
+              </div>
             </div>
 
+            {/* Educational Concept Card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <div className="border-b-2 border-dashed border-zinc-205 dark:border-zinc-800 pb-3">
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  📖 NLP LAB REPORT
+                </span>
+                <h4 className="text-sm font-black text-black dark:text-white uppercase mt-1">
+                  Lexical Boundaries & Word Segmentation
+                </h4>
+              </div>
+              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium">
+                Tokenization divides raw character streams into meaningful word arrays. For Ethiopic scripts, word bounds are historically marked by word space separators (፡), but modern digital texts often use spaces or omit delimiters entirely.
+              </p>
+              <div className="border-t border-dashed border-zinc-205 dark:border-zinc-800 pt-3 space-y-2">
+                <h5 className="text-[10px] font-black uppercase text-black dark:text-amber-400">HOW TO PLAY</h5>
+                <ul className="list-disc pl-4 text-[10px] text-zinc-650 dark:text-zinc-400 space-y-1 font-semibold">
+                  <li>Analyze the run-on character tape display.</li>
+                  <li>Click in between character blocks to physically insert or remove boundary cuts.</li>
+                  <li>Press "SUBMIT BOUNDARIES" to evaluate your divisions against human gold standards.</li>
+                </ul>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     );
   }

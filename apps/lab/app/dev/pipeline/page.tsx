@@ -228,7 +228,7 @@ export default function PipelinePage() {
   if (mode === "fun") {
     // ── 10/10 FUN MODE: CONVEYOR FACTORY ───────────────────────────────────
     return (
-      <div className="font-mono min-h-screen p-6 md:p-12 flex flex-col items-center bg-[#fdfcfa] bg-[radial-gradient(#e5e7eb_1.5px,transparent_1.5px)] [background-size:24px_24px] text-zinc-900 dark:bg-[#121110] dark:bg-[radial-gradient(#292524_1.5px,transparent_1.5px)] dark:text-amber-100 animate-in fade-in duration-300">
+      <div className="font-mono min-h-screen p-4 md:p-8 flex flex-col items-center bg-[#fdfcfa] bg-[radial-gradient(#e5e7eb_1.5px,transparent_1.5px)] [background-size:24px_24px] text-zinc-900 dark:bg-[#121110] dark:bg-[radial-gradient(#292524_1.5px,transparent_1.5px)] dark:text-amber-100 animate-in fade-in duration-300">
         <style dangerouslySetInnerHTML={{
           __html: `
             .cartoon-border {
@@ -257,230 +257,291 @@ export default function PipelinePage() {
           `
         }} />
 
-        {/* Header HUD */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
-          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
-            <span>🏭 LEVEL 2: CONVEYOR MUTATIONS 🏭</span>
+        {/* Header Block */}
+        <div className="w-full max-w-6xl pb-5 border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200 space-y-2 mb-8 text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
+                    CONVEYOR FACTORY
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider font-mono">
+                    Level 2
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-650 dark:text-zinc-400 font-sans mt-0.5">
+                  Drag stage compilation blocks to align the conveyor text mutations!
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
-            CONVEYOR FACTORY
-          </h2>
-          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
-            Drag stage compilation blocks to align the conveyor text mutations!
-          </p>
         </div>
 
-        {/* Game Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-5xl items-stretch">
-          
-          {/* Column 1: Rounds and Crate list */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Round target detail */}
-            <div className="cartoon-border rounded-2xl p-6 bg-cyan-50 dark:bg-[#1c1a19] dark:border-amber-500 space-y-4">
-              <span className="inline-block py-1 px-2 border-2 border-black bg-amber-400 text-black text-[9px] font-black tracking-widest uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                {currentRound.title}
-              </span>
+        {/* 12-Column Layout */}
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Interactive Conveyor Belt Game (Col span 8) */}
+          <div className="lg:col-span-8 w-full bg-white/40 dark:bg-zinc-900/10 p-4 md:p-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-800">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch animate-in fade-in">
               
-              <div className="space-y-1">
-                <span className="text-[9px] font-black text-zinc-500 block uppercase">INPUT SOURCE</span>
-                <p className="p-3 bg-white dark:bg-black border-2 border-black text-xs font-bold rounded">
-                  {currentRound.inputText}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-[9px] font-black text-zinc-500 block uppercase">TARGET OUTPUT</span>
-                <p className="p-3 bg-white dark:bg-black border-2 border-black text-xs font-black text-green-600 dark:text-amber-400 rounded">
-                  {currentRound.targetText}
-                </p>
-              </div>
-            </div>
-
-            {/* Stage crates */}
-            <div className="cartoon-border rounded-2xl p-6 bg-white dark:bg-[#1a1c1d] dark:border-amber-500 space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-widest text-black dark:text-amber-400">
-                DRAG STAGES (OR CLICK)
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {Object.entries(STAGE_LABELS).map(([key, item]) => {
-                  const onBelt = conveyorBelt.includes(key);
-                  return (
-                    <div
-                      key={key}
-                      draggable={!onBelt}
-                      onDragStart={() => handleDragStart(key)}
-                      onClick={() => handleStageClick(key)}
-                      className={`cartoon-border p-3 rounded-xl flex items-center justify-between transition-all select-none ${
-                        onBelt
-                          ? "opacity-30 bg-zinc-150 border-zinc-400 cursor-not-allowed text-zinc-400"
-                          : `${item.color} border-black dark:border-amber-500 cursor-grab hover:translate-x-[1px] hover:translate-y-[1px]`
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="w-4 h-4 text-zinc-500" />
-                        <div>
-                          <p className="text-xs font-black uppercase text-black dark:text-white">
-                            {item.title}
-                          </p>
-                          <p className="text-[8px] font-bold text-zinc-500 dark:text-zinc-400 uppercase">
-                            {item.desc}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-black border-2 border-black px-1.5 py-0.5 rounded-lg bg-white text-black shadow-[1px_1px_0px_0px_#000]">
-                        {onBelt ? "BELT" : "ADD"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Column 2 & 3: Conveyor Line and Mutations */}
-          <div className="lg:col-span-2 space-y-6 flex flex-col justify-between">
-            {/* The Conveyor Belt Rig */}
-            <div
-              onDragOver={handleDragOver}
-              onDrop={handleDropOnConveyor}
-              className="cartoon-border rounded-2xl p-8 bg-[#f3f4f6] dark:bg-[#1c1a19] dark:border-amber-500 space-y-6 relative overflow-hidden flex-grow"
-            >
-              {/* Gears and smoke decorations */}
-              <div className="absolute top-2 right-4 flex gap-2 select-none z-10">
-                <span className="animate-spin duration-3000 text-xs">⚙️</span>
-                <span className="animate-spin duration-5000 text-xs">⚙️</span>
-              </div>
-              <div className="absolute -top-3.5 left-6 px-3 py-0.5 border-2 border-black bg-amber-400 text-black text-[9px] font-black tracking-widest uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                CONVEYOR ASSEMBLY LINE
-              </div>
-
-              {/* Belt Slots */}
-              <div className="flex flex-col gap-6 pt-4">
-                {conveyorBelt.length === 0 ? (
-                  <div className="border-[3px] border-dashed border-zinc-400 dark:border-zinc-800 rounded-2xl p-12 flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-650 font-black text-xs gap-3">
-                    <span className="text-3xl select-none">🏭</span>
-                    <span>CONVEYOR BELT IS READY FOR CARGO</span>
-                    <span className="text-[9px] font-bold text-center uppercase max-w-sm">
-                      Drag crates onto the conveyor belt or click them to sequence pipeline transformations!
-                    </span>
+              {/* Column 1: Rounds and Crate list */}
+              <div className="md:col-span-1 space-y-6">
+                {/* Round target detail */}
+                <div className="cartoon-border rounded-2xl p-4 bg-cyan-50 dark:bg-[#1c1a19] dark:border-amber-500 space-y-4">
+                  <span className="inline-block py-1 px-2 border-2 border-black bg-amber-400 text-black text-[9px] font-black tracking-widest uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                    {currentRound.title}
+                  </span>
+                  
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-black text-zinc-555 block uppercase">INPUT SOURCE</span>
+                    <p className="p-3 bg-white dark:bg-black border-2 border-black text-xs font-bold rounded">
+                      {currentRound.inputText}
+                    </p>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {conveyorBelt.map((stage, i) => {
-                      const label = STAGE_LABELS[stage];
-                      const intermediateOut = mutatedOutputs[stage] || "...";
 
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-black text-zinc-555 block uppercase">TARGET OUTPUT</span>
+                    <p className="p-3 bg-white dark:bg-black border-2 border-black text-xs font-black text-green-600 dark:text-amber-400 rounded">
+                      {currentRound.targetText}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stage crates */}
+                <div className="cartoon-border rounded-2xl p-4 bg-white dark:bg-[#1a1c1d] dark:border-amber-500 space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-black dark:text-amber-400 leading-tight">
+                    DRAG STAGES (OR CLICK)
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {Object.entries(STAGE_LABELS).map(([key, item]) => {
+                      const onBelt = conveyorBelt.includes(key);
                       return (
-                        <div key={stage} className="relative animate-in slide-in-from-left-4 duration-300">
-                          {/* Crates card */}
-                          <div className={`cartoon-border p-4 rounded-xl ${label.color} border-2 border-black flex flex-col md:flex-row md:items-center justify-between gap-4 relative`}>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="w-7 h-7 rounded-full border-2 border-black bg-white text-black font-black flex items-center justify-center text-xs shadow-[1px_1px_0px_0px_#000]">
-                                #{i + 1}
-                              </span>
-                              <div>
-                                <h4 className="text-xs font-black uppercase text-black dark:text-white">
-                                  {label.title}
-                                </h4>
-                                <p className="text-[8px] font-bold text-zinc-550 uppercase">
-                                  {label.desc}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Mutated state */}
-                            <div className="flex-grow">
-                              <span className="text-[8px] font-black uppercase text-zinc-500 block mb-0.5">INTERMEDIATE STATE</span>
-                              <p className="p-2 bg-white dark:bg-black border-2 border-black text-[11px] font-bold rounded truncate select-all dark:border-amber-500">
-                                {intermediateOut}
+                        <div
+                          key={key}
+                          draggable={!onBelt}
+                          onDragStart={() => handleDragStart(key)}
+                          onClick={() => handleStageClick(key)}
+                          className={`cartoon-border p-2.5 rounded-xl flex items-center justify-between transition-all select-none ${
+                            onBelt
+                              ? "opacity-30 bg-zinc-150 border-zinc-400 cursor-not-allowed text-zinc-400"
+                              : `${item.color} border-black dark:border-amber-500 cursor-grab hover:translate-x-[1px] hover:translate-y-[1px]`
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <GripVertical className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                            <div>
+                              <p className="text-[10px] font-black uppercase text-black dark:text-white leading-tight">
+                                {item.title}
+                              </p>
+                              <p className="text-[7px] font-bold text-zinc-550 dark:text-zinc-400 uppercase mt-0.5 leading-none">
+                                {item.desc}
                               </p>
                             </div>
                           </div>
-
-                          {/* Connecting arrow */}
-                          {i < conveyorBelt.length - 1 && (
-                            <div className="flex justify-center my-1 select-none">
-                              <ArrowDown className="w-5 h-5 text-black dark:text-amber-500 animate-bounce" />
-                            </div>
-                          )}
+                          <span className="text-[8px] font-black border-2 border-black px-1.5 py-0.5 rounded-lg bg-white text-black shadow-[1px_1px_0px_0px_#000] shrink-0">
+                            {onBelt ? "BELT" : "ADD"}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
-                )}
-              </div>
-
-              {/* Physical roller wheels */}
-              <div className="pt-4">
-                <div className="roller-conveyor rounded-full border-2 border-black dark:border-amber-500 bg-white dark:bg-black" />
-              </div>
-
-              {/* Reset button */}
-              <div className="flex gap-4 justify-end pt-3">
-                <button
-                  onClick={handleResetConveyor}
-                  className="px-4 py-2 border-2 border-black bg-white hover:bg-zinc-150 text-black text-xs font-black rounded-lg active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] shadow-[3px_3px_0px_0px_#000] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer dark:bg-zinc-900 dark:text-white dark:border-amber-500"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>RESET</span>
-                </button>
-              </div>
-
-              {/* Steam success puff */}
-              {gameWin && !loading && (
-                <div className="absolute bottom-8 left-8 flex flex-col items-center select-none z-20 pointer-events-none">
-                  <span className="steam-cloud text-3xl">💨</span>
-                  <span className="steam-cloud text-2xl" style={{ animationDelay: "0.2s" }}>💨</span>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Score HUD / Victory banner */}
-            {hasTested && (
-              <div className="cartoon-border rounded-xl p-5 bg-white dark:bg-[#1a1c1d] dark:border-amber-500 flex items-center justify-between shadow-inner">
-                <div className="space-y-1">
-                  <span className="text-zinc-550 text-[9px] font-black uppercase tracking-wider block">CONVEYOR EFFICIENCY</span>
-                  {loading ? (
-                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase">
-                      <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
-                      <span>COMPILING CONVEYOR...</span>
+              {/* Column 2 & 3: Conveyor Line and Mutations */}
+              <div className="md:col-span-2 space-y-6 flex flex-col justify-between">
+                {/* The Conveyor Belt Rig */}
+                <div
+                  onDragOver={handleDragOver}
+                  onDrop={handleDropOnConveyor}
+                  className="cartoon-border rounded-2xl p-6 bg-[#f3f4f6] dark:bg-[#1c1a19] dark:border-amber-500 space-y-6 relative overflow-hidden flex-grow"
+                >
+                  {/* Gears and smoke decorations */}
+                  <div className="absolute top-2 right-4 flex gap-2 select-none z-10">
+                    <span className="animate-spin duration-3000 text-xs">⚙️</span>
+                    <span className="animate-spin text-xs">⚙️</span>
+                  </div>
+
+                  <div className="border-b-2 border-dashed border-zinc-300 dark:border-zinc-800 pb-2">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase">PREVIEWING COMPILATION</span>
+                  </div>
+
+                  {/* Belt Slots */}
+                  <div className="flex flex-col gap-6 pt-4">
+                    {conveyorBelt.length === 0 ? (
+                      <div className="border-[3px] border-dashed border-zinc-400 dark:border-zinc-800 rounded-2xl p-12 flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-650 font-black text-xs gap-3">
+                        <span className="text-3xl select-none">🏭</span>
+                        <span>CONVEYOR BELT IS READY FOR CARGO</span>
+                        <span className="text-[9px] font-bold text-center uppercase max-w-sm">
+                          Drag crates onto the conveyor belt or click them to sequence pipeline transformations!
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {conveyorBelt.map((stage, i) => {
+                          const label = STAGE_LABELS[stage as keyof typeof STAGE_LABELS];
+                          const intermediateOut = mutatedOutputs[stage] || "...";
+
+                          return (
+                            <div key={stage} className="relative animate-in slide-in-from-left-4 duration-300">
+                              {/* Crates card */}
+                              <div className={`cartoon-border p-4 rounded-xl ${label.color} border-2 border-black flex flex-col md:flex-row md:items-center justify-between gap-4 relative`}>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <span className="w-7 h-7 rounded-full border-2 border-black bg-white text-black font-black flex items-center justify-center text-xs shadow-[1px_1px_0px_0px_#000]">
+                                    #{i + 1}
+                                  </span>
+                                  <div>
+                                    <h4 className="text-xs font-black uppercase text-black dark:text-white">
+                                      {label.title}
+                                    </h4>
+                                    <p className="text-[8px] font-bold text-zinc-555 uppercase">
+                                      {label.desc}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Mutated state */}
+                                <div className="flex-grow">
+                                  <span className="text-[8px] font-black uppercase text-zinc-500 block mb-0.5">INTERMEDIATE STATE</span>
+                                  <p className="p-2 bg-white dark:bg-black border-2 border-black text-[11px] font-bold rounded truncate select-all dark:border-amber-500">
+                                    {intermediateOut}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Connecting arrow */}
+                              {i < conveyorBelt.length - 1 && (
+                                <div className="flex justify-center my-1 select-none">
+                                  <ArrowDown className="w-5 h-5 text-black dark:text-amber-500 animate-bounce" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Physical roller wheels */}
+                  <div className="pt-4">
+                    <div className="roller-conveyor rounded-full border-2 border-black dark:border-amber-500 bg-white dark:bg-black" />
+                  </div>
+
+                  {/* Reset button */}
+                  <div className="flex gap-4 justify-end pt-3">
+                    <button
+                      onClick={handleResetConveyor}
+                      className="px-4 py-2 border-2 border-black bg-white hover:bg-zinc-150 text-black text-xs font-black rounded-lg active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] shadow-[3px_3px_0px_0px_#000] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer dark:bg-zinc-900 dark:text-white dark:border-amber-500"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>RESET</span>
+                    </button>
+                  </div>
+
+                  {/* Steam success puff */}
+                  {gameWin && !loading && (
+                    <div className="absolute bottom-8 left-8 flex flex-col items-center select-none z-20 pointer-events-none">
+                      <span className="steam-cloud text-3xl">💨</span>
+                      <span className="steam-cloud text-2xl" style={{ animationDelay: "0.2s" }}>💨</span>
                     </div>
-                  ) : (
-                    <span className="text-2xl font-black text-black dark:text-amber-500 tracking-wider">
-                      {score} / 100 PTS
-                    </span>
                   )}
                 </div>
 
-                {gameWin && !loading ? (
-                  <div className="flex flex-col gap-2 items-end">
-                    <div className="flex items-center gap-2 border-[3.5px] border-black bg-green-200 dark:border-amber-500 dark:bg-amber-500/10 p-2.5 rounded-xl text-green-700 dark:text-amber-400 text-xs font-black tracking-wider uppercase animate-bounce shadow-[3px_3px_0px_0px_#000]">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>COMPILE PERFECT!</span>
+                {/* Score HUD / Victory banner */}
+                {hasTested && (
+                  <div className="cartoon-border rounded-xl p-5 bg-white dark:bg-[#1a1c1d] dark:border-amber-500 flex items-center justify-between shadow-inner">
+                    <div className="space-y-1">
+                      <span className="text-zinc-555 text-[9px] font-black uppercase tracking-wider block">CONVEYOR EFFICIENCY</span>
+                      {loading ? (
+                        <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase">
+                          <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
+                          <span>COMPILING CONVEYOR...</span>
+                        </div>
+                      ) : (
+                        <span className="text-2xl font-black text-black dark:text-amber-500 tracking-wider">
+                          {score} / 100 PTS
+                        </span>
+                      )}
                     </div>
-                    {currentRoundIdx < CONVEYOR_ROUNDS.length - 1 && (
-                      <button
-                        onClick={handleNextRound}
-                        className="px-4 py-2 bg-amber-400 text-black border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-[10px] font-black uppercase tracking-wider hover:translate-x-[1px] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] flex items-center gap-1 cursor-pointer dark:border-amber-550"
-                      >
-                        <span>NEXT ROUND</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+
+                    {gameWin && !loading ? (
+                      <div className="flex flex-col gap-2 items-end">
+                        <div className="flex items-center gap-2 border-[3.5px] border-black bg-green-200 dark:border-amber-500 dark:bg-amber-500/10 p-2.5 rounded-xl text-green-700 dark:text-amber-400 text-xs font-black tracking-wider uppercase animate-bounce shadow-[3px_3px_0px_0px_#000]">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>COMPILE PERFECT!</span>
+                        </div>
+                        {currentRoundIdx < CONVEYOR_ROUNDS.length - 1 && (
+                          <button
+                            onClick={handleNextRound}
+                            className="px-4 py-2 bg-amber-400 text-black border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-[10px] font-black uppercase tracking-wider hover:translate-x-[1px] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] flex items-center gap-1 cursor-pointer dark:border-amber-550"
+                          >
+                            <span>NEXT ROUND</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      !loading && (
+                        <div className="flex items-center gap-2 border-2 border-black bg-red-100 p-2.5 rounded-lg text-red-750 text-xs font-black tracking-wider uppercase shadow-[2px_2px_0px_0px_#000]">
+                          <XCircle className="w-4 h-4" />
+                          <span>MUTATION MISMATCH</span>
+                        </div>
+                      )
                     )}
                   </div>
-                ) : (
-                  !loading && (
-                    <div className="flex items-center gap-2 border-2 border-black bg-red-100 p-2.5 rounded-lg text-red-750 text-xs font-black tracking-wider uppercase shadow-[2px_2px_0px_0px_#000]">
-                      <XCircle className="w-4 h-4" />
-                      <span>MUTATION MISMATCH</span>
-                    </div>
-                  )
                 )}
               </div>
-            )}
 
+            </div>
+          </div>
+
+          {/* Right Column: Study Guide & Performance HUD (Col span 4) */}
+          <div className="lg:col-span-4 space-y-6 w-full font-mono">
+            {/* Real-time stats card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <h3 className="text-xs font-black uppercase text-zinc-500 dark:text-amber-500 tracking-wider">
+                🎮 PIPELINE MONITOR
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-black dark:text-white leading-none">{score}</p>
+                  <p className="text-[9px] font-black text-zinc-550 dark:text-zinc-500 uppercase mt-1 leading-none">EFFICIENCY</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-amber-500 leading-none">⚙️ {currentRoundIdx + 1}</p>
+                  <p className="text-[9px] font-black text-zinc-555 dark:text-zinc-500 uppercase mt-1 leading-none">ROUND</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Educational Concept Card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <div className="border-b-2 border-dashed border-zinc-205 dark:border-zinc-800 pb-3">
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  📖 NLP LAB REPORT
+                </span>
+                <h4 className="text-sm font-black text-black dark:text-white uppercase mt-1">
+                  Sequential Preprocessing Chains
+                </h4>
+              </div>
+              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium">
+                Raw text processing follows a strict order: normalizing characters, tokenizing boundaries, stripping grammatical stopwords, and stemming terms. Getting the order wrong ruins downstream indexing.
+              </p>
+              <div className="border-t border-dashed border-zinc-205 dark:border-zinc-800 pt-3 space-y-2">
+                <h5 className="text-[10px] font-black uppercase text-black dark:text-amber-400">HOW TO PLAY</h5>
+                <ul className="list-disc pl-4 text-[10px] text-zinc-650 dark:text-zinc-400 space-y-1 font-semibold">
+                  <li>Drag the NLP stage crates onto the conveyor belt in the logical execution order.</li>
+                  <li>Click stage crates or drag them onto the conveyor belt to sequence pipeline transformations.</li>
+                  <li>Compare your outputs directly with the gold target to secure a perfect compile efficiency!</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     );
   }

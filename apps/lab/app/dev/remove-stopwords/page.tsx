@@ -207,184 +207,232 @@ export default function RemoveStopwordsPage() {
           `
         }} />
 
-        {/* Header HUD */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
-          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
-            <span>📡 LEVEL 5: SIGNAL EXTRACTOR 📡</span>
+        {/* Header Block */}
+        <div className="w-full max-w-6xl pb-5 border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200 space-y-2 mb-8 text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                <X className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
+                    SWIPE RADAR
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider font-mono">
+                    Level 5
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-650 dark:text-zinc-400 font-sans mt-0.5">
+                  Extract semantic signal words and sweep stopwords before the beaker overflows!
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-5xl font-black tracking-wider text-black dark:text-amber-500">
-            SWIPE RADAR
-          </h2>
-          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-black uppercase tracking-widest">
-            Extract semantic signal words and sweep stopwords before the beaker overflows!
-          </p>
         </div>
 
-        {!isPlaying ? (
-          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
-            <div className="text-5xl">📡</div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
-                Start Swiping Signal?
-              </h3>
-              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                Nouns and verbs must be kept. Grammar stopwords (conjunctions/prepositions) must be cut. Unsorted or wrong decisions fill the Noise Beaker. Reach 100% noise and the lab explodes!
-              </p>
-            </div>
-            {score > 0 && (
-              <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-amber-950/20 dark:border-amber-500">
-                PREVIOUS SCORE: {score} PTS
-              </div>
-            )}
-            <button
-              onClick={startGame}
-              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
-            >
-              Start Swiping
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl items-stretch">
-            
-            {/* Left Column: Bubbling Noise Beaker */}
-            <div className="md:col-span-1 flex flex-col items-center justify-between cartoon-border rounded-2xl p-6 bg-white dark:bg-[#1c1a19] dark:border-amber-500">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">NOISE LEVEL</span>
-              
-              {/* Beaker Container */}
-              <div className="relative w-24 h-56 border-[4px] border-black dark:border-amber-500 rounded-b-3xl overflow-hidden bg-zinc-50 dark:bg-black mt-4 flex flex-col justify-end shadow-inner">
-                {/* Tick marks */}
-                <div className="absolute inset-y-0 right-2 flex flex-col justify-between text-[7px] font-black py-4 text-zinc-400 select-none z-10">
-                  <span>BOIL 💥</span>
-                  <span>80%</span>
-                  <span>60%</span>
-                  <span>40%</span>
-                  <span>20%</span>
-                  <span>SAFE 🟢</span>
+        {/* 12-Column Layout */}
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Interactive Game Area (Col span 8) */}
+          <div className="lg:col-span-8 w-full bg-white/40 dark:bg-zinc-900/10 p-4 md:p-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-800 flex flex-col items-center justify-center min-h-[480px]">
+            {!isPlaying ? (
+              <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+                <div className="text-5xl">📡</div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                    Start Swiping Signal?
+                  </h3>
+                  <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold font-mono">
+                    Nouns and verbs must be kept. Grammar stopwords (conjunctions/prepositions) must be cut. Unsorted or wrong decisions fill the Noise Beaker. Reach 100% noise and the lab explodes!
+                  </p>
                 </div>
-
-                {/* Bubbling liquid */}
-                <div
-                  style={{ height: `${noiseLevel}%` }}
-                  className={`boiling-fluid w-full border-t-4 border-black transition-all duration-300 ${
-                    noiseLevel >= 75
-                      ? "bg-red-500 dark:bg-red-950"
-                      : noiseLevel >= 50
-                      ? "bg-yellow-400 dark:bg-yellow-950/50"
-                      : "bg-emerald-400 dark:bg-emerald-950/50"
-                  }`}
-                />
-              </div>
-
-              <div className="text-center mt-4">
-                <span className="text-2xl font-black block text-black dark:text-amber-400">{noiseLevel}%</span>
-                <span className="text-[9px] font-bold text-zinc-500 uppercase">NOISE VOLUME</span>
-              </div>
-            </div>
-
-            {/* Right Column: Streaming radar target & decision buttons */}
-            <div className="md:col-span-2 flex flex-col justify-between gap-6">
-              
-              {/* Radar Area */}
-              <div className="cartoon-border rounded-2xl p-8 bg-zinc-100/50 dark:bg-black dark:border-amber-500 flex-grow flex flex-col items-center justify-center relative overflow-hidden">
-                <span className="absolute top-2 left-3 text-[9px] font-black text-zinc-550 uppercase">
-                  RADAR SIGNAL ({currentIndex + 1}/{STREAM_WORDS.length})
-                </span>
-
-                {/* The word bubble target */}
-                {!gameOver && !gameWin && (
-                  <div className="radar-bubble px-8 py-5 rounded-3xl bg-white dark:bg-[#1c1a19] text-3xl font-black text-black dark:text-white tracking-wider z-10 border-2 border-black dark:border-amber-500">
-                    {currentWord.text}
+                {score > 0 && (
+                  <div className="text-sm font-black text-black border-2 border-black bg-amber-100 py-2 rounded dark:bg-amber-950/20 dark:border-amber-500">
+                    PREVIOUS SCORE: {score} PTS
                   </div>
                 )}
+                <button
+                  onClick={startGame}
+                  className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
+                >
+                  Start Swiping
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-stretch animate-in fade-in">
+                
+                {/* Left Column: Bubbling Noise Beaker */}
+                <div className="md:col-span-1 flex flex-col items-center justify-between cartoon-border rounded-2xl p-6 bg-white dark:bg-[#1c1a19] dark:border-amber-500">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">NOISE LEVEL</span>
+                  
+                  {/* Beaker Container */}
+                  <div className="relative w-24 h-56 border-[4px] border-black dark:border-amber-500 rounded-b-3xl overflow-hidden bg-zinc-55 dark:bg-black mt-4 flex flex-col justify-end shadow-inner">
+                    {/* Tick marks */}
+                    <div className="absolute inset-y-0 right-2 flex flex-col justify-between text-[7px] font-black py-4 text-zinc-400 select-none z-10">
+                      <span>BOIL 💥</span>
+                      <span>80%</span>
+                      <span>60%</span>
+                      <span>40%</span>
+                      <span>20%</span>
+                      <span>SAFE 🟢</span>
+                    </div>
 
-                {/* Feedback Splash Bubble */}
-                {feedback && (
-                  <div className="absolute inset-0 bg-white/95 dark:bg-black/95 flex flex-col items-center justify-center animate-in fade-in duration-200 z-20">
-                    <span className={`text-4xl font-black uppercase tracking-widest rotate-6 ${
-                      feedback === "miss" ? "text-red-550" : "text-green-600"
-                    }`}>
-                      {feedback === "miss" ? "NOISE CLOG!" : feedback === "keep" ? "SAVED!" : "CLEANED!"}
-                    </span>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase mt-2">
-                      Reason: {currentWord.reason}
-                    </p>
-                  </div>
-                )}
-
-                {/* Time Indicator bar */}
-                {!feedback && !gameOver && !gameWin && (
-                  <div className="absolute bottom-0 inset-x-0 h-2 bg-zinc-200 dark:bg-zinc-800">
+                    {/* Bubbling liquid */}
                     <div
-                      style={{ width: `${(timeLeft / 2.5) * 100}%` }}
-                      className="h-full bg-amber-500 transition-all duration-100"
+                      style={{ height: `${noiseLevel}%` }}
+                      className={`boiling-fluid w-full border-t-4 border-black transition-all duration-350 ${
+                        noiseLevel >= 75
+                          ? "bg-red-500 dark:bg-red-950"
+                          : noiseLevel >= 50
+                          ? "bg-yellow-400 dark:bg-yellow-950/50"
+                          : "bg-emerald-400 dark:bg-emerald-950/50"
+                      }`}
                     />
                   </div>
-                )}
 
-                {/* Game over / Victory overlays */}
-                {gameOver && (
-                  <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
-                    <span className="text-5xl">💥</span>
-                    <h3 className="text-2xl font-black text-red-550 uppercase">LAB OVERFLOW!</h3>
-                    <p className="text-xs font-semibold text-zinc-550">The noise beaker boiled over and clogged the parser!</p>
-                    <button
-                      onClick={startGame}
-                      className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
-                    >
-                      TRY AGAIN
-                    </button>
+                  <div className="text-center mt-4">
+                    <span className="text-2xl font-black block text-black dark:text-amber-400">{noiseLevel}%</span>
+                    <span className="text-[9px] font-bold text-zinc-550 uppercase">NOISE VOLUME</span>
                   </div>
-                )}
-
-                {gameWin && (
-                  <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
-                    <span className="text-5xl">🏆</span>
-                    <h3 className="text-2xl font-black text-green-600 dark:text-amber-400 uppercase">SIGNAL CLEANSED!</h3>
-                    <p className="text-xs font-semibold text-zinc-550 font-black">All stopwords filtered. Perfect linguistic signal!</p>
-                    <button
-                      onClick={startGame}
-                      className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
-                    >
-                      REPLAY
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Swipe/Decision Buttons */}
-              {!gameOver && !gameWin && (
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    disabled={feedback !== null}
-                    onClick={() => handleDecision(false)}
-                    className="cartoon-border py-4 bg-red-200 hover:bg-red-300 dark:bg-red-950/60 dark:hover:bg-red-955 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
-                  >
-                    🗑️ CUT STOPWORD
-                  </button>
-                  <button
-                    disabled={feedback !== null}
-                    onClick={() => handleDecision(true)}
-                    className="cartoon-border py-4 bg-cyan-200 hover:bg-cyan-300 dark:bg-cyan-900/60 dark:hover:bg-cyan-900 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
-                  >
-                    💾 KEEP SIGNAL
-                  </button>
                 </div>
-              )}
 
-              {/* Score HUD */}
-              <div className="cartoon-border rounded-lg bg-zinc-100 dark:bg-[#1c1a19] p-3.5 flex justify-between items-center text-[10px] font-black text-zinc-500 dark:text-amber-500/85">
-                <span>SCORE: {score} PTS</span>
-                <span className="flex items-center gap-1.5">
-                  <span>STREAK: {streak}</span>
-                  <span className="px-1.5 py-0.5 border border-black bg-amber-400 text-black text-[9px] rounded">
-                    {mult}X MULTIPLIER
-                  </span>
-                </span>
+                {/* Right Column: Streaming radar target & decision buttons */}
+                <div className="md:col-span-2 flex flex-col justify-between gap-6">
+                  
+                  {/* Radar Area */}
+                  <div className="cartoon-border rounded-2xl p-8 bg-zinc-100/50 dark:bg-black dark:border-amber-500 flex-grow flex flex-col items-center justify-center relative overflow-hidden min-h-[220px]">
+                    <span className="absolute top-2 left-3 text-[9px] font-black text-zinc-550 uppercase">
+                      RADAR SIGNAL ({currentIndex + 1}/{STREAM_WORDS.length})
+                    </span>
+
+                    {/* The word bubble target */}
+                    {!gameOver && !gameWin && (
+                      <div className="radar-bubble px-8 py-5 rounded-3xl bg-white dark:bg-[#1c1a19] text-3xl font-black text-black dark:text-white tracking-wider z-10 border-2 border-black dark:border-amber-500 select-none">
+                        {currentWord.text}
+                      </div>
+                    )}
+
+                    {/* Feedback Splash Bubble */}
+                    {feedback && (
+                      <div className="absolute inset-0 bg-white/95 dark:bg-black/95 flex flex-col items-center justify-center animate-in fade-in duration-200 z-20">
+                        <span className={`text-3xl font-black uppercase tracking-widest rotate-6 ${
+                          feedback === "miss" ? "text-red-550" : "text-green-600"
+                        }`}>
+                          {feedback === "miss" ? "NOISE CLOG!" : feedback === "keep" ? "SAVED!" : "CLEANED!"}
+                        </span>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase mt-2">
+                          Reason: {currentWord.reason}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Time Indicator bar */}
+                    {!feedback && !gameOver && !gameWin && (
+                      <div className="absolute bottom-0 inset-x-0 h-2 bg-zinc-200 dark:bg-zinc-800">
+                        <div
+                          style={{ width: `${(timeLeft / 2.5) * 100}%` }}
+                          className="h-full bg-amber-500 transition-all duration-100"
+                        />
+                      </div>
+                    )}
+
+                    {/* Game over / Victory overlays */}
+                    {gameOver && (
+                      <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
+                        <span className="text-5xl">💥</span>
+                        <h3 className="text-2xl font-black text-red-555 uppercase">LAB OVERFLOW!</h3>
+                        <p className="text-xs font-semibold text-zinc-550">The noise beaker boiled over and clogged the parser!</p>
+                        <button
+                          onClick={startGame}
+                          className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
+                        >
+                          TRY AGAIN
+                        </button>
+                      </div>
+                    )}
+
+                    {gameWin && (
+                      <div className="text-center space-y-4 animate-in zoom-in-75 duration-200">
+                        <span className="text-5xl">🏆</span>
+                        <h3 className="text-2xl font-black text-green-600 dark:text-amber-400 uppercase">SIGNAL CLEANSED!</h3>
+                        <p className="text-xs font-semibold text-zinc-550 font-black">All stopwords filtered. Perfect linguistic signal!</p>
+                        <button
+                          onClick={startGame}
+                          className="px-5 py-2.5 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] text-xs font-black uppercase cursor-pointer dark:bg-zinc-900"
+                        >
+                          REPLAY
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Swipe/Decision Buttons */}
+                  {!gameOver && !gameWin && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        disabled={feedback !== null}
+                        onClick={() => handleDecision(false)}
+                        className="cartoon-border py-4 bg-red-200 hover:bg-red-300 dark:bg-red-950/60 dark:hover:bg-red-955 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
+                      >
+                        🗑️ CUT STOPWORD
+                      </button>
+                      <button
+                        disabled={feedback !== null}
+                        onClick={() => handleDecision(true)}
+                        className="cartoon-border py-4 bg-cyan-200 hover:bg-cyan-300 dark:bg-cyan-900/60 dark:hover:bg-cyan-900 text-black dark:text-white font-black uppercase text-xs rounded-xl active:translate-y-0.5 disabled:opacity-50 cursor-pointer text-center border-black"
+                      >
+                        💾 KEEP SIGNAL
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+          </div>
 
+          {/* Right Column: Study Guide & Performance HUD (Col span 4) */}
+          <div className="lg:col-span-4 space-y-6 w-full font-mono">
+            {/* Real-time stats card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <h3 className="text-xs font-black uppercase text-zinc-500 dark:text-amber-500 tracking-wider">
+                🎮 SESSION PERFORMANCE
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-black dark:text-white leading-none">{score}</p>
+                  <p className="text-[9px] font-black text-zinc-550 dark:text-zinc-500 uppercase mt-1 leading-none">SCORE</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-amber-500 leading-none">🔥 {streak}</p>
+                  <p className="text-[9px] font-black text-zinc-555 dark:text-zinc-500 uppercase mt-1 leading-none">{mult}X MULTIPLIER</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Educational Concept Card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <div className="border-b-2 border-dashed border-zinc-205 dark:border-zinc-800 pb-3">
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  📖 NLP LAB REPORT
+                </span>
+                <h4 className="text-sm font-black text-black dark:text-white uppercase mt-1">
+                  Semantic Noise Filtering
+                </h4>
+              </div>
+              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium">
+                Common grammatical particles (conjunctions, prepositions, copulas) carry minimal keyword meaning in search indexing. Stripping them focuses compute on semantic nouns and verbs.
+              </p>
+              <div className="border-t border-dashed border-zinc-205 dark:border-zinc-800 pt-3 space-y-2">
+                <h5 className="text-[10px] font-black uppercase text-black dark:text-amber-400">HOW TO PLAY</h5>
+                <ul className="list-disc pl-4 text-[10px] text-zinc-650 dark:text-zinc-400 space-y-1 font-semibold">
+                  <li>Words will pop up on the radar sweep.</li>
+                  <li>Swipe/Click left to discard grammatical stopwords, or swipe/click right to preserve high-signal terms.</li>
+                  <li>Protect your beaker! Incorrect swiping pours noisy liquid into the beaker; letting it overflow triggers a system purge.</li>
+                </ul>
+              </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     );
   }

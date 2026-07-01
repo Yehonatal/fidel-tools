@@ -291,159 +291,218 @@ export default function TransliteratePage() {
           `
         }} />
 
-        {/* Title */}
-        <div className="text-center space-y-2 mb-10 w-full max-w-4xl border-b-4 border-black dark:border-amber-500 pb-6">
-          <div className="flex items-center justify-center gap-2 text-sm font-black tracking-widest uppercase text-amber-600 dark:text-amber-400">
-            <span>⌨️ LEVEL 7: TRANSLITERATION RUSH v2 🚀</span>
+        {/* Header Block */}
+        <div className="w-full max-w-6xl pb-5 border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200 space-y-2 mb-8 text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                <Keyboard className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-sans">
+                    TRANSLITERATION RUSH
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider font-mono">
+                    Level 7
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-650 dark:text-zinc-400 font-sans mt-0.5">
+                  Match characters in both directions under fire. Typos get partial credit!
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-4xl font-black tracking-wider text-black dark:text-amber-500">
-            TRANSLITERATION RUSH v2
-          </h2>
-          <p className="text-xs text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider">
-            Match characters in both directions under fire. typos get partial credit!
-          </p>
         </div>
 
-        {!isPlaying ? (
-          <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
-            <div className="text-5xl">🚀</div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
-                Start Transliteration?
-              </h3>
-              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold">
-                Alternate between Ge'ez-to-ASCII and ASCII-to-Ge'ez typing. Classic Mode gives 3 lives. Endless Mode tracks session high scores!
-              </p>
-            </div>
+        {/* 12-Column Layout */}
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Interactive Game Area (Col span 8) */}
+          <div className="lg:col-span-8 w-full bg-white/40 dark:bg-zinc-900/10 p-4 md:p-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-800 flex flex-col items-center justify-center min-h-[480px]">
+            {!isPlaying ? (
+              <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full text-center space-y-6">
+                <div className="text-5xl">🚀</div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-black dark:text-amber-400 uppercase tracking-wider">
+                    Start Transliteration?
+                  </h3>
+                  <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-semibold font-mono">
+                    Alternate between Ge'ez-to-ASCII and ASCII-to-Ge'ez typing. Classic Mode gives 3 lives. Endless Mode tracks session high scores!
+                  </p>
+                </div>
 
-            {/* Mode selection buttons */}
-            <div className="grid grid-cols-2 gap-4 border-2 border-black p-2 rounded-xl dark:border-amber-500 bg-zinc-550/5">
-              <button
-                onClick={() => setIsEndless(false)}
-                className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
-                  !isEndless ? "bg-amber-400 border-black" : "bg-transparent border-transparent text-zinc-500"
-                }`}
-              >
-                CLASSIC
-              </button>
-              <button
-                onClick={() => setIsEndless(true)}
-                className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
-                  isEndless ? "bg-amber-400 border-black" : "bg-transparent border-transparent text-zinc-500"
-                }`}
-              >
-                ENDLESS
-              </button>
-            </div>
+                {/* Mode selection buttons */}
+                <div className="grid grid-cols-2 gap-4 border-2 border-black p-2 rounded-xl dark:border-amber-500 bg-zinc-550/5">
+                  <button
+                    onClick={() => setIsEndless(false)}
+                    className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
+                      !isEndless ? "bg-amber-400 border-black text-black" : "bg-transparent border-transparent text-zinc-500"
+                    }`}
+                  >
+                    CLASSIC
+                  </button>
+                  <button
+                    onClick={() => setIsEndless(true)}
+                    className={`py-2 text-[10px] font-black uppercase rounded-lg border-2 ${
+                      isEndless ? "bg-amber-400 border-black text-black" : "bg-transparent border-transparent text-zinc-500"
+                    }`}
+                  >
+                    ENDLESS
+                  </button>
+                </div>
 
-            {sessionHighScore > 0 && (
-              <div className="text-xs font-black text-black border-2 border-black bg-cyan-150 py-2 rounded dark:bg-cyan-950/20 dark:border-amber-500 dark:text-amber-400 flex items-center justify-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <span>SESSION BEST: {sessionHighScore} PTS</span>
+                {sessionHighScore > 0 && (
+                  <div className="text-xs font-black text-black border-2 border-black bg-cyan-150 py-2 rounded dark:bg-cyan-950/20 dark:border-amber-500 dark:text-amber-400 flex items-center justify-center gap-1">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <span>SESSION BEST: {sessionHighScore} PTS</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={startGame}
+                  className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
+                >
+                  Start Arena
+                </button>
+              </div>
+            ) : (
+              <div className="cartoon-border rounded-2xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full flex flex-col justify-between min-h-[440px] relative space-y-6">
+                
+                {/* Top stats HUD */}
+                <div className="w-full flex items-center justify-between border-b-2 border-dashed border-black dark:border-amber-500 pb-3 text-xs font-black">
+                  <span>SCORE: {score} PTS</span>
+                  {isEndless ? (
+                    <span className="flex items-center gap-1 text-[9px] uppercase font-black text-amber-550 dark:text-amber-400">
+                      <Star className="w-3.5 h-3.5 fill-current animate-pulse" /> ENDLESS MODE
+                    </span>
+                  ) : (
+                    <div className="flex gap-1 items-center">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Heart
+                          key={i}
+                          className={`w-4 h-4 ${i < lives ? "text-red-500 fill-red-500" : "text-zinc-200 dark:text-zinc-800"}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Core word challenge box */}
+                <div className="text-center space-y-4 flex-grow flex flex-col items-center justify-center relative">
+                  <span className="text-[10px] text-zinc-550 dark:text-zinc-400 uppercase tracking-widest block font-black">
+                    {roundDirection === "to-sera" ? "💻 CONVERT GE'EZ TO SERA" : "💻 CONVERT SERA TO GE'EZ"}
+                  </span>
+
+                  {/* Time progress bar */}
+                  <div className="w-full max-w-[120px] h-3 bg-zinc-200 border-2 border-black rounded-full overflow-hidden relative dark:border-amber-500 bg-white dark:bg-black">
+                    <div
+                      style={{ width: `${(timeLeft / 10) * 100}%` }}
+                      className="h-full bg-red-500 transition-all duration-300"
+                    />
+                  </div>
+
+                  <span className="text-4xl font-black text-black dark:text-white block font-sans tracking-wide">
+                    {sourceDisplay}
+                  </span>
+
+                  {/* Stamp feedback */}
+                  <div className="absolute top-2 right-2 min-h-[28px]">
+                    {feedback === "correct" && (
+                      <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-green-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                        EXACT MATCH!
+                      </span>
+                    )}
+                    {feedback === "near-miss" && (
+                      <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-yellow-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                        NEAR-MISS!
+                      </span>
+                    )}
+                    {feedback === "incorrect" && (
+                      <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-red-400 text-white text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                        WRONG!
+                      </span>
+                    )}
+                    {feedback === "timeout" && (
+                      <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-zinc-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
+                        TIME OUT!
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Input field */}
+                <div className="w-full space-y-4">
+                  <input
+                    type="text"
+                    autoFocus
+                    disabled={feedback !== null}
+                    value={userTyped}
+                    onChange={(e) => handleLiveTransliterate(e.target.value)}
+                    placeholder={roundDirection === "to-sera" ? "Type Latin ASCII..." : "Type keys (e.g. selam)..."}
+                    className="w-full bg-white border-[3px] border-black focus:bg-amber-50 dark:bg-black dark:border-amber-500 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-xl text-black dark:text-amber-100 font-sans font-black shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b] focus:translate-x-0.5 focus:translate-y-0.5 focus:shadow-[1px_1px_0px_0px_#000] transition-all"
+                  />
+
+                  {feedback && (
+                    <div className="cartoon-border p-3 bg-cyan-100 dark:bg-cyan-950/20 text-[10px] font-black text-center text-zinc-700 dark:text-amber-300 rounded-lg">
+                      Target Answer: "{targetDisplay}"
+                    </div>
+                  )}
+
+                  <button
+                    disabled={feedback !== null}
+                    onClick={() => checkAnswer(false)}
+                    className="w-full py-3 bg-amber-400 border-[3px] border-black text-black font-black text-xs uppercase rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_#000] cursor-pointer"
+                  >
+                    SUBMIT ANSWER
+                  </button>
+                </div>
               </div>
             )}
-
-            <button
-              onClick={startGame}
-              className="w-full py-3.5 bg-amber-400 border-[3px] border-black text-black font-black uppercase tracking-widest text-xs rounded-lg hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer font-mono dark:border-amber-500"
-            >
-              Start Arena
-            </button>
           </div>
-        ) : (
-          <div className="cartoon-border rounded-2xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-8 max-w-md w-full flex flex-col justify-between min-h-[440px] relative space-y-6">
-            
-            {/* Top stats HUD */}
-            <div className="w-full flex items-center justify-between border-b-2 border-dashed border-black dark:border-amber-500 pb-3 text-xs font-black">
-              <span>SCORE: {score} PTS</span>
-              {isEndless ? (
-                <span className="flex items-center gap-1 text-[9px] uppercase font-black text-amber-550 dark:text-amber-400">
-                  <Star className="w-3.5 h-3.5 fill-current animate-pulse" /> ENDLESS MODE
+
+          {/* Right Column: Study Guide & Performance HUD (Col span 4) */}
+          <div className="lg:col-span-4 space-y-6 w-full font-mono">
+            {/* Real-time stats card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <h3 className="text-xs font-black uppercase text-zinc-500 dark:text-amber-500 tracking-wider">
+                🎮 SESSION PERFORMANCE
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-2xl font-black text-black dark:text-white leading-none">{score}</p>
+                  <p className="text-[9px] font-black text-zinc-555 dark:text-zinc-500 uppercase mt-1 leading-none font-black">SCORE</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg">
+                  <p className="text-xl font-black text-amber-550 leading-none">⚙️ {isEndless ? "ENDLESS" : `LIVES: ${lives}`}</p>
+                  <p className="text-[9px] font-black text-zinc-555 dark:text-zinc-500 uppercase mt-1 leading-none font-black">GAME STATUS</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Educational Concept Card */}
+            <div className="cartoon-border rounded-xl bg-white dark:bg-[#1c1a19] dark:border-amber-500 p-6 space-y-4">
+              <div className="border-b-2 border-dashed border-zinc-205 dark:border-zinc-800 pb-3">
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  📖 NLP LAB REPORT
                 </span>
-              ) : (
-                <div className="flex gap-1 items-center">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Heart
-                      key={i}
-                      className={`w-4 h-4 ${i < lives ? "text-red-500 fill-red-500" : "text-zinc-200 dark:text-zinc-800"}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Core word challenge box */}
-            <div className="text-center space-y-4 flex-grow flex flex-col items-center justify-center relative">
-              <span className="text-[10px] text-zinc-550 dark:text-zinc-400 uppercase tracking-widest block font-black">
-                {roundDirection === "to-sera" ? "💻 CONVERT GE'EZ TO SERA" : "💻 CONVERT SERA TO GE'EZ"}
-              </span>
-
-              {/* Time progress bar */}
-              <div className="w-full max-w-[120px] h-3 bg-zinc-200 border-2 border-black rounded-full overflow-hidden relative dark:border-amber-500">
-                <div
-                  style={{ width: `${(timeLeft / 10) * 100}%` }}
-                  className="h-full bg-red-500 transition-all duration-300"
-                />
+                <h4 className="text-sm font-black text-black dark:text-white uppercase mt-1">
+                  ASCII Phonetic Transcription Maps
+                </h4>
               </div>
-
-              <span className="text-4xl font-black text-black dark:text-white block font-sans tracking-wide">
-                {sourceDisplay}
-              </span>
-
-              {/* Stamp feedback */}
-              <div className="absolute top-2 right-2 min-h-[28px]">
-                {feedback === "correct" && (
-                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-green-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                    EXACT MATCH!
-                  </span>
-                )}
-                {feedback === "near-miss" && (
-                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-yellow-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                    NEAR-MISS!
-                  </span>
-                )}
-                {feedback === "incorrect" && (
-                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-red-400 text-white text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                    WRONG!
-                  </span>
-                )}
-                {feedback === "timeout" && (
-                  <span className="boom-stamp inline-block py-1.5 px-3 border-2 border-black bg-zinc-400 text-black text-[10px] font-black uppercase rounded shadow-[2px_2px_0px_0px_#000]">
-                    TIME OUT!
-                  </span>
-                )}
+              <p className="text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium">
+                Inputting Ethiopic characters on standard hardware requires mapping keys phonetically. The System for Ethiopic Representation in ASCII (SERA) translates Unicode shapes to readable ASCII strings.
+              </p>
+              <div className="border-t border-dashed border-zinc-205 dark:border-zinc-800 pt-3 space-y-2">
+                <h5 className="text-[10px] font-black uppercase text-black dark:text-amber-400">HOW TO PLAY</h5>
+                <ul className="list-disc pl-4 text-[10px] text-zinc-650 dark:text-zinc-400 space-y-1 font-semibold">
+                  <li>A word is displayed in Ge'ez characters (or phonetic SERA transcription).</li>
+                  <li>Type the exact corresponding transliteration translation.</li>
+                  <li>Fast typing without spelling typos earns maximum bonus points!</li>
+                </ul>
               </div>
             </div>
-
-            {/* Input field */}
-            <div className="w-full space-y-4">
-              <input
-                type="text"
-                autoFocus
-                disabled={feedback !== null}
-                value={userTyped}
-                onChange={(e) => handleLiveTransliterate(e.target.value)}
-                placeholder={roundDirection === "to-sera" ? "Type Latin ASCII..." : "Type keys (e.g. selam)..."}
-                className="w-full bg-white border-[3px] border-black focus:bg-amber-50 dark:bg-black dark:border-amber-500 dark:focus:border-amber-500 outline-none text-center py-3 text-sm rounded-xl text-black dark:text-amber-100 font-sans font-black shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#f59e0b] focus:translate-x-0.5 focus:translate-y-0.5 focus:shadow-[1px_1px_0px_0px_#000] transition-all"
-              />
-
-              {feedback && (
-                <div className="cartoon-border p-3 bg-cyan-100 dark:bg-cyan-950/20 text-[10px] font-black text-center text-zinc-700 dark:text-amber-300 rounded-lg">
-                  Target Answer: "{targetDisplay}"
-                </div>
-              )}
-
-              <button
-                disabled={feedback !== null}
-                onClick={() => checkAnswer(false)}
-                className="w-full py-3 bg-amber-400 border-[3px] border-black text-black font-black text-xs uppercase rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all shadow-[4px_4px_0px_0px_#000] cursor-pointer"
-              >
-                SUBMIT ANSWER
-              </button>
-            </div>
-
           </div>
-        )}
+        </div>
       </div>
     );
   }
