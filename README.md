@@ -16,6 +16,7 @@
 <p align="center">
   <a href="https://github.com/Yehonatal/fidel-tools/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
   <a href="https://www.npmjs.com/package/@fidel-tools/core"><img src="https://img.shields.io/npm/v/@fidel-tools/core.svg" alt="NPM Version" /></a>
+  <a href="https://pypi.org/project/fidel-tools/"><img src="https://img.shields.io/pypi/v/fidel-tools.svg" alt="PyPI Version" /></a>
   <a href="https://fidel-tools.vercel.app/"><img src="https://img.shields.io/badge/demo-live-brightgreen.svg" alt="Live Demo" /></a>
   <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/maintained%20with-pnpm-ff69b4.svg" alt="pnpm" /></a>
 </p>
@@ -39,6 +40,7 @@ Fidel Tools is managed as a monorepo workspace. Check the individual package dir
 | [`@fidel-tools/core`](./packages/core) | Core processing pipeline and NLP engine | `0.1.8` | [Changelog](./packages/core/CHANGELOG.md) |
 | [`@fidel-tools/lang-am`](./packages/lang-am) | Amharic language pack & schema configurations | `0.1.8` | [Changelog](./packages/lang-am/CHANGELOG.md) |
 | [`@fidel-tools/validate-pack`](./packages/validate-pack) | CLI tool to validate & fix language packs | `0.1.8` | [Changelog](./packages/validate-pack/CHANGELOG.md) |
+| [`fidel-tools` (Python)](./packages/py-fidel-tools) | Python bindings for the core native Rust engine | `0.1.8` | [README](./packages/py-fidel-tools/README.md) |
 
 ---
 
@@ -46,12 +48,19 @@ Fidel Tools is managed as a monorepo workspace. Check the individual package dir
 
 ### Installation
 
+**Node.js**:
 ```bash
 pnpm add @fidel-tools/core @fidel-tools/lang-am
 ```
 
+**Python**:
+```bash
+pip install fidel-tools
+```
+
 ### Usage
 
+**Node.js**:
 ```typescript
 import { Pipeline } from '@fidel-tools/core'
 import amPack from '@fidel-tools/lang-am'
@@ -69,6 +78,29 @@ console.log(cleaned) // "ያወጣውን የ እሴት"
 // Stem Amharic words
 const stem = nlp.stem("ልጆቻቸውን")
 console.log(stem) // "ልጅ"
+```
+
+**Python**:
+```python
+import fidel_tools as fidel
+
+# Load Amharic language pack
+am_pack = fidel.get_amharic_pack()
+
+# Initialize pipeline
+nlp = fidel.Pipeline(am_pack)
+
+# Normalize homophones, labialization, and gemination
+text = nlp.normalize("ሐኪም ኀይሉ በልቷልልል!")
+print(text)  # "ሃኪም ሃይሉ በልቱዋልል!"
+
+# Remove stopwords using boundary rules
+cleaned = nlp.remove_stopwords("ያወጣውን የተጨማሪ እሴት")
+print(cleaned)  # "ያወጣውን የ እሴት"
+
+# Stem Amharic words
+stem = nlp.stem("ልጆቻቸውን")
+print(stem)  # "ልጅ"
 ```
 
 ---
