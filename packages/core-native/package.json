@@ -1,6 +1,9 @@
 {
   "name": "@fidel-tools/core-native",
   "version": "0.1.8",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "dist/wasm_inline.cjs",
   "module": "dist/wasm_inline.js",

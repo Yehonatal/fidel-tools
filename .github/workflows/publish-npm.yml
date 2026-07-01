@@ -33,6 +33,7 @@ jobs:
 
     - name: Publish to NPM
       run: |
+        pnpm --filter @fidel-tools/core-native publish --no-git-checks
         pnpm --filter @fidel-tools/core publish --no-git-checks
         pnpm --filter @fidel-tools/lang-am publish --no-git-checks
         pnpm --filter @fidel-tools/validate-pack publish --no-git-checks
@@ -58,10 +59,12 @@ jobs:
           # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-          - os: windows-latest
-            target: i686-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
