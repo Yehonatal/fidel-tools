@@ -13,6 +13,7 @@ export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
       const payload = await verify(token, secret, "HS256");
       if (payload && payload.userId) {
         c.set("apiKeyOwner", payload.userId as string);
+        c.set("apiKeyId", (payload.apiKeyId as string) || null);
         c.set("apiKey", (payload.apiKey as string) || "bearer_token");
         await next();
         return;
@@ -132,6 +133,7 @@ export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
 
     // Store developer info in execution context for routing handlers
     c.set("apiKeyOwner", result.rows[0].user_id);
+    c.set("apiKeyId", result.rows[0].id);
     c.set("apiKey", apiKey);
   } catch (err: any) {
     console.error("Authentication DB query failed:", err);

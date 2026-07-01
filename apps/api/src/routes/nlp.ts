@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getPack, getPipeline, SUPPORTED_LANGS } from "../lang-registry.js";
 import { authenticateApiKey } from "../middleware/auth.js";
 import { apiRateLimiter } from "../middleware/rateLimiter.js";
+import { logUsage } from "../middleware/usageLogger.js";
 import {
   normalize,
   sentenceTokenize,
@@ -17,8 +18,9 @@ import {
 
 const nlpRouter = new Hono();
 
-// Apply auth and rate limiting to all NLP endpoints
+// Apply auth, rate limiting, and usage logging to all NLP endpoints
 nlpRouter.use("*", authenticateApiKey);
+nlpRouter.use("*", logUsage);
 nlpRouter.use("*", apiRateLimiter);
 
 // Schemas
