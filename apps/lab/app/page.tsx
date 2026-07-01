@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useLabMode } from "@/components/mode-context";
-import { Terminal, Gamepad, ArrowRight, Cpu, HelpCircle, Layers } from "lucide-react";
+import { Terminal, Gamepad, ArrowRight, Cpu, HelpCircle, Layers, Award } from "lucide-react";
 
 export default function LabLandingPage() {
   const router = useRouter();
@@ -11,11 +11,6 @@ export default function LabLandingPage() {
 
   const handleSelectMode = (selectedMode: "academic" | "fun") => {
     setMode(selectedMode);
-    if (selectedMode === "academic") {
-      router.push("/pipeline?mode=academic");
-    } else {
-      router.push("/languages?mode=fun");
-    }
   };
 
   return (
@@ -30,8 +25,9 @@ export default function LabLandingPage() {
           <Cpu className="w-3.5 h-3.5 animate-pulse" />
           <span>Fidel NLP Lab v0.2.0</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
-          ፊደል Tools interactive Lab
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight flex flex-wrap items-center justify-center gap-x-3">
+          <span className="font-loga font-light tracking-tight text-5xl sm:text-6xl text-zinc-950 dark:text-zinc-50">ፊደል</span>
+          <span>Tools Interactive Lab</span>
         </h1>
         <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 font-medium max-w-lg mx-auto">
           Explore Ethiopic Natural Language Processing. Reframer engine toggles all nine endpoints from a professional developer console to an interactive game arcade.
@@ -83,7 +79,7 @@ export default function LabLandingPage() {
           </div>
         </div>
 
-        {/* Card 2: Fun Mode */}
+        {/* Card 2: Daily Puzzles Mode */}
         <div 
           onClick={() => handleSelectMode("fun")}
           className="group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/40 backdrop-blur-md p-8 flex flex-col justify-between cursor-pointer hover:border-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 active:scale-[0.99] overflow-hidden"
@@ -91,22 +87,22 @@ export default function LabLandingPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-all duration-300" />
           <div className="space-y-6">
             <div className="inline-flex p-3.5 rounded-xl bg-amber-500/10 text-amber-550 border border-amber-500/20 shadow-inner group-hover:scale-110 transition-all duration-300">
-              <Gamepad className="w-6 h-6" />
+              <Award className="w-6 h-6" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white group-hover:text-amber-500 transition-colors">
-                Arcade Playground
+                Daily Puzzles
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold">
-                Explore language processing through gamified mechanics. Solve ordering puzzles, match characters, sweep stopwords, and sprint through morphological stems.
+                Solve elegant, Wordle-style etymological and logical daily challenges. Compare your judgment against live NLP indexes and trace morphological compilation runs.
               </p>
             </div>
             <ul className="space-y-2 text-left pt-2">
               {[
-                "Character Select & statistics matching",
-                "Draggable stage re-ordering games",
-                "Quick-fire normalization trivia quiz",
-                "Stopword sweeps and vocabulary zappers",
+                "Relevance Arena (TF-IDF Connoisseur)",
+                "Pipeline Trace (Logic Deduction)",
+                "Wordle-style shareable daily results",
+                "Daily streaks & etymological guides",
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-2 text-[11px] font-semibold text-zinc-400 dark:text-zinc-550">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -117,9 +113,9 @@ export default function LabLandingPage() {
           </div>
 
           <div className="mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-500 font-mono">mode: fun</span>
+            <span className="text-xs font-bold text-amber-500 font-mono">mode: puzzle</span>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-white group-hover:translate-x-1.5 transition-transform">
-              <span>Let me play</span>
+              <span>Start Puzzles</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-500" />
             </span>
           </div>

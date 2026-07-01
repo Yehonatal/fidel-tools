@@ -24,12 +24,19 @@ try {
   console.log("\nStep 2: Running Speed Benchmarks...");
   execSync(`node ${pathModule.join(benchmarkDir, "speed.js")}`, { stdio: "inherit" });
 
+  // 2.5 Run Python speed checks
+  console.log("\nStep 2.5: Running Python Speed Benchmarks...");
+  execSync(`python3 ${pathModule.join(benchmarkDir, "python_speed.py")}`, { stdio: "inherit" });
+
   // 3. Read results
   const accuracy = JSON.parse(
     fs.readFileSync(pathModule.join(benchmarkDir, "accuracy_results.json"), "utf8"),
   );
   const speed = JSON.parse(
     fs.readFileSync(pathModule.join(benchmarkDir, "speed_results.json"), "utf8"),
+  );
+  const pythonSpeed = JSON.parse(
+    fs.readFileSync(pathModule.join(benchmarkDir, "python_speed_results.json"), "utf8"),
   );
 
   // 4. Enforce accuracy threshold against the new honest baselines
@@ -147,23 +154,26 @@ As a light stemmer using longest-match affix-removal, the engine lacks a complet
 ### 3. Tokenization (Hulet Neteb \`፡\` as Sentence Boundary)
 The language pack specifies the Amharic word separator (hulet neteb \`፡\`) as a sentence boundary. In standard modern writing, \`፡\` separates words (analogous to a space) rather than sentences. Because the tokenizer splits sentences on every \`፡\`, paragraphs using hulet neteb are over-segmented into word-level fragments, resulting in 0% exact match sentence accuracy. This highlighting represents an actionable area for language pack tuning.
 
-## Performance Throughput & Latency (JS vs WASM)
-Comparing pure JavaScript normalization with the compiled WebAssembly (WASM) engine.
+## Performance Throughput & Latency (JS vs WASM vs Python)
+Comparing pure JavaScript normalization with the compiled WebAssembly (WASM) engine and the native Python package.
 
 ### Short Sentences (~15 characters)
 *Payload: "${shortPayloadText()}"*
 - **JS Throughput**: ${speed.short.js.throughput.toFixed(0)} ops/sec | p50: ${speed.short.js.p50.toFixed(2)} μs | p95: ${speed.short.js.p95.toFixed(2)} μs | p99: ${speed.short.js.p99.toFixed(2)} μs
 - **WASM Throughput**: ${speed.short.wasm.throughput.toFixed(0)} ops/sec | p50: ${speed.short.wasm.p50.toFixed(2)} μs | p95: ${speed.short.wasm.p95.toFixed(2)} μs | p99: ${speed.short.wasm.p99.toFixed(2)} μs
+- **Python Throughput**: ${pythonSpeed.short.throughput.toFixed(0)} ops/sec | Avg Latency: ${pythonSpeed.short.avg.toFixed(2)} μs
 - **WASM Speedup**: **${speed.short.speedup.toFixed(2)}x**
 
 ### Medium Paragraphs (~200 characters)
 - **JS Throughput**: ${speed.medium.js.throughput.toFixed(0)} ops/sec | p50: ${speed.medium.js.p50.toFixed(2)} μs | p95: ${speed.medium.js.p95.toFixed(2)} μs | p99: ${speed.medium.js.p99.toFixed(2)} μs
 - **WASM Throughput**: ${speed.medium.wasm.throughput.toFixed(0)} ops/sec | p50: ${speed.medium.wasm.p50.toFixed(2)} μs | p95: ${speed.medium.wasm.p95.toFixed(2)} μs | p99: ${speed.medium.wasm.p99.toFixed(2)} μs
+- **Python Throughput**: ${pythonSpeed.medium.throughput.toFixed(0)} ops/sec | Avg Latency: ${pythonSpeed.medium.avg.toFixed(2)} μs
 - **WASM Speedup**: **${speed.medium.speedup.toFixed(2)}x**
 
 ### Large Documents (~2000 characters)
 - **JS Throughput**: ${speed.large.js.throughput.toFixed(0)} ops/sec | p50: ${speed.large.js.p50.toFixed(2)} μs | p95: ${speed.large.js.p95.toFixed(2)} μs | p99: ${speed.large.js.p99.toFixed(2)} μs
 - **WASM Throughput**: ${speed.large.wasm.throughput.toFixed(0)} ops/sec | p50: ${speed.large.wasm.p50.toFixed(2)} μs | p95: ${speed.large.wasm.p95.toFixed(2)} μs | p99: ${speed.large.wasm.p99.toFixed(2)} μs
+- **Python Throughput**: ${pythonSpeed.large.throughput.toFixed(0)} ops/sec | Avg Latency: ${pythonSpeed.large.avg.toFixed(2)} μs
 - **WASM Speedup**: **${speed.large.speedup.toFixed(2)}x**
 
 ## Analysis & Methodology

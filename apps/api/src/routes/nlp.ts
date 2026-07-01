@@ -34,6 +34,7 @@ const pipelineSchema = z.object({
     .array(z.enum(["normalize", "tokenize", "stopwords", "stem"]))
     .optional()
     .default(["normalize", "tokenize", "stopwords", "stem"]),
+  sequential: z.boolean().optional().default(false),
 });
 
 const stemSchema = z.object({
@@ -104,8 +105,33 @@ nlpRouter.post("/pipeline", async (c) => {
   }
 
   try {
-    const { text, lang, steps } = data;
+    const { text, lang, steps, sequential } = data;
     const pack = await getPack(lang);
+
+    if (sequential) {
+      let current: any = text;
+      for (const step of steps) {
+        if (step === "normalize") {
+          current = Array.isArray(current)
+            ? current.map((w) => normalize(w, pack))
+            : normalize(current, pack);
+        } else if (step === "tokenize") {
+          current = Array.isArray(current)
+            ? current.flatMap((w) => w.split(/\s+/).filter(Boolean))
+            : current.split(/\s+/).filter(Boolean);
+        } else if (step === "stopwords") {
+          current = Array.isArray(current)
+            ? current.filter((w) => removeStopwords(w, pack).trim().length > 0)
+            : removeStopwords(current, pack);
+        } else if (step === "stem") {
+          current = Array.isArray(current)
+            ? current.map((w: string) => stem(w, pack))
+            : current.split(/\s+/).filter(Boolean).map((w: string) => stem(w, pack)).join(" ");
+        }
+      }
+      return c.json({ input: text, steps, result: current }, 200);
+    }
+
     const result: {
       input: string;
       lang: string;

@@ -84,6 +84,19 @@ export async function initDb() {
       );
     `);
 
+    // Create daily_puzzles table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS daily_puzzles (
+        id SERIAL PRIMARY KEY,
+        puzzle_id TEXT NOT NULL,
+        date DATE NOT NULL,
+        payload JSONB NOT NULL,
+        day_number INTEGER NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE (puzzle_id, date)
+      );
+    `);
+
     // Seed default developer user
     await client.query(`
       INSERT INTO users (id, name, email) 

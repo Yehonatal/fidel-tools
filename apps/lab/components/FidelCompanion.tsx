@@ -32,55 +32,55 @@ const PAGE_CONTEXTS: Record<string, {
     question: "How do I choose between Academic and Arcade modes?",
     answer: "You can toggle the workspace mode at any time using the console/joystick icon in the top header, or select it on this landing dashboard card!"
   },
-  "/languages": {
+  "/dev/languages": {
     name: "Supported Languages Tool",
     greeting: "ሰላም! You are on the languages page. Ready to choose your linguist warrior class?",
     question: "What language parameters are returned by the API?",
     answer: "The /api/languages endpoint returns supported locales (like 'am' for Amharic), their rules metadata counts, and active homophone mapping collections."
   },
-  "/pipeline": {
+  "/dev/pipeline": {
     name: "Execution Pipeline Tool",
     greeting: "ሰላም! I see you are viewing the multi-stage NLP pipeline playground.",
     question: "What stages are running in this pipeline?",
     answer: "We compile input text through five sequential stages: Normalize (homophones), Lexical Expansion (contractions), Stopword Sweep (noise), Stemming (prefixes/suffixes), and Transliterate (Ge'ez/SERA)."
   },
-  "/normalize": {
+  "/dev/normalize": {
     name: "Normalization Tool",
     greeting: "ሰላም! Inspecting spelling variants? Let's check some homophone groups.",
     question: "How does the normalizer handle Amharic homophones?",
     answer: "It maps characters like ሐ/ሀ/ሃ/ኀ/ኃ and ሰ/ሠ to their canonical baselines. In 'Normalize or Not', you identify which word is the canonical index key!"
   },
-  "/tokenize": {
+  "/dev/tokenize": {
     name: "Tokenizer Tool",
     greeting: "ሰላም! Need to split sentences and words? You are on the Tokenizer page.",
     question: "How does tokenization handle boundary characters?",
     answer: "It uses Ge'ez punctuation markers like '።' for sentences, and spaces or '፡' for words. In Token Ninja, you reconstruct the sentence sequence!"
   },
-  "/remove-stopwords": {
+  "/dev/remove-stopwords": {
     name: "Stopwords Removal Tool",
     greeting: "ሰላም! Clearing grammatical noise? You are in the Stopword Sweep zone.",
     question: "What are stopwords in Amharic?",
     answer: "They are high-frequency function words like 'እና' (and), 'ወደ' (to), or 'በ' (by). Sweeping them allows search indexing to focus on nouns/verbs."
   },
-  "/stem": {
+  "/dev/stem": {
     name: "Morphological Stemmer Tool",
     greeting: "ሰላም! You are in the Stem Sprint arena. Let's find some word bases.",
     question: "How does light stemming work?",
     answer: "It strips prefix/suffix markers (like 'የ', 'ችን', 'ቻቸው') from inflected words. In Stem Sprint, you type these base stems to zap falling words!"
   },
-  "/transliterate": {
+  "/dev/transliterate": {
     name: "Transliteration Tool",
     greeting: "ሰላም! Converting Ge'ez Unicode to ASCII SERA? Ready for the typing rush?",
     question: "What keyboard mapping scheme is used?",
     answer: "We use the Felig Transliteration scheme, mapping characters like 'ሰላም' to ASCII 'selam' and back. In Transliteration Rush, you type these equivalents!"
   },
-  "/lexical-analyze": {
+  "/dev/lexical-analyze": {
     name: "Lexical Expansion Tool",
     greeting: "ሰላም! Expanding abbreviations? Let's bust some contractions.",
     question: "How does abbreviation expansion work?",
     answer: "It matches short-forms like 'ት/ቤት' and expands them to their dictionary equivalents like 'ትምህርት ቤት'. In Abbreviation Buster, you guess these!"
   },
-  "/search": {
+  "/dev/search": {
     name: "Full-Text Search Engine",
     greeting: "ሰላም! Prepared for the index card-showdown? Let's query the corpus.",
     question: "How does search rank results?",

@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Gamepad, Lock, Key, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import { Lock, Key, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import FidelLoader from "./FidelLoader";
 
 export type LabMode = "academic" | "fun";
 
@@ -16,137 +17,18 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType | undefined>(undefined);
 
 function ModeTransitionLoader({ progress, targetMode }: { progress: number; targetMode: LabMode | null }) {
-  const [msg, setMsg] = useState("");
+  if (!targetMode) return null;
 
-  const funMsgs = [
-    "INSERTING COIN...",
-    "LOADING GAME ENGINE...",
-    "COMPILING LINGUISTIC MAPS...",
-    "READY PLAYER ONE!",
-  ];
+  const mode = targetMode === "fun" ? "fun" : "academic";
+  const message = mode === "fun" ? "Compiling linguistic maps..." : "Initializing developer session...";
 
-  useEffect(() => {
-    if (targetMode === "fun") {
-      const index = Math.min(Math.floor((progress / 100) * funMsgs.length), funMsgs.length - 1);
-      setMsg(funMsgs[index]);
-    }
-  }, [progress, targetMode]);
-
-  if (targetMode === "fun") {
-    // Retro Arcade Loader
-    return (
-      <div className="fixed inset-0 z-[200000] bg-[#0c0a09] flex flex-col items-center justify-center font-mono text-amber-500 select-none">
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            @keyframes bounceJoystick {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-8px); }
-            }
-            .animate-joystick {
-              animation: bounceJoystick 0.5s ease infinite;
-            }
-          `
-        }} />
-        <div className="flex flex-col items-center gap-6 text-center max-w-sm w-full px-6">
-          <div className="w-16 h-16 rounded-full bg-amber-500/10 border-2 border-amber-500 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.25)] animate-joystick">
-            <Gamepad className="w-8 h-8 text-amber-500" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-2xl font-bold tracking-widest text-transparent bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text">
-              FIDEL PLAYGROUND
-            </h3>
-            <p className="text-[9px] font-bold tracking-[0.25em] text-orange-500">
-              ★ SWITCHING TO ARCADE ★
-            </p>
-          </div>
-
-          <div className="w-full space-y-3 pt-2">
-            <div className="w-full h-5 border-2 border-amber-500/60 p-0.5 rounded overflow-hidden bg-zinc-950">
-              <div className="h-full bg-amber-500 transition-all duration-100" style={{ width: `${progress}%` }} />
-            </div>
-            <div className="flex items-center justify-between text-[9px] font-bold text-amber-405/80">
-              <span className="truncate">{msg}</span>
-              <span>{Math.floor(progress)}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Developer Console SSH Loader (Matches the old logo loader with a custom graduation cap hat directly on logo + dev text)
   return (
-    <div className="fixed inset-0 z-[200000] bg-[#fafafa] dark:bg-[#030303] flex flex-col items-center justify-center select-none text-zinc-900 dark:text-white">
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes xp-char-slide {
-            0% { transform: translateX(-120%); }
-            100% { transform: translateX(180%); }
-          }
-          .animate-xp-char {
-            animation: xp-char-slide 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          }
-          .fade-mask {
-            mask-image: linear-gradient(to right, transparent, white 20%, white 80%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, white 20%, white 80%, transparent);
-          }
-          @keyframes bounceCap {
-            0%, 100% { transform: translateY(0) rotate(5deg); }
-            50% { transform: translateY(-4px) rotate(-5deg); }
-          }
-          .animate-cap {
-            animation: bounceCap 1.2s ease-in-out infinite;
-          }
-        `
-      }} />
-
-      <div className="flex flex-col items-center gap-4 max-w-xs w-full px-6 relative pt-10">
-        {/* Logo text with left-to-right progress filling */}
-        <div className="relative text-7xl font-light font-loga tracking-tight leading-none">
-          {/* Custom SVG Graduation Cap Hat sitting on top of the first letter ፊ */}
-          <div className="absolute -top-[32px] -left-[2px] select-none animate-cap z-20 origin-bottom">
-            <svg 
-              className="w-10 h-10 text-zinc-900 dark:text-white transition-colors duration-300"
-              viewBox="0 0 32 32" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M16 6L28 11L16 16L4 11Z" fill="currentColor" fillOpacity="0.1" />
-              <path d="M8 13v4.5c0 2 3.5 3.5 8 3.5s8-1.5 8-3.5V13" />
-              <path d="M16 11l8.5 3.5v5.5" />
-              <circle cx="24.5" cy="20.5" r="1.2" fill="currentColor" />
-            </svg>
-          </div>
-
-          {/* dev text sitting on top of the next two letters ደል */}
-          <span className="absolute -top-[14px] left-[46px] text-xs font-mono font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 select-none">
-            dev
-          </span>
-
-          <span className="text-zinc-200 dark:text-zinc-905 transition-colors">ፊደል</span>
-          <div
-            className="absolute top-0 left-0 h-full overflow-hidden text-zinc-900 dark:text-white transition-all duration-75"
-            style={{ width: `${progress}%` }}
-          >
-            <span className="whitespace-nowrap font-loga text-7xl font-light tracking-tight leading-none">
-              ፊደል
-            </span>
-          </div>
-        </div>
-
-        {/* Sliding characters */}
-        <div className="relative w-40 h-6 overflow-hidden fade-mask">
-          <div className="absolute inset-0 flex items-center justify-start">
-            <span className="animate-xp-char font-mono text-[10px] font-bold tracking-[0.2em] text-zinc-650 dark:text-zinc-400 whitespace-nowrap">
-              ሀ ሉ ሒ ማ ሜ ር ሶ ሿ ቁ ቢ ታ ቼ ኅ ኖ ኚ ኣ ኬ
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <FidelLoader 
+      layout="page" 
+      mode={mode} 
+      progress={progress} 
+      message={message} 
+    />
   );
 }
 
@@ -231,7 +113,7 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
   }, [searchParams]);
 
   const setMode = (newMode: LabMode) => {
-    if (newMode === mode) return;
+    if (newMode === mode && pathname !== "/") return;
 
     // Trigger transition loader
     setTargetMode(newMode);
@@ -253,9 +135,11 @@ function ModeProviderInner({ children }: { children: React.ReactNode }) {
         setModeState(newMode);
         localStorage.setItem("fidel-lab-mode", newMode);
         
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("mode", newMode);
-        router.replace(`${pathname}?${params.toString()}`);
+        if (newMode === "fun") {
+          router.push("/puzzle");
+        } else {
+          router.push("/dev");
+        }
         
         setTimeout(() => {
           setIsTransitioning(false);

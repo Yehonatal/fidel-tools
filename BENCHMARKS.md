@@ -67,24 +67,27 @@ As a light stemmer using longest-match affix-removal, the engine lacks a complet
 ### 3. Tokenization (Hulet Neteb `፡` as Sentence Boundary)
 The language pack specifies the Amharic word separator (hulet neteb `፡`) as a sentence boundary. In standard modern writing, `፡` separates words (analogous to a space) rather than sentences. Because the tokenizer splits sentences on every `፡`, paragraphs using hulet neteb are over-segmented into word-level fragments, resulting in 0% exact match sentence accuracy. This highlighting represents an actionable area for language pack tuning.
 
-## Performance Throughput & Latency (JS vs WASM)
-Comparing pure JavaScript normalization with the compiled WebAssembly (WASM) engine.
+## Performance Throughput & Latency (JS vs WASM vs Python)
+Comparing pure JavaScript normalization with the compiled WebAssembly (WASM) engine and the native Python package.
 
 ### Short Sentences (~15 characters)
 *Payload: "ሐኪም ኀይሉ ሄደ።"*
-- **JS Throughput**: 543995 ops/sec | p50: 1.31 μs | p95: 2.23 μs | p99: 3.25 μs
-- **WASM Throughput**: 563939 ops/sec | p50: 1.29 μs | p95: 2.57 μs | p99: 3.30 μs
-- **WASM Speedup**: **1.04x**
+- **JS Throughput**: 581156 ops/sec | p50: 1.26 μs | p95: 2.39 μs | p99: 3.47 μs
+- **WASM Throughput**: 458261 ops/sec | p50: 1.62 μs | p95: 3.01 μs | p99: 4.34 μs
+- **Python Throughput**: 2012102 ops/sec | Avg Latency: 0.50 μs
+- **WASM Speedup**: **0.79x**
 
 ### Medium Paragraphs (~200 characters)
-- **JS Throughput**: 69400 ops/sec | p50: 13.08 μs | p95: 20.07 μs | p99: 25.13 μs
-- **WASM Throughput**: 93884 ops/sec | p50: 9.95 μs | p95: 11.93 μs | p99: 16.28 μs
-- **WASM Speedup**: **1.35x**
+- **JS Throughput**: 69805 ops/sec | p50: 13.30 μs | p95: 17.27 μs | p99: 25.24 μs
+- **WASM Throughput**: 93817 ops/sec | p50: 10.29 μs | p95: 12.16 μs | p99: 13.74 μs
+- **Python Throughput**: 149115 ops/sec | Avg Latency: 6.71 μs
+- **WASM Speedup**: **1.34x**
 
 ### Large Documents (~2000 characters)
-- **JS Throughput**: 7531 ops/sec | p50: 127.01 μs | p95: 155.53 μs | p99: 260.43 μs
-- **WASM Throughput**: 9555 ops/sec | p50: 101.81 μs | p95: 117.29 μs | p99: 148.33 μs
-- **WASM Speedup**: **1.27x**
+- **JS Throughput**: 7358 ops/sec | p50: 130.85 μs | p95: 148.82 μs | p99: 264.87 μs
+- **WASM Throughput**: 9529 ops/sec | p50: 103.19 μs | p95: 114.05 μs | p99: 125.68 μs
+- **Python Throughput**: 14423 ops/sec | Avg Latency: 69.33 μs
+- **WASM Speedup**: **1.30x**
 
 ## Analysis & Methodology
 1. **Boundary-Crossing Overhead Gate**: WebAssembly runs at near-native compile speeds. However, passing data between JS and WASM requires allocating heap memory and encoding/decoding strings to UTF-8 bytes. On short strings, this boundary-crossing overhead dominates the computation time. On larger payloads (~200 to 2,000+ chars), the actual computation time eclipses the boundary transitions, showing the clear benefits of the compiled Rust normalizer.

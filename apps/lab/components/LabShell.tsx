@@ -14,10 +14,11 @@ import {
   PanelLeftClose,
   PanelLeft,
   BookOpen,
-  Gamepad,
+  Award,
   Terminal,
   Activity,
   Compass,
+  LayoutGrid,
 } from "lucide-react";
 import { useLabMode } from "./mode-context";
 import FidelCompanion from "./FidelCompanion";
@@ -52,56 +53,62 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
 
   const academicNavigation: SidebarItem[] = [
     {
+      name: "Overview",
+      href: "/dev",
+      icon: <LayoutGrid className="w-4 h-4" />,
+      desc: "Developer tools grid overview",
+    },
+    {
       name: "Supported Languages",
-      href: "/languages",
+      href: "/dev/languages",
       icon: <BookOpen className="w-4 h-4" />,
       desc: "Language codes & config metadata",
     },
     {
       name: "Execution Pipeline",
-      href: "/pipeline",
+      href: "/dev/pipeline",
       icon: <Layers className="w-4 h-4" />,
       desc: "Interactive multi-stage processing",
     },
     {
       name: "Smart Normalization",
-      href: "/normalize",
+      href: "/dev/normalize",
       icon: <Type className="w-4 h-4" />,
       desc: "Orthographic spelling homophones",
     },
     {
       name: "Sentence & Word Tokenizer",
-      href: "/tokenize",
+      href: "/dev/tokenize",
       icon: <Activity className="w-4 h-4" />,
       desc: "Sentence segmenter & word arrays",
     },
     {
       name: "Stopwords Removal",
-      href: "/remove-stopwords",
+      href: "/dev/remove-stopwords",
       icon: <X className="w-4 h-4" />,
       desc: "Filter high-frequency semantic noise",
     },
     {
       name: "Morphological Stemmer",
-      href: "/stem",
+      href: "/dev/stem",
       icon: <Compass className="w-4 h-4" />,
       desc: "Light stemmer and affix parsing",
     },
     {
       name: "Ge'ez ↔ SERA Transliteration",
-      href: "/transliterate",
+      href: "/dev/transliterate",
       icon: <Layers className="w-4 h-4" />, // Replaced Keyboard with Layers to avoid type checking issues
       desc: "Bidirectional Unicode transcription",
     },
     {
       name: "Lexical Analyzer",
-      href: "/lexical-analyze",
+      href: "/dev/lexical-analyze",
       icon: <BarChart3 className="w-4 h-4" />,
       desc: "Contraction & abbreviation expansion",
     },
     {
       name: "Search & Term Indexer",
-      href: "/search",
+      href: "/dev/search",
       icon: <Search className="w-4 h-4" />,
       desc: "Index documents & query weighing",
     },
@@ -110,55 +117,55 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
   const arcadeNavigation: SidebarItem[] = [
     {
       name: "Hero Selector",
-      href: "/languages",
+      href: "/dev/languages",
       icon: <span className="text-sm select-none">🛡️</span>,
       desc: "Choose your linguist class",
     },
     {
       name: "Pipeline Playground",
-      href: "/pipeline",
+      href: "/dev/pipeline",
       icon: <span className="text-sm select-none">⚙️</span>,
       desc: "Assemble stage compilation blocks",
     },
     {
       name: "Normalize or Not",
-      href: "/normalize",
+      href: "/dev/normalize",
       icon: <span className="text-sm select-none">🎯</span>,
       desc: "Spot spelling homophones under fire",
     },
     {
       name: "Token Ninja",
-      href: "/tokenize",
+      href: "/dev/tokenize",
       icon: <span className="text-sm select-none">🥷</span>,
       desc: "Slice and reorder boundary units",
     },
     {
       name: "Stopword Sweep",
-      href: "/remove-stopwords",
+      href: "/dev/remove-stopwords",
       icon: <span className="text-sm select-none">🧹</span>,
       desc: "Clean high-frequency noise words",
     },
     {
       name: "Stem Sprint",
-      href: "/stem",
+      href: "/dev/stem",
       icon: <span className="text-sm select-none">⚡</span>,
       desc: "Zap inflections by typing stems",
     },
     {
       name: "Transliteration Rush",
-      href: "/transliterate",
+      href: "/dev/transliterate",
       icon: <span className="text-sm select-none">⌨️</span>,
       desc: "Ge'ez phonetic keyboard zapper",
     },
     {
       name: "Abbreviation Buster",
-      href: "/lexical-analyze",
+      href: "/dev/lexical-analyze",
       icon: <span className="text-sm select-none">💥</span>,
       desc: "Trivia match for contractions",
     },
     {
       name: "Search Showdown",
-      href: "/search",
+      href: "/dev/search",
       icon: <span className="text-sm select-none">⚔️</span>,
       desc: "Card-battle inverted relevance match",
     },
@@ -166,7 +173,12 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
 
   const navigation = mode === "fun" ? arcadeNavigation : academicNavigation;
 
-  // 1. Landing page layout (No sidebar, full screen width, marketing header)
+  // 1. Bypass layout for puzzle routes (renders the dedicated puzzle layout instead)
+  if (pathname && pathname.startsWith("/puzzle")) {
+    return <div className="min-h-screen w-full relative">{children}</div>;
+  }
+
+  // 2. Landing page layout (No sidebar, full screen width, marketing header)
   if (pathname === "/") {
     return (
       <div className="min-h-screen flex flex-col w-full relative">
@@ -190,18 +202,18 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
                   {mode === "academic" ? (
                     <>
                       <Terminal className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Console</span>
+                      <span>Dev</span>
                     </>
                   ) : (
                     <>
-                      <Gamepad className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Arcade</span>
+                      <Award className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Puzzle</span>
                     </>
                   )}
                 </button>
               )}
               <Link
-                href="/pipeline"
+                href="/dev/pipeline"
                 className="hidden sm:inline-flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-sans text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer"
               >
                 Launch
@@ -224,13 +236,20 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
           ? "border-dashed border-zinc-250 bg-stone-100/90 dark:border-amber-500/25 dark:bg-[#0c0a09]/90 font-mono text-amber-500"
           : "border-zinc-200 dark:border-zinc-900 bg-white/80 dark:bg-black/80 backdrop-blur-md"
       }`}>
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="font-loga text-2xl font-light text-zinc-900 dark:text-white select-none tracking-tight">
+        <Link href="/" className="group flex items-center gap-2.5 select-none">
+          <span className="font-loga text-2xl font-light text-zinc-900 dark:text-white tracking-tight">
             ፊደል
           </span>
-          <span className="text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase mt-1.5 font-mono">
-            {mode === "fun" ? "Arcade" : "Labs"}
-          </span>
+          <div className="relative h-4 overflow-hidden mt-1.5">
+            <span className="block text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase font-mono transition-transform duration-300 group-hover:-translate-y-6">
+              {mode === "fun" ? "Puzzle" : "Dev"}
+            </span>
+            <span className={`absolute top-0 left-0 text-[10px] font-bold tracking-widest uppercase font-mono transition-transform duration-300 translate-y-6 group-hover:translate-y-0 whitespace-nowrap ${
+              mode === "fun" ? "text-amber-500" : "text-blue-500"
+            }`}>
+              ← Back to Labs
+            </span>
+          </div>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -238,12 +257,12 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
             <button
               onClick={toggleMode}
               className="p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-md bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 cursor-pointer"
-              title={mode === "academic" ? "Arcade Mode" : "Console Mode"}
+              title={mode === "academic" ? "Fidel Puzzle" : "Fidel Dev"}
             >
               {mode === "academic" ? (
                 <Terminal className="w-4 h-4 text-blue-500" />
               ) : (
-                <Gamepad className="w-4 h-4 text-amber-500" />
+                <Award className="w-4 h-4 text-amber-500" />
               )}
             </button>
           )}
@@ -277,16 +296,23 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
               : "border-b border-zinc-200 dark:border-zinc-900"
           }`}
         >
-          <Link href="/" className="flex items-center gap-2.5 select-none">
+          <Link href="/" className="group flex items-center gap-2.5 select-none">
             <span className="font-loga text-2xl font-light text-zinc-900 dark:text-white shrink-0">
               {isCollapsed ? "ፊ" : "ፊደል"}
             </span>
             {!isCollapsed && (
-              <span className={`text-[10px] font-bold tracking-widest uppercase mt-1.5 font-mono animate-in fade-in duration-200 ${
-                mode === "fun" ? "text-blue-600 dark:text-amber-400" : "text-zinc-405 dark:text-zinc-500"
-              }`}>
-                {mode === "fun" ? "Arcade" : "Labs"}
-              </span>
+              <div className="relative h-4 overflow-hidden mt-1.5">
+                <span className={`block text-[10px] font-bold tracking-widest uppercase font-mono transition-transform duration-300 group-hover:-translate-y-6 ${
+                  mode === "fun" ? "text-blue-600 dark:text-amber-400" : "text-zinc-405 dark:text-zinc-500"
+                }`}>
+                  {mode === "fun" ? "Puzzle" : "Dev"}
+                </span>
+                <span className={`absolute top-0 left-0 text-[10px] font-bold tracking-widest uppercase font-mono transition-transform duration-300 translate-y-6 group-hover:translate-y-0 whitespace-nowrap ${
+                  mode === "fun" ? "text-amber-500" : "text-blue-500"
+                }`}>
+                  ← Back to Labs
+                </span>
+              </div>
             )}
           </Link>
         </div>
@@ -368,7 +394,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between px-1">
             {!isCollapsed && (
               <span className="text-[9px] font-bold font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-widest whitespace-nowrap">
-                {mode === "academic" ? "Console Mode" : "Arcade Mode"}
+                {mode === "academic" ? "Fidel Dev" : "Fidel Puzzle"}
               </span>
             )}
             {mounted && (
@@ -379,7 +405,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
                 {mode === "academic" ? (
                   <Terminal className="w-4 h-4 text-blue-500" />
                 ) : (
-                  <Gamepad className="w-4 h-4 text-amber-500" />
+                  <Award className="w-4 h-4 text-amber-500" />
                 )}
               </button>
             )}
@@ -417,7 +443,7 @@ export default function LabShell({ children }: { children: React.ReactNode }) {
                   {mode === "academic" ? (
                     <Terminal className="w-4 h-4 text-blue-500" />
                   ) : (
-                    <Gamepad className="w-4 h-4 text-amber-500" />
+                    <Award className="w-4 h-4 text-amber-500" />
                   )}
                 </button>
               )}

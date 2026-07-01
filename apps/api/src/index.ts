@@ -5,6 +5,7 @@ import { prettyJSON } from "hono/pretty-json";
 import { serve } from "@hono/node-server";
 import notifyRouter from "./routes/notify.js";
 import nlpRouter from "./routes/nlp.js";
+import puzzleRouter from "./routes/puzzle.js";
 import { initDb } from "./db.js";
 import { globalIpLimiter } from "./middleware/rateLimiter.js";
 
@@ -31,6 +32,7 @@ app.use("*", prettyJSON());
 // Mount active sub-routers
 app.route("/api/v1/notify", notifyRouter);
 app.route("/notify", notifyRouter); // Direct mount fallback for frontend subscriber form
+app.route("/api/v1/nlp/puzzle", puzzleRouter);
 app.route("/api/v1/nlp", nlpRouter);
 
 // Base health check & status endpoint (Industry Standard API Root)
