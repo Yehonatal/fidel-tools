@@ -3,22 +3,17 @@ import { callFidelApi } from "@/lib/api-client";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, direction = "to-sera", lang = "am" } = await req.json();
+    const { text, lang = "am" } = await req.json();
     if (typeof text !== "string") {
       return NextResponse.json({ error: "Missing or invalid text input" }, { status: 400 });
     }
 
-    const data = await callFidelApi("/transliterate", {
+    const data = await callFidelApi("/lexical-analyze", {
       method: "POST",
-      body: {
-        text,
-        direction: direction === "to-geez" ? "en" : "am",
-        type: "felig",
-        lang,
-      },
+      body: { text, lang },
     });
 
-    return NextResponse.json({ input: text, result: data.result, direction });
+    return NextResponse.json(data);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
   }

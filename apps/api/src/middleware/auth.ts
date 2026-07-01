@@ -3,6 +3,48 @@ import { pool } from "../db.js";
 import crypto from "crypto";
 
 export const authenticateApiKey: MiddlewareHandler = async (c, next) => {
+  const passkey = c.req.header("x-passkey");
+  const passphrase = c.req.header("x-passphrase");
+
+  if (!passkey || !passphrase) {
+    return c.json(
+      {
+        error: "Forbidden",
+        message: "Missing internal passkey/passphrase headers. Live API access is locked for developer authentication.",
+      },
+      403,
+    );
+  }
+
+  try {
+    const pkHash = crypto.createHash("sha256").update(passkey).digest("hex");
+    const ppHash = crypto.createHash("sha256").update(passphrase).digest("hex");
+
+    const credsCheck = await pool.query(
+      "SELECT id FROM internal_auth WHERE passkey_hash = $1 AND passphrase_hash = $2",
+      [pkHash, ppHash]
+    );
+
+    if (credsCheck.rowCount === 0) {
+      return c.json(
+        {
+          error: "Forbidden",
+          message: "Invalid internal passkey/passphrase credentials. Access denied.",
+        },
+        403,
+      );
+    }
+  } catch (err) {
+    console.error("Internal credentials database check failed:", err);
+    return c.json(
+      {
+        error: "Internal Server Error",
+        message: "Failed to validate credentials.",
+      },
+      500,
+    );
+  }
+
   let apiKey = c.req.header("x-api-key");
 
   if (!apiKey) {

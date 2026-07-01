@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { nlp } from "@/lib/nlp";
+import { callFidelApi } from "@/lib/api-client";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
+    const { text, lang = "am" } = await req.json();
     if (typeof text !== "string") {
       return NextResponse.json({ error: "Missing or invalid text input" }, { status: 400 });
     }
-    const result = nlp.normalize(text);
-    return NextResponse.json({ input: text, result });
+
+    const data = await callFidelApi("/normalize", {
+      method: "POST",
+      body: { text, lang },
+    });
+
+    return NextResponse.json({ input: text, result: data.normalized });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
   }

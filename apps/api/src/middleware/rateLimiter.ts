@@ -75,14 +75,24 @@ const demoLimiter = rateLimiter({
   },
 });
 
-// Standard Limit: 100 requests per endpoint per hour per API Key
+// Standard Limit: 60 requests per 15 minutes per API Key (safeguard Render free tier)
 const standardLimiter = rateLimiter({
-  windowMs: 60 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000,
+  max: 60,
   keyGenerator: (c) => {
     const apiKey = c.get("apiKey") || "no-key";
     const path = c.req.path;
     return `standard:${apiKey}:${path}`;
+  },
+});
+
+// Global IP Limiter: 150 requests per 15 minutes per IP
+export const globalIpLimiter = rateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 150,
+  keyGenerator: (c) => {
+    const ip = getClientIp(c);
+    return `global:${ip}`;
   },
 });
 

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { indexDocument, processQuery, score } from "@/lib/search";
-import { nlp } from "@/lib/nlp";
-import amPack from "@fidel-tools/lang-am/am.json";
+import { callFidelApi } from "@/lib/api-client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,8 +10,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing expand parameter" }, { status: 400 });
     }
 
-    const normalized = nlp.normalize(expand);
-    const baseStem = nlp.stem(normalized);
+    // Call normalize on Hono backend
+    const normData = await callFidelApi("/normalize", {
+      method: "POST",
+      body: { text: expand, lang: "am" },
+    });
+    const normalized = normData.normalized;
+
+    // Call stem on Hono backend
+    const stemData = await callFidelApi("/stem", {
+      method: "POST",
+      body: { word: normalized, lang: "am" },
+    });
+    const baseStem = stemData.stem;
 
     const prefixes = ["የ", "በ", "ለ", "ከ", "ስለ", "እነ", "የሚ", "የማይ"];
     const suffixes = [
@@ -33,43 +42,19 @@ export async function GET(req: NextRequest) {
       "ውን",
       "ኡን",
       "ዋን",
-      "አችንን",
-      "አቸውን",
     ];
 
     const candidates = new Set<string>();
-    const userWords = [expand, normalized, baseStem];
+    const alternateBases = [expand, normalized, baseStem];
 
     // Spelling alternatives for homophones
     const chars = expand.split("");
-    const alternateBases = [expand];
     for (let i = 0; i < chars.length; i++) {
       const c = chars[i];
       if (["ሀ", "ሐ", "ሃ", "ኃ", "ኀ"].includes(c)) {
         ["ሀ", "ሐ", "ሃ", "ኃ", "ኀ"].forEach((h) => {
           const copy = [...chars];
           copy[i] = h;
-          alternateBases.push(copy.join(""));
-        });
-      }
-      if (["ሰ", "ሠ"].includes(c)) {
-        ["ሰ", "ሠ"].forEach((s) => {
-          const copy = [...chars];
-          copy[i] = s;
-          alternateBases.push(copy.join(""));
-        });
-      }
-      if (["አ", "ዐ"].includes(c)) {
-        ["አ", "ዐ"].forEach((a) => {
-          const copy = [...chars];
-          copy[i] = a;
-          alternateBases.push(copy.join(""));
-        });
-      }
-      if (["ጸ", "ፀ"].includes(c)) {
-        ["ጸ", "ፀ"].forEach((z) => {
-          const copy = [...chars];
-          copy[i] = z;
           alternateBases.push(copy.join(""));
         });
       }
@@ -84,22 +69,7 @@ export async function GET(req: NextRequest) {
       });
     });
 
-    const stopwords = (amPack as any).stopwords || [];
-    stopwords.forEach((w: string) => candidates.add(w));
-
-    const exceptions = (amPack as any).tokenization?.exceptions || {};
-    Object.keys(exceptions).forEach((k) => {
-      candidates.add(k);
-      exceptions[k].forEach((w: string) => candidates.add(w));
-    });
-
-    const expansions = Array.from(candidates).filter((candidate) => {
-      try {
-        return nlp.stem(nlp.normalize(candidate)) === baseStem;
-      } catch {
-        return false;
-      }
-    });
+    const expansions = Array.from(candidates);
 
     return NextResponse.json({
       stem: baseStem,
@@ -124,16 +94,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const queryStems = processQuery(query);
+    // Call index-documents on Hono backend
+    const docsIndexData = await callFidelApi("/index-documents", {
+      method: "POST",
+      body: { docs: documents, lang: "am" },
+    });
+
+    // Call index-query on Hono backend
+    const queryIndexData = await callFidelApi("/index-query", {
+      method: "POST",
+      body: { query, lang: "am" },
+    });
+
+    // Call weigh-terms on Hono backend for query
+    const queryWeightsData = await callFidelApi("/weigh-terms", {
+      method: "POST",
+      body: { index: queryIndexData.index, type: "query" },
+    });
+
+    // Call weigh-terms on Hono backend for docs
+    const docsWeightsData = await callFidelApi("/weigh-terms", {
+      method: "POST",
+      body: { index: docsIndexData.index, type: "doc" },
+    });
+
+    const queryWeights = queryWeightsData.weights || {};
+    const docWeights = docsWeightsData.weights || {};
 
     const scoredDocs = documents.map((doc) => {
-      const docStems = indexDocument(doc.content);
-      const similarityScore = score(docStems, queryStems);
+      const docTermMap = docWeights[doc.id] || {};
+      let score = 0;
+      const matchedStems: string[] = [];
+
+      Object.keys(queryWeights).forEach((term) => {
+        if (docTermMap[term]) {
+          score += queryWeights[term] * docTermMap[term];
+          matchedStems.push(term);
+        }
+      });
+
       return {
         id: doc.id,
         content: doc.content,
-        score: similarityScore,
-        matchedStems: queryStems.filter((s) => docStems.includes(s)),
+        score: score,
+        matchedStems,
       };
     });
 
@@ -141,8 +145,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       query,
-      queryStems,
+      queryStems: Object.keys(queryWeights),
       results: ranked,
+      rawIndex: docsIndexData.index,
+      rawWeights: docsWeightsData.weights,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });

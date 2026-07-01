@@ -6,6 +6,7 @@ import { serve } from "@hono/node-server";
 import notifyRouter from "./routes/notify.js";
 import nlpRouter from "./routes/nlp.js";
 import { initDb } from "./db.js";
+import { globalIpLimiter } from "./middleware/rateLimiter.js";
 
 const app = new Hono();
 
@@ -15,12 +16,13 @@ initDb().catch((err) => {
 });
 
 // Global Middlewares
+app.use("*", globalIpLimiter);
 app.use(
   "*",
   cors({
     origin: "*",
     allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "x-api-key", "Authorization"],
+    allowHeaders: ["Content-Type", "x-api-key", "Authorization", "x-passkey", "x-passphrase"],
   }),
 );
 app.use("*", logger());

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Interactive playground, transliteration sandbox, and tokenization tools for Amharic language processing.",
 };
 
+import { ModeProvider } from "@/components/mode-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -63,7 +65,9 @@ export default function RootLayout({
 
         <div className="relative z-10 w-full min-h-screen flex flex-col">
           <AOSProvider>
-            <LabShell>{children}</LabShell>
+            <ModeProvider>
+              <LabShell>{children}</LabShell>
+            </ModeProvider>
           </AOSProvider>
         </div>
       </body>
