@@ -513,14 +513,10 @@ const transliterateRoute = createRoute({
               .string()
               .min(1)
               .openapi({ description: "Text to transliterate", example: "ኢትዮጵያ" }),
-            direction: z
-              .enum(["am", "en"])
-              .optional()
-              .default("am")
-              .openapi({
-                description:
-                  "Target alphabet direction ('am' for Ge'ez output, 'en' for English Latin output)",
-              }),
+            direction: z.enum(["am", "en"]).optional().default("am").openapi({
+              description:
+                "Target alphabet direction ('am' for Ge'ez output, 'en' for English Latin output)",
+            }),
             type: z
               .enum(["felig", "sera"])
               .optional()

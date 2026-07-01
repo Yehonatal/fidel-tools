@@ -1,6 +1,6 @@
 {
   "name": "@fidel-tools/core",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Amharic Language Pre-processor toolkit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
