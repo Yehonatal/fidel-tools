@@ -157,6 +157,44 @@ export default function PuzzleHubPage() {
         </div>
       </div>
 
+      {/* Mini-Games Grid */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Flame className="w-4 h-4 text-amber-500" />
+          <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-zinc-800 dark:text-zinc-200">
+            Mini-Games
+          </h2>
+          <span className="text-[9px] font-bold font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+            Practice NLP concepts
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            { name: "Proverb Wheel", href: "/puzzle/languages", emoji: "📜", desc: "Spin & discover proverbs" },
+            { name: "Assembly Line", href: "/puzzle/pipeline", emoji: "🏭", desc: "Order pipeline stages" },
+            { name: "Variant Sort", href: "/puzzle/normalize", emoji: "⚖️", desc: "Canonical vs variant" },
+            { name: "Scissor Snipper", href: "/puzzle/tokenize", emoji: "✂️", desc: "Cut text into tokens" },
+            { name: "Signal Extractor", href: "/puzzle/remove-stopwords", emoji: "📡", desc: "Filter stopwords" },
+            { name: "Root Cluster", href: "/puzzle/stem", emoji: "☁️", desc: "Find morphological roots" },
+            { name: "Transliteration Rush", href: "/puzzle/transliterate", emoji: "🚀", desc: "Ge'ez to SERA" },
+            { name: "Expand or Explode", href: "/puzzle/lexical-analyze", emoji: "💥", desc: "Expand abbreviations" },
+            { name: "Rank Royale", href: "/puzzle/search", emoji: "👑", desc: "Rank by TF-IDF" },
+          ].map((game) => (
+            <Link
+              key={game.href}
+              href={game.href}
+              className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/40 p-4 hover:border-amber-500/50 hover:shadow-[0_0_12px_rgba(245,158,11,0.05)] transition-all duration-200 flex items-center gap-3"
+            >
+              <span className="text-xl select-none group-hover:scale-110 transition-transform">{game.emoji}</span>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">{game.name}</h4>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium truncate">{game.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Info / Explanation Card */}
       <div className="rounded-2xl border border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/20 p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex gap-4 items-start">

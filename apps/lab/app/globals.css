@@ -43,6 +43,7 @@
   --color-zinc-650-val: #27272a;
   --color-zinc-805-val: #18181b;
   --color-zinc-850-val: #27272a;
+  --color-zinc-955-val: #fafafa;
 
   /* ── Dark Mode (Zinc Industrial Palette) ──────────────── */
   --color-dark-surface: #030303;
@@ -76,6 +77,7 @@
   --color-zinc-650-val: #e4e4e7;
   --color-zinc-805-val: #fafafa;
   --color-zinc-850-val: #1f1f23;
+  --color-zinc-955-val: #09090b;
 }
 
 @theme {
@@ -102,6 +104,7 @@
   --color-zinc-650: var(--color-zinc-650-val);
   --color-zinc-805: var(--color-zinc-805-val);
   --color-zinc-850: var(--color-zinc-850-val);
+  --color-zinc-955: var(--color-zinc-955-val);
 
   /* ── Dark Mode mappings 1:1 with Web ── */
   --color-dark-surface: var(--color-dark-surface);
@@ -371,3 +374,11 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--color-surface-border);
 }
 
+/* ── No-Scrollbar Utility ── */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

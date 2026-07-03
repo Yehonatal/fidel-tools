@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Award, Layers, Search, Flame, Terminal, HelpCircle, X, ChevronRight } from "lucide-react";
+import { Award, Layers, Search, Flame, Terminal, HelpCircle, X, ChevronRight, BookOpen } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import { loadPuzzleHistory, PuzzleHistory } from "@/lib/puzzle/store";
 import { useLabMode } from "@/components/mode-context";
@@ -87,12 +87,28 @@ export default function PuzzleLayout({ children }: { children: React.ReactNode }
     setMode("academic");
   };
 
-  // Nav item list
-  const navItems = [
+  // Nav item list — organized into sections
+  const dailyPuzzles = [
     { name: "Hub", href: "/puzzle", icon: <Layers className="w-4 h-4" /> },
     { name: "Relevance Arena", href: "/puzzle/relevance-arena", icon: <Search className="w-4 h-4" /> },
     { name: "Trace", href: "/puzzle/trace", icon: <Award className="w-4 h-4" /> },
   ];
+
+  const miniGames = [
+    { name: "Proverb Wheel", href: "/puzzle/languages", emoji: "📜" },
+    { name: "Assembly Line", href: "/puzzle/pipeline", emoji: "🏭" },
+    { name: "Variant Sort", href: "/puzzle/normalize", emoji: "⚖️" },
+    { name: "Scissor Snipper", href: "/puzzle/tokenize", emoji: "✂️" },
+    { name: "Signal Extractor", href: "/puzzle/remove-stopwords", emoji: "📡" },
+    { name: "Root Cluster", href: "/puzzle/stem", emoji: "☁️" },
+    { name: "Transliteration Rush", href: "/puzzle/transliterate", emoji: "🚀" },
+    { name: "Expand or Explode", href: "/puzzle/lexical-analyze", emoji: "💥" },
+    { name: "Rank Royale", href: "/puzzle/search", emoji: "👑" },
+  ];
+
+  const allNavItems = [...dailyPuzzles, ...miniGames.map(g => ({ name: g.name, href: g.href, icon: <span className="text-sm select-none">{g.emoji}</span> }))];
+
+  const [gamesMenuOpen, setGamesMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#030303] text-zinc-900 dark:text-zinc-100 font-sans transition-colors duration-300">
@@ -115,9 +131,9 @@ export default function PuzzleLayout({ children }: { children: React.ReactNode }
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — daily puzzles inline + games dropdown */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {dailyPuzzles.map((item) => {
               const active = pathname === item.href;
               return (
                 <Link
@@ -134,6 +150,55 @@ export default function PuzzleLayout({ children }: { children: React.ReactNode }
                 </Link>
               );
             })}
+
+            {/* Mini-Games Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setGamesMenuOpen(!gamesMenuOpen)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  miniGames.some(g => pathname === g.href)
+                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black shadow-sm"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
+                }`}
+              >
+                <Flame className="w-4 h-4" />
+                <span>{miniGames.find(g => pathname === g.href)?.name || "Mini-Games"}</span>
+                <ChevronRight className={`w-3 h-3 transition-transform ${gamesMenuOpen ? "rotate-90" : ""}`} />
+              </button>
+
+              {gamesMenuOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div className="fixed inset-0 z-30" onClick={() => setGamesMenuOpen(false)} />
+                  {/* Dropdown */}
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-40 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-3 py-1.5 text-[9px] font-bold font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                      Mini-Games
+                    </div>
+                    {miniGames.map((game) => {
+                      const active = pathname === game.href;
+                      return (
+                        <Link
+                          key={game.href}
+                          href={game.href}
+                          onClick={() => setGamesMenuOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 mx-1 rounded-lg text-xs font-bold transition-all ${
+                            active
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
+                          }`}
+                        >
+                          <span className="text-sm select-none w-5 text-center">{game.emoji}</span>
+                          <div className="flex flex-col">
+                            <span>{game.name}</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
 
           {/* Controls & Actions */}
@@ -168,31 +233,54 @@ export default function PuzzleLayout({ children }: { children: React.ReactNode }
       </header>
 
       {/* Sub Header for Mobile Navigation */}
-      <div className="md:hidden border-b border-zinc-200 dark:border-zinc-900 bg-white/40 dark:bg-black/40 backdrop-blur-xs flex items-center justify-around py-2">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                active
-                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black shadow-xs"
-                  : "text-zinc-500 dark:text-zinc-400"
-              }`}
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={handleBackToConsole}
-          className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-bold text-zinc-500 dark:text-zinc-400"
-        >
-          <Terminal className="w-3.5 h-3.5" />
-          <span>Console</span>
-        </button>
+      <div className="md:hidden border-b border-zinc-200 dark:border-zinc-900 bg-white/40 dark:bg-black/40 backdrop-blur-xs">
+        {/* Daily row */}
+        <div className="flex items-center justify-around py-2 border-b border-zinc-100 dark:border-zinc-900/50">
+          {dailyPuzzles.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                  active
+                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black shadow-xs"
+                    : "text-zinc-500 dark:text-zinc-400"
+                }`}
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={handleBackToConsole}
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-bold text-zinc-500 dark:text-zinc-400"
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span>Console</span>
+          </button>
+        </div>
+        {/* Mini-games scrollable row */}
+        <div className="flex items-center gap-1 px-2 py-2 overflow-x-auto no-scrollbar">
+          {miniGames.map((game) => {
+            const active = pathname === game.href;
+            return (
+              <Link
+                key={game.href}
+                href={game.href}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap transition-all shrink-0 ${
+                  active
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                    : "text-zinc-500 dark:text-zinc-400 border border-transparent"
+                }`}
+              >
+                <span className="text-xs select-none">{game.emoji}</span>
+                <span>{game.name}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Content Area */}
